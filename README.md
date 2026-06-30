@@ -36,3 +36,8 @@ npm run dev       # http://localhost:4321
 npm run build     # dist/ + pagefind 인덱스
 npm run preview   # 빌드 결과 미리보기
 ```
+
+## 라이선스
+
+- **코드** (Astro 설정·컴포넌트·플러그인 등): [MIT](./LICENSE)
+- **글·이미지** (`src/content/blog/`, `public/images/`): [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) — 출처 표기 + 비상업적 사용 + 동일 조건 공유
