@@ -1,0 +1,56 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../../astro/components/BaseHead.astro';
+import Footer from '../../astro/components/Footer.astro';
+import Header from '../../astro/components/Header.astro';
+import PostCard from '../../astro/components/PostCard.astro';
+import { SITE_TITLE } from '../../consts';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  const tagSet = new Set<string>();
+  for (const post of posts) {
+    for (const tag of post.data.tags) tagSet.add(tag);
+  }
+  return Array.from(tagSet).map((tag) => ({
+    params: { tag },
+    props: {
+      tag,
+      posts: posts
+        .filter((p) => p.data.tags.includes(tag))
+        .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()),
+    },
+  }));
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <BaseHead title={`#${tag} | ${SITE_TITLE}`} description={`${tag} 태그가 붙은 글 모음`} />
+  </head>
+  <body>
+    <Header />
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-12">
+      <header class="mb-10">
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">
+          <a href="/tags/" class="hover:text-slate-900 dark:hover:text-slate-100 transition-colors">← 모든 태그</a>
+        </p>
+        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">
+          #{tag}
+        </h1>
+        <p class="text-slate-600 dark:text-slate-400">{posts.length}개의 글</p>
+      </header>
+      <ul class="space-y-8">
+        {posts.map((post) => (
+          <li>
+            <PostCard post={post} />
+          </li>
+        ))}
+      </ul>
+    </main>
+    <Footer />
+  </body>
+</html>

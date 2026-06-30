@@ -1,0 +1,46 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import FormattedDate from './FormattedDate.astro';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const categoryLabel = post.data.category === 'tech' ? 'Tech' : 'Life';
+---
+
+<a href={`/${post.id}/`} class="group block">
+  <article class="flex flex-col sm:flex-row gap-5">
+    {post.data.heroImage && (
+      <div class="sm:w-56 shrink-0">
+        <Image
+          width={448}
+          height={252}
+          src={post.data.heroImage}
+          alt=""
+          class="w-full aspect-video object-cover rounded-md"
+        />
+      </div>
+    )}
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+          {categoryLabel}
+        </span>
+        <span class="text-xs text-slate-500 dark:text-slate-500">
+          <FormattedDate date={post.data.pubDate} />
+        </span>
+      </div>
+      <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100 group-hover:text-(--color-accent) transition-colors mb-2 leading-snug">
+        {post.data.title}
+      </h2>
+      {post.data.description && (
+        <p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
+          {post.data.description}
+        </p>
+      )}
+    </div>
+  </article>
+</a>

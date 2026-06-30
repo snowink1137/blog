@@ -1,0 +1,36 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../astro/components/BaseHead.astro';
+import Footer from '../astro/components/Footer.astro';
+import Header from '../astro/components/Header.astro';
+import PostCard from '../astro/components/PostCard.astro';
+import { SITE_TITLE } from '../consts';
+
+const posts = (await getCollection('blog'))
+  .filter((post) => post.data.category === 'tech')
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <BaseHead title={`Tech | ${SITE_TITLE}`} description="개발 관련 글 모음" />
+  </head>
+  <body>
+    <Header />
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-12">
+      <header class="mb-10">
+        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">Tech</h1>
+        <p class="text-slate-600 dark:text-slate-400">개발하면서 배운 것들 · {posts.length}개의 글</p>
+      </header>
+      <ul class="space-y-8">
+        {posts.map((post) => (
+          <li>
+            <PostCard post={post} />
+          </li>
+        ))}
+      </ul>
+    </main>
+    <Footer />
+  </body>
+</html>

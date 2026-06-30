@@ -1,0 +1,77 @@
+---
+import BaseHead from '../astro/components/BaseHead.astro';
+import Footer from '../astro/components/Footer.astro';
+import Header from '../astro/components/Header.astro';
+import { SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <BaseHead title={`Search | ${SITE_TITLE}`} description="블로그 검색" />
+    <link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
+  </head>
+  <body>
+    <Header />
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-12">
+      <header class="mb-8">
+        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">Search</h1>
+        <p class="text-slate-600 dark:text-slate-400">검색어를 입력하면 결과가 나타납니다.</p>
+      </header>
+
+      <div id="search"></div>
+
+      <noscript>
+        <p class="mt-6 text-sm text-slate-500 dark:text-slate-400">
+          검색을 사용하려면 JavaScript 를 활성화해주세요.
+        </p>
+      </noscript>
+    </main>
+    <Footer />
+
+    <script src="/pagefind/pagefind-ui.js" is:inline></script>
+    <script is:inline>
+      window.addEventListener('DOMContentLoaded', () => {
+        if (typeof PagefindUI === 'undefined') {
+          const el = document.getElementById('search');
+          if (el) {
+            el.innerHTML =
+              '<p class="text-sm text-slate-500 dark:text-slate-400">검색 인덱스가 아직 빌드되지 않았습니다. 프로덕션 빌드 후 사용할 수 있습니다.</p>';
+          }
+          return;
+        }
+        new PagefindUI({
+          element: '#search',
+          showSubResults: true,
+          translations: {
+            placeholder: '검색어 입력 (예: kotlin, 호텔)',
+            zero_results: '"[SEARCH_TERM]" 에 대한 결과 없음',
+            many_results: '[COUNT]개 결과',
+            one_result: '[COUNT]개 결과',
+            searching: '"[SEARCH_TERM]" 검색 중...',
+          },
+        });
+      });
+    </script>
+
+    <style is:global>
+      :root {
+        --pagefind-ui-scale: 0.9;
+        --pagefind-ui-primary: var(--color-accent);
+        --pagefind-ui-text: rgb(15 23 42);
+        --pagefind-ui-background: rgb(255 255 255);
+        --pagefind-ui-border: rgb(226 232 240);
+        --pagefind-ui-tag: rgb(241 245 249);
+        --pagefind-ui-border-width: 1px;
+        --pagefind-ui-border-radius: 0.5rem;
+        --pagefind-ui-font: var(--font-sans);
+      }
+      .dark {
+        --pagefind-ui-text: rgb(241 245 249);
+        --pagefind-ui-background: rgb(2 6 23);
+        --pagefind-ui-border: rgb(30 41 59);
+        --pagefind-ui-tag: rgb(30 41 59);
+      }
+    </style>
+  </body>
+</html>

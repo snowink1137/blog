@@ -1,0 +1,58 @@
+---
+import BaseHead from '../astro/components/BaseHead.astro';
+import Footer from '../astro/components/Footer.astro';
+import Header from '../astro/components/Header.astro';
+import { SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <BaseHead title={`Privacy Policy | ${SITE_TITLE}`} description="개인정보 처리방침" />
+  </head>
+  <body>
+    <Header />
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-12">
+      <article class="prose prose-slate dark:prose-invert max-w-none prose-a:text-(--color-accent) prose-a:no-underline hover:prose-a:underline">
+        <h1>Privacy policy</h1>
+
+        <p><strong>hello world log</strong> (이하 "본 사이트")는 방문자의 개인정보를 중요하게 생각하며, 아래와 같이 개인정보를 처리하고 있습니다.</p>
+
+        <h3>1. 수집하는 정보</h3>
+        <p>본 사이트는 회원가입 기능이 없으며, 방문자로부터 직접적으로 개인정보를 수집하지 않습니다. 다만, 댓글 작성 시 이름, 이메일, 웹사이트 주소가 수집될 수 있습니다.</p>
+
+        <h3>2. 쿠키(Cookie) 사용</h3>
+        <p>본 사이트는 방문자 경험 개선과 통계 분석을 위해 쿠키를 사용합니다. 브라우저 설정에서 쿠키를 거부할 수 있으나, 일부 기능 이용이 제한될 수 있습니다.</p>
+
+        <h3>3. 광고 및 분석 서비스</h3>
+        <p>본 사이트는 다음과 같은 제3자 서비스를 사용합니다.</p>
+
+        <p><strong>Google AdSense</strong></p>
+        <ul>
+          <li>Google 및 광고 파트너는 쿠키를 사용하여 방문자의 관심사에 기반한 광고를 게재할 수 있습니다.</li>
+          <li>방문자는 Google 광고 설정에서 맞춤 광고를 비활성화할 수 있습니다.</li>
+        </ul>
+
+        <p><strong>Google Analytics</strong></p>
+        <ul>
+          <li>방문자 통계 분석을 위해 사용되며, 수집된 데이터는 익명으로 처리됩니다.</li>
+        </ul>
+
+        <h3>4. 개인정보의 보유 및 파기</h3>
+        <p>댓글 작성 시 수집된 정보는 댓글 삭제 시 함께 파기됩니다.</p>
+
+        <h3>5. 문의</h3>
+        <p>개인정보 관련 문의사항은 아래로 연락해 주세요.</p>
+        <ul>
+          <li>이메일: <a href="mailto:snowink1137@gmail.com">snowink1137@gmail.com</a></li>
+        </ul>
+
+        <h3>6. 개정 이력</h3>
+        <ul>
+          <li>최초 시행일: 2025년 1월 8일</li>
+        </ul>
+      </article>
+    </main>
+    <Footer />
+  </body>
+</html>
