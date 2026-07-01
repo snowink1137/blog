@@ -70,8 +70,20 @@ document
     img.addEventListener('click', () => openImage(img));
   });
 
-document
-  .querySelectorAll<SVGSVGElement>('article .mermaid-wrapper svg')
-  .forEach((svg) => {
-    svg.addEventListener('click', () => openSvg(svg));
-  });
+const bindMermaidClicks = () => {
+  document
+    .querySelectorAll<SVGSVGElement>('article .prose pre.mermaid svg')
+    .forEach((svg) => {
+      if (svg.dataset.lightboxBound === '1') return;
+      svg.dataset.lightboxBound = '1';
+      svg.addEventListener('click', () => openSvg(svg));
+    });
+};
+
+// Bind now (in case SSR already produced SVGs) and again after mermaid renders.
+bindMermaidClicks();
+
+const mermaidObserver = new MutationObserver(bindMermaidClicks);
+document.querySelectorAll('article .prose pre.mermaid').forEach((el) => {
+  mermaidObserver.observe(el, { childList: true, subtree: true });
+});

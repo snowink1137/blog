@@ -26,11 +26,13 @@
 }
 
 @layer components {
-  /* Mermaid diagrams: dual-variant SVGs, theme switches via .dark class */
-  .mermaid-wrapper {
-    @apply my-8 max-w-full;
+  /* Mermaid diagrams: rendered client-side into <pre class="mermaid"> by
+     mermaid.js. The wrapper stays block-level and full-width, but is not
+     styled until mermaid replaces its content with an <svg>. */
+  .prose pre.mermaid {
+    @apply my-8 mx-auto max-w-full bg-transparent p-0 text-center min-h-16;
   }
-  .mermaid-wrapper svg {
+  .prose pre.mermaid svg {
     @apply mx-auto max-w-full h-auto cursor-zoom-in;
   }
 
@@ -51,12 +53,6 @@
     @apply cursor-zoom-in;
   }
 }
-
-/* Mermaid theme switching — high specificity needed to beat per-SVG inline styles */
-.mermaid-wrapper svg.mermaid-dark { display: none !important; }
-.mermaid-wrapper svg.mermaid-light { display: block !important; }
-html.dark .mermaid-wrapper svg.mermaid-light { display: none !important; }
-html.dark .mermaid-wrapper svg.mermaid-dark { display: block !important; }
 
 /* PhotoSwipe lightbox background follows current theme — its own .pswp scope
    wins over generic root vars, so we set them directly on the element. */

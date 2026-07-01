@@ -7,7 +7,7 @@ import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 
 import rehypeGallery from './src/lib/rehype-gallery.js';
-import rehypeMermaidDual from './src/lib/rehype-mermaid-dual.js';
+import rehypeMermaidClient from './src/lib/rehype-mermaid-client.js';
 
 export default defineConfig({
   site: 'https://hello-world-log.com',
@@ -33,13 +33,7 @@ export default defineConfig({
     syntaxHighlight: false,
     rehypePlugins: [
       [rehypeGallery, {}],
-      [
-        rehypeMermaidDual,
-        {
-          lightTheme: 'default',
-          darkTheme: 'dark',
-        },
-      ],
+      [rehypeMermaidClient, {}],
     ],
   },
 
