@@ -70,20 +70,24 @@ document
     img.addEventListener('click', () => openImage(img));
   });
 
-const bindMermaidClicks = () => {
+// Mermaid SVGs are inserted by mermaid.js after page load and re-inserted on
+// theme toggles, so bind clicks via event delegation instead of per-element
+// listeners.
+document.addEventListener('click', (event) => {
+  const target = event.target as Element | null;
+  if (!target) return;
+  const svg = target.closest<SVGSVGElement>('article .prose pre.mermaid svg');
+  if (svg) openSvg(svg);
+});
+
+// Style cursor once the SVG appears.
+const styleMermaidCursor = () => {
   document
     .querySelectorAll<SVGSVGElement>('article .prose pre.mermaid svg')
-    .forEach((svg) => {
-      if (svg.dataset.lightboxBound === '1') return;
-      svg.dataset.lightboxBound = '1';
-      svg.addEventListener('click', () => openSvg(svg));
-    });
+    .forEach((svg) => (svg.style.cursor = 'zoom-in'));
 };
-
-// Bind now (in case SSR already produced SVGs) and again after mermaid renders.
-bindMermaidClicks();
-
-const mermaidObserver = new MutationObserver(bindMermaidClicks);
-document.querySelectorAll('article .prose pre.mermaid').forEach((el) => {
-  mermaidObserver.observe(el, { childList: true, subtree: true });
+new MutationObserver(styleMermaidCursor).observe(document.body, {
+  childList: true,
+  subtree: true,
 });
+styleMermaidCursor();
