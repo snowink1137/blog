@@ -45,18 +45,31 @@ export default function rehypeMermaidDual(options = {}) {
 
     const diagrams = instances.map((i) => i.diagram);
 
-    const [lightResults, darkResults] = await Promise.all([
-      renderDiagrams(diagrams, {
-        ...options,
-        mermaidConfig: { ...(options.mermaidConfig ?? {}), theme: lightTheme },
-        prefix: 'mermaid-light',
-      }),
-      renderDiagrams(diagrams, {
-        ...options,
-        mermaidConfig: { ...(options.mermaidConfig ?? {}), theme: darkTheme },
-        prefix: 'mermaid-dark',
-      }),
-    ]);
+    let lightResults;
+    let darkResults;
+    try {
+      [lightResults, darkResults] = await Promise.all([
+        renderDiagrams(diagrams, {
+          ...options,
+          mermaidConfig: { ...(options.mermaidConfig ?? {}), theme: lightTheme },
+          prefix: 'mermaid-light',
+        }),
+        renderDiagrams(diagrams, {
+          ...options,
+          mermaidConfig: { ...(options.mermaidConfig ?? {}), theme: darkTheme },
+          prefix: 'mermaid-dark',
+        }),
+      ]);
+    } catch (err) {
+      // Renderer failed at launch (e.g. no chromium binary, missing shared libs).
+      // Leave the original ```mermaid code blocks untouched so the article body
+      // still has content — the client will see the raw mermaid source in a
+      // <pre><code> block rather than a rendered SVG.
+      process.stderr.write(
+        `[rehype-mermaid-dual] renderer failed, leaving ${instances.length} block(s) as source: ${err?.message ?? err}\n`,
+      );
+      return;
+    }
 
     for (let i = 0; i < instances.length; i++) {
       const { preNode, preParent } = instances[i];
