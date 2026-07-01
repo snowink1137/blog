@@ -43,8 +43,18 @@ import ThemeToggle from './ThemeToggle.astro';
       <ThemeToggle />
     </div>
 
-    <!-- Mobile: hamburger + theme toggle only -->
+    <!-- Mobile: search + theme toggle + hamburger -->
     <div class="flex sm:hidden items-center gap-3">
+      <a
+        href="/search"
+        class="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors"
+        aria-label="검색"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+      </a>
       <ThemeToggle />
       <button
         type="button"
@@ -77,7 +87,6 @@ import ThemeToggle from './ThemeToggle.astro';
       <a href="/life" class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">Life</a>
       <a href="/tags" class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">Tags</a>
       <a href="/about" class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">About</a>
-      <a href="/search" class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">검색</a>
       <a href="/rss.xml" class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">RSS</a>
     </div>
   </div>
