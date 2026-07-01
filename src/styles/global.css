@@ -27,10 +27,17 @@
 
 @layer components {
   /* Mermaid diagrams: rendered client-side into <pre class="mermaid"> by
-     mermaid.js. The wrapper stays block-level and full-width, but is not
-     styled until mermaid replaces its content with an <svg>. */
-  .prose pre.mermaid {
-    @apply my-8 mx-auto max-w-full bg-transparent p-0 text-center min-h-16;
+     mermaid.js. Tailwind Typography styles `.prose pre` with a dark background
+     for code blocks — override so the diagram inherits the page background. */
+  .prose pre.mermaid,
+  .prose pre.mermaid:not(:where(.not-prose, .not-prose *)) {
+    background: transparent !important;
+    color: inherit;
+    padding: 0;
+    margin: 2rem auto;
+    max-width: 100%;
+    text-align: center;
+    min-height: 4rem;
   }
   .prose pre.mermaid svg {
     @apply mx-auto max-w-full h-auto cursor-zoom-in;

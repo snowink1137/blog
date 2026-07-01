@@ -2,14 +2,19 @@ import mermaid from 'mermaid';
 
 const themeFor = (isDark: boolean) => (isDark ? 'dark' : 'default');
 
+const bodyFontFamily = () =>
+  getComputedStyle(document.body).fontFamily || 'sans-serif';
+
+const configFor = (isDark: boolean) => ({
+  startOnLoad: false as const,
+  theme: themeFor(isDark),
+  securityLevel: 'strict' as const,
+  fontFamily: bodyFontFamily(),
+});
+
 const initAndRun = () => {
   const isDark = document.documentElement.classList.contains('dark');
-  mermaid.initialize({
-    startOnLoad: false,
-    theme: themeFor(isDark),
-    securityLevel: 'strict',
-    fontFamily: 'inherit',
-  });
+  mermaid.initialize(configFor(isDark));
   void mermaid.run({ querySelector: 'pre.mermaid' });
 };
 
@@ -26,12 +31,7 @@ const rerender = async () => {
     }
   });
 
-  mermaid.initialize({
-    startOnLoad: false,
-    theme: themeFor(isDark),
-    securityLevel: 'strict',
-    fontFamily: 'inherit',
-  });
+  mermaid.initialize(configFor(isDark));
   await mermaid.run({ nodes });
 };
 
