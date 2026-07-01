@@ -5,11 +5,16 @@ import ThemeToggle from './ThemeToggle.astro';
 ---
 
 <header class="border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur sticky top-0 z-50">
-  <nav class="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-    <a href="/" class="font-bold text-slate-900 dark:text-slate-100 hover:text-(--color-accent) transition-colors">
+  <nav class="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
+    <a
+      href="/"
+      class="font-bold text-slate-900 dark:text-slate-100 hover:text-(--color-accent) transition-colors whitespace-nowrap truncate"
+    >
       {SITE_TITLE}
     </a>
-    <div class="flex items-center gap-6">
+
+    <!-- Desktop nav: hidden below sm -->
+    <div class="hidden sm:flex items-center gap-5">
       <HeaderLink href="/tech">Tech</HeaderLink>
       <HeaderLink href="/life">Life</HeaderLink>
       <HeaderLink href="/tags">Tags</HeaderLink>
@@ -37,5 +42,62 @@ import ThemeToggle from './ThemeToggle.astro';
       </a>
       <ThemeToggle />
     </div>
+
+    <!-- Mobile: hamburger + theme toggle only -->
+    <div class="flex sm:hidden items-center gap-3">
+      <ThemeToggle />
+      <button
+        type="button"
+        id="mobile-menu-button"
+        class="text-slate-700 dark:text-slate-200 p-1 -mr-1"
+        aria-label="메뉴 열기"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+      >
+        <svg id="menu-icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="6" x2="20" y2="6"></line>
+          <line x1="4" y1="12" x2="20" y2="12"></line>
+          <line x1="4" y1="18" x2="20" y2="18"></line>
+        </svg>
+        <svg id="menu-icon-close" class="hidden" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+        </svg>
+      </button>
+    </div>
   </nav>
+
+  <!-- Mobile drawer -->
+  <div
+    id="mobile-menu"
+    class="hidden sm:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950"
+  >
+    <div class="max-w-3xl mx-auto px-4 py-3 flex flex-col gap-1">
+      <a href="/tech" class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">Tech</a>
+      <a href="/life" class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">Life</a>
+      <a href="/tags" class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">Tags</a>
+      <a href="/about" class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">About</a>
+      <a href="/search" class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">검색</a>
+      <a href="/rss.xml" class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">RSS</a>
+    </div>
+  </div>
 </header>
+
+<script is:inline>
+  (() => {
+    const btn = document.getElementById('mobile-menu-button');
+    const menu = document.getElementById('mobile-menu');
+    const openIcon = document.getElementById('menu-icon-open');
+    const closeIcon = document.getElementById('menu-icon-close');
+    if (!btn || !menu || !openIcon || !closeIcon) return;
+
+    btn.addEventListener('click', () => {
+      const isOpening = menu.classList.contains('hidden');
+      menu.classList.toggle('hidden', !isOpening);
+      openIcon.classList.toggle('hidden', isOpening);
+      closeIcon.classList.toggle('hidden', !isOpening);
+      btn.setAttribute('aria-expanded', isOpening ? 'true' : 'false');
+      btn.setAttribute('aria-label', isOpening ? '메뉴 닫기' : '메뉴 열기');
+    });
+  })();
+</script>
