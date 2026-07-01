@@ -26,6 +26,8 @@
 <script is:inline>
   (() => {
     document.querySelectorAll('[data-theme-toggle]').forEach((btn) => {
+      if (btn.dataset.themeBound === '1') return;
+      btn.dataset.themeBound = '1';
       btn.addEventListener('click', () => {
         const isDark = document.documentElement.classList.toggle('dark');
         document.documentElement.classList.toggle('light', !isDark);
