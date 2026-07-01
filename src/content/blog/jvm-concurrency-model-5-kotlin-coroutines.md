@@ -101,7 +101,7 @@ fun main() = runBlocking {
 }
 ```
 
-`suspend`는 "무조건 중단"이 아니라 "중단할 수 있다"는 가능성의 선언입니다. 실제 중단은 `delay()`, `withContext()`, `await()` 같은 **중단점(suspension point)**에서만 발생합니다.
+`suspend`는 "무조건 중단"이 아니라 "중단할 수 있다"는 가능성의 선언입니다. 실제 중단은 `delay()`, `withContext()`, `await()` 같은 **중단점** (suspension point) 에서만 발생합니다.
 
 ## 코루틴 빌더 — 코루틴을 시작하는 방법
 
@@ -201,7 +201,7 @@ suspend fun processAll() = coroutineScope {
 
 **runBlocking**: 호출한 스레드를 **물리적으로 점유**합니다. 내부 코루틴이 완료될 때까지 그 스레드는 아무것도 할 수 없습니다.
 
-**coroutineScope**: 코루틴을 **중단(suspend)**합니다. 스레드는 반환되어 다른 코루틴을 실행할 수 있으며, 자식이 완료되면 중단된 코루틴이 재개됩니다.
+**coroutineScope**: 코루틴을 **중단** (suspend) 합니다. 스레드는 반환되어 다른 코루틴을 실행할 수 있으며, 자식이 완료되면 중단된 코루틴이 재개됩니다.
 
 ```kotlin
 // runBlocking — 스레드 자체를 잡고 안 놓아줌
@@ -490,7 +490,7 @@ flow {
 }
 ```
 
-`collect`가 아직 이전 값을 처리 중이면 `emit()`은 자동으로 **중단(suspend)**됩니다. Reactor에서는 개발자가 버퍼 크기와 오버플로 전략을 선택해야 하지만, Flow에서는 suspend가 Backpressure를 자연스럽게 해결합니다.
+`collect`가 아직 이전 값을 처리 중이면 `emit()`은 자동으로 **중단** (suspend) 됩니다. Reactor에서는 개발자가 버퍼 크기와 오버플로 전략을 선택해야 하지만, Flow에서는 suspend가 Backpressure를 자연스럽게 해결합니다.
 
 ### Cold Flow vs Flux 비교
 

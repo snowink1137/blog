@@ -43,8 +43,9 @@ import ThemeToggle from './ThemeToggle.astro';
       <ThemeToggle />
     </div>
 
-    <!-- Mobile: search + theme toggle + hamburger -->
+    <!-- Mobile: theme toggle + search + hamburger -->
     <div class="flex sm:hidden items-center gap-3">
+      <ThemeToggle />
       <a
         href="/search"
         class="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors"
@@ -55,7 +56,6 @@ import ThemeToggle from './ThemeToggle.astro';
           <path d="m21 21-4.3-4.3"></path>
         </svg>
       </a>
-      <ThemeToggle />
       <button
         type="button"
         id="mobile-menu-button"
