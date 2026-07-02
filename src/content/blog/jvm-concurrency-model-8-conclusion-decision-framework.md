@@ -15,7 +15,7 @@ tags: ['jvm', 'kotlin', 'java', 'reactor', 'kotlin-coroutines', 'spring-webflux'
 > 5.  [Kotlin Coroutines](/jvm-concurrency-model-5-kotlin-coroutines)
 > 6.  [Spring + Coroutines 통합 — WebFlux, MVC, 그리고 AOP의 한계](/jvm-concurrency-model-6-spring-coroutines)
 > 7.  [Virtual Thread — 동기 세계의 해법](/jvm-concurrency-model-7-virtual-thread)
-> 8.  **[총정리 — 언제 무엇을 선택할 것인가](https://hello-world-log.com/jvm-concurrency-model-8-conclusion-decision-framework/) ← 현재 글**
+> 8.  **[총정리 — 언제 무엇을 선택할 것인가](/jvm-concurrency-model-8-conclusion-decision-framework/) ← 현재 글**
 
 ## 시리즈 되돌아보기
 
@@ -40,20 +40,19 @@ subgraph 비동기 세계
     P7 -.-> GOAL
 ```
 
+**[Part 1 — 동시성과 병렬성의 기초.](/jvm-concurrency-model-1-fundamentals/)** 동시성(concurrency)과 병렬성(parallelism)은 다르다. 동기/비동기는 “결과를 누가 챙기는가”, 블로킹/논블로킹은 “제어권이 언제 돌아오는가” — 이 두 축이 독립적이라는 것을 정리했습니다. 이후 모든 기술을 이해하는 기초 체력이 됩니다.
 
-**[Part 1 — 동시성과 병렬성의 기초.](https://hello-world-log.com/jvm-concurrency-model-1-fundamentals/)** 동시성(concurrency)과 병렬성(parallelism)은 다르다. 동기/비동기는 “결과를 누가 챙기는가”, 블로킹/논블로킹은 “제어권이 언제 돌아오는가” — 이 두 축이 독립적이라는 것을 정리했습니다. 이후 모든 기술을 이해하는 기초 체력이 됩니다.
+**[Part 2 — Java의 전통적인 동시성 모델.](/jvm-concurrency-model-2-java-traditional-concurrency/)** `Thread`, `Runnable`에서 시작해 `Callable`/`Future`, `ExecutorService`, `CompletableFuture`까지 — 추상화 수준이 올라가며 “스레드를 직접 관리하지 마라”는 방향으로 발전했습니다. 하지만 `CompletableFuture`의 체이닝에도 한계가 있었습니다: 값 하나가 아니라 **연속된 데이터 스트림**을 처리해야 할 때, 그리고 소비자가 생산 속도를 제어해야 할 때(backpressure).
 
-**[Part 2 — Java의 전통적인 동시성 모델.](https://hello-world-log.com/jvm-concurrency-model-2-java-traditional-concurrency/)** `Thread`, `Runnable`에서 시작해 `Callable`/`Future`, `ExecutorService`, `CompletableFuture`까지 — 추상화 수준이 올라가며 “스레드를 직접 관리하지 마라”는 방향으로 발전했습니다. 하지만 `CompletableFuture`의 체이닝에도 한계가 있었습니다: 값 하나가 아니라 **연속된 데이터 스트림**을 처리해야 할 때, 그리고 소비자가 생산 속도를 제어해야 할 때(backpressure).
+**[Part 3 — Reactive Streams와 Project Reactor.](/jvm-concurrency-model-3-reactive-streams-reactor/)** `Publisher`–`Subscriber` 4개의 인터페이스로 backpressure를 표준화하고, Reactor가 `Mono`/`Flux`와 풍부한 operator로 이를 구현했습니다. 선언적 파이프라인으로 “데이터가 흘러가는 대로 처리”하는 모델 — 강력하지만 학습 곡선이 가파르고, 디버깅이 어렵고, 코드가 콜백 체이닝에 묶인다는 단점이 있었습니다.
 
-**[Part 3 — Reactive Streams와 Project Reactor.](https://hello-world-log.com/jvm-concurrency-model-3-reactive-streams-reactor/)** `Publisher`–`Subscriber` 4개의 인터페이스로 backpressure를 표준화하고, Reactor가 `Mono`/`Flux`와 풍부한 operator로 이를 구현했습니다. 선언적 파이프라인으로 “데이터가 흘러가는 대로 처리”하는 모델 — 강력하지만 학습 곡선이 가파르고, 디버깅이 어렵고, 코드가 콜백 체이닝에 묶인다는 단점이 있었습니다.
+**[Part 4 — Spring WebFlux.](/jvm-concurrency-model-4-spring-webflux/)** Reactor를 웹에 적용한 결과. Netty의 이벤트 루프 위에서 적은 스레드로 많은 동시 연결을 처리합니다. Spring MVC의 “1 요청 = 1 스레드” 모델을 깨고 논블로킹 I/O로 처리량을 높였지만, 블로킹 코드를 쓰면 이벤트 루프가 멈추므로 **논블로킹 라이브러리만 사용해야** 한다는 제약이 생겼습니다.
 
-**[Part 4 — Spring WebFlux.](https://hello-world-log.com/jvm-concurrency-model-4-spring-webflux/)** Reactor를 웹에 적용한 결과. Netty의 이벤트 루프 위에서 적은 스레드로 많은 동시 연결을 처리합니다. Spring MVC의 “1 요청 = 1 스레드” 모델을 깨고 논블로킹 I/O로 처리량을 높였지만, 블로킹 코드를 쓰면 이벤트 루프가 멈추므로 **논블로킹 라이브러리만 사용해야** 한다는 제약이 생겼습니다.
+**[Part 5 — Kotlin Coroutines.](/jvm-concurrency-model-5-kotlin-coroutines/)** Reactor의 operator 체이닝 대신 `suspend fun`으로 동기 코드처럼 작성하면서 논블로킹의 이점을 누리는 모델. 컴파일러가 CPS 변환과 상태 머신으로 코루틴을 구현하고, 구조화된 동시성으로 코루틴의 생명주기를 안전하게 관리합니다. Reactor의 가독성 문제를 해결했지만, 내부적으로는 여전히 논블로킹 세계 위에서 동작합니다.
 
-**[Part 5 — Kotlin Coroutines.](https://hello-world-log.com/jvm-concurrency-model-5-kotlin-coroutines/)** Reactor의 operator 체이닝 대신 `suspend fun`으로 동기 코드처럼 작성하면서 논블로킹의 이점을 누리는 모델. 컴파일러가 CPS 변환과 상태 머신으로 코루틴을 구현하고, 구조화된 동시성으로 코루틴의 생명주기를 안전하게 관리합니다. Reactor의 가독성 문제를 해결했지만, 내부적으로는 여전히 논블로킹 세계 위에서 동작합니다.
+**[Part 6 — Spring + Coroutines 통합, 그리고 AOP의 한계.](/jvm-concurrency-model-6-spring-coroutines/)** WebFlux에서 `suspend fun`을 선언하면 Spring이 내부적으로 `mono {}`로 감싸서 Reactor 파이프라인에 태웁니다. 하지만 AOP 프록시가 `COROUTINE_SUSPENDED` 반환을 “메서드 종료”로 판단하는 구조적 한계가 있었습니다. `@Transactional` + JDBC + 코루틴은 지원되지 않고, 커스텀 `@Around` 어드바이스도 동일한 문제를 겪습니다.
 
-**[Part 6 — Spring + Coroutines 통합, 그리고 AOP의 한계.](https://hello-world-log.com/jvm-concurrency-model-6-spring-coroutines/)** WebFlux에서 `suspend fun`을 선언하면 Spring이 내부적으로 `mono {}`로 감싸서 Reactor 파이프라인에 태웁니다. 하지만 AOP 프록시가 `COROUTINE_SUSPENDED` 반환을 “메서드 종료”로 판단하는 구조적 한계가 있었습니다. `@Transactional` + JDBC + 코루틴은 지원되지 않고, 커스텀 `@Around` 어드바이스도 동일한 문제를 겪습니다.
-
-**[Part 7 — Virtual Thread.](https://hello-world-log.com/jvm-concurrency-model-7-virtual-thread/)** 동기 세계의 해법. JVM이 경량 스레드를 제공하여 블로킹 코드를 그대로 두고도 높은 동시성을 달성합니다. 함수가 반환하지 않으므로 AOP 프록시가 정상 동작하고, ThreadLocal도 유지됩니다. Part 6의 한계를 동기 모델 안에서 해결합니다.
+**[Part 7 — Virtual Thread.](/jvm-concurrency-model-7-virtual-thread/)** 동기 세계의 해법. JVM이 경량 스레드를 제공하여 블로킹 코드를 그대로 두고도 높은 동시성을 달성합니다. 함수가 반환하지 않으므로 AOP 프록시가 정상 동작하고, ThreadLocal도 유지됩니다. Part 6의 한계를 동기 모델 안에서 해결합니다.
 
 이 시리즈의 여정을 한 문장으로 요약하면: **비동기 세계는 “블로킹하지 마라”로, 동기 세계는 “블로킹해도 괜찮게 만들어라”로 같은 문제를 풀어왔다.** 그렇다면 실무에서는 어떤 기술을 선택해야 할까요?
 
@@ -63,7 +62,7 @@ subgraph 비동기 세계
 
 ### 질문 1: 데이터 접근 기술이 블로킹인가, 논블로킹인가?
 
-가장 먼저 확인할 것은 **데이터 접근 기술**입니다. [Part 6](https://hello-world-log.com/jvm-concurrency-model-6-spring-coroutines/)에서 다뤘듯이, `PlatformTransactionManager`와 `ReactiveTransactionManager`를 결정하는 것은 HTTP 레이어(MVC vs WebFlux)가 아니라 데이터 접근 기술이었습니다. 이 구분이 기술 선택의 출발점입니다.
+가장 먼저 확인할 것은 **데이터 접근 기술**입니다. [Part 6](/jvm-concurrency-model-6-spring-coroutines/)에서 다뤘듯이, `PlatformTransactionManager`와 `ReactiveTransactionManager`를 결정하는 것은 HTTP 레이어(MVC vs WebFlux)가 아니라 데이터 접근 기술이었습니다. 이 구분이 기술 선택의 출발점입니다.
 
 **블로킹 데이터 접근** — JDBC, JPA/Hibernate, MyBatis, 블로킹 Redis(Jedis):
 
@@ -132,7 +131,6 @@ Q1{"데이터 접근이 블로킹인가?"}
     Q3 -->|Kotlin| CO["WebFlux + Coroutines 또는 MVC + Virtual Thread"]
 ```
 
-
 ## 기술별 진짜 강점 — “이것만큼은 이 기술이 최선”
 
 각 기술에는 다른 기술로 대체하기 어려운 **고유한 강점 영역**이 있습니다.
@@ -183,7 +181,7 @@ Reactor의 backpressure는 이 문제를 파이프라인 수준에서 해결합�
 
 ### ThreadLocal 메모리 주의
 
-[Part 7](https://hello-world-log.com/jvm-concurrency-model-7-virtual-thread/)에서 다뤘듯이, ThreadLocal은 Virtual Thread에서 정상 동작하지만 스레드 수에 비례하여 메모리가 증가합니다. Platform Thread 200개일 때는 문제 없던 ThreadLocal 캐시가, Virtual Thread 10만 개 환경에서는 메모리 이슈가 될 수 있습니다.
+[Part 7](/jvm-concurrency-model-7-virtual-thread/)에서 다뤘듯이, ThreadLocal은 Virtual Thread에서 정상 동작하지만 스레드 수에 비례하여 메모리가 증가합니다. Platform Thread 200개일 때는 문제 없던 ThreadLocal 캐시가, Virtual Thread 10만 개 환경에서는 메모리 이슈가 될 수 있습니다.
 
 ### Structured Concurrency는 아직 프리뷰
 
@@ -217,7 +215,6 @@ subgraph 각 기술이 해결한 문제
     end
 ```
 
-
 이 시리즈에서 다룬 모든 기술은 **같은 근본 문제 — “적은 리소스로 많은 동시 작업을 처리”** — 를 서로 다른 각도에서 해결합니다.
 
 Thread와 Future는 “스레드를 직접 다루는 복잡성”을, CompletableFuture는 “비동기 결과의 조합”을, Reactor는 “데이터 스트림의 선언적 처리와 흐름 제어”를, WebFlux는 “적은 스레드로 많은 HTTP 연결”을, Coroutines는 “논블로킹을 동기 코드처럼”을, Virtual Thread는 “블로킹 코드를 그대로 두고 동시성 확보”를 해결했습니다.
@@ -230,13 +227,13 @@ Thread와 Future는 “스레드를 직접 다루는 복잡성”을, Completabl
 
 **시리즈 전체**
 
--   [Part 1 — 동시성과 병렬성의 기초](https://hello-world-log.com/jvm-concurrency-model-1-fundamentals)
--   [Part 2 — Java의 전통적인 동시성 모델](https://hello-world-log.com/jvm-concurrency-model-2-java-traditional-concurrency)
--   [Part 3 — Reactive Streams와 Project Reactor](https://hello-world-log.com/jvm-concurrency-model-3-reactive-streams-reactor)
--   [Part 4 — Spring WebFlux](https://hello-world-log.com/jvm-concurrency-model-4-spring-webflux)
--   [Part 5 — Kotlin Coroutines](https://hello-world-log.com/jvm-concurrency-model-5-kotlin-coroutines)
--   [Part 6 — Spring + Coroutines 통합](https://hello-world-log.com/jvm-concurrency-model-6-spring-coroutines)
--   [Part 7 — Virtual Thread](https://hello-world-log.com/jvm-concurrency-model-7-virtual-thread)
+-   [Part 1 — 동시성과 병렬성의 기초](/jvm-concurrency-model-1-fundamentals)
+-   [Part 2 — Java의 전통적인 동시성 모델](/jvm-concurrency-model-2-java-traditional-concurrency)
+-   [Part 3 — Reactive Streams와 Project Reactor](/jvm-concurrency-model-3-reactive-streams-reactor)
+-   [Part 4 — Spring WebFlux](/jvm-concurrency-model-4-spring-webflux)
+-   [Part 5 — Kotlin Coroutines](/jvm-concurrency-model-5-kotlin-coroutines)
+-   [Part 6 — Spring + Coroutines 통합](/jvm-concurrency-model-6-spring-coroutines)
+-   [Part 7 — Virtual Thread](/jvm-concurrency-model-7-virtual-thread)
 
 **외부 참고**
 
