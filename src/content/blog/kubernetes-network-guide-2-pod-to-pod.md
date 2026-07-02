@@ -294,7 +294,7 @@ Calico는 **“프로덕션에서 무난하게 쓸 수 있는”** 선택지입�
 -   다른 CNI 대비 리소스 사용량 높음
 -   최신 Linux 커널 필요 (eBPF 지원)
 
-```text
+```bash
 # Cilium 설치 (Helm 사용)
 helm install cilium cilium/cilium --namespace kube-system
 ```
@@ -364,7 +364,7 @@ CoreDNS는 다음과 같이 동작합니다:
 
 Kubernetes에서 Service의 전체 도메인(FQDN)은 다음 형식입니다:
 
-```xml
+```text
 <service-name>.<namespace>.svc.cluster.local
 ```
 
@@ -495,7 +495,7 @@ kubectl logs -n kube-system -l k8s-app=kube-dns
 
 ### 2\. 네트워크 연결 확인
 
-```xml
+```bash
 # Pod에서 다른 Pod로 직접 통신 테스트
 kubectl exec -it <pod-name> -- ping <target-pod-ip>
 kubectl exec -it <pod-name> -- curl <target-pod-ip>:<port>

@@ -293,7 +293,7 @@ java -javaagent:opentelemetry-javaagent.jar \
 
 Docker 환경에서는:
 
-```text
+```dockerfile
 FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
@@ -354,7 +354,7 @@ OpenTelemetry Java Agent는 **150개 이상의 라이브러리**를 자동으로
 
 ### 테스트 시나리오
 
-```xml
+```kotlin
 @RestController
 class OrderController(
     private val webClient: WebClient,  // 외부 API 호출

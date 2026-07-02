@@ -848,7 +848,7 @@ public class OrderController {
 
 출력 예시:
 
-```yaml
+```text
 14:23:45.123 [abc123def456,111aaa] [reactor-http-nio-1] INFO  c.e.OrderController - 주문 생성 시작: PROD-001
 14:23:45.234 [abc123def456,222bbb] [reactor-http-nio-2] INFO  c.e.OrderController - 주문 저장 완료: ORD-123
 14:23:45.345 [abc123def456,333ccc] [reactor-http-nio-3] INFO  c.e.OrderController - 재고 차감 완료
@@ -897,7 +897,7 @@ new Thread(() -> {
 
 Automatic Context Propagation은 편리하지만 성능 비용이 있습니다:
 
-```json
+```java
 // 모든 연산자에서 이런 일이 발생
 // 1. 연산자 실행 전: Context → ThreadLocal 복원
 // 2. 사용자 코드 실행
@@ -989,7 +989,7 @@ public Flux<Order> getOrders() {
 
 **증상 예시**: 애플리케이션 코드의 로그에는 traceId가 잘 나오는데, Reactive Mongo Client, R2DBC 드라이버 등 **라이브러리의 DEBUG 로그**에서는 traceId가 비어있음
 
-```yaml
+```text
 14:23:45.123 [abc123,111aaa] INFO  c.e.OrderService - 주문 조회 시작          // ✅ 정상
 14:23:45.124 [abc123,111aaa] DEBUG c.m.r.c.internal - Executing query       // ✅ 정상 (체인 안)
 14:23:45.125 [,]             DEBUG c.m.r.c.internal - Socket connected      // ❌ 유실 (체인 밖)

@@ -116,7 +116,7 @@ sudo growpart /dev/nvme0n1 1
 
 이 명령어는 `nvme0n1` 디스크의 **1번 파티션을 디스크 끝까지 확장**합니다.
 
-```yaml
+```text
 CHANGED: partition=1 start=2099200 old: size=14677983 end=16777182 new: size=39843807 end=41943006
 ```
 
@@ -129,7 +129,7 @@ CHANGED: partition=1 start=2099200 old: size=14677983 end=16777182 new: size=398
 ```bash
 sudo resize2fs /dev/nvme0n1p1
 ```
-```bash
+```text
 resize2fs 1.47.0 (5-Feb-2023)
 Filesystem at /dev/nvme0n1p1 is mounted on /; on-line resizing required
 The filesystem on /dev/nvme0n1p1 is now 4980475 (4k) blocks long.

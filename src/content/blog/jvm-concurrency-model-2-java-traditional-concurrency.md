@@ -192,7 +192,7 @@ CachedThreadPool의 코어 스레드가 0인 이유는, 작업이 없으면 **�
 
 ExecutorService는 명시적으로 종료해야 합니다. 종료하지 않으면 JVM이 끝나지 않습니다.
 
-```text
+```java
 executor.shutdown();       // 새 작업 거부, 진행 중인 작업은 완료까지 기다림
 executor.shutdownNow();    // 새 작업 거부, 진행 중인 작업에 interrupt 시도
 ```
@@ -278,7 +278,7 @@ CompletableFuture.supplyAsync(() -> {
 
 `exceptionally`는 예외가 발생했을 때만 호출되고, 대체 값을 반환합니다. `handle`과 `whenComplete`은 **성공이든 실패든 항상 호출**되지만, 핵심적인 차이가 있습니다.
 
-```text
+```java
 // handle: 성공/실패 모두 받고, 결과를 변환할 수 있음 (try-catch + 변환)
 cf.handle((result, ex) -> {
     if (ex != null) return "기본값";   // 예외 시 대체 값
@@ -472,7 +472,7 @@ Core 0에서 `running = false`로 변경하면, Core 0의 캐시는 업데이트
 
 참고로 이 메모리 배리어는 **명령어 재배치도 방지**합니다. CPU나 컴파일러는 성능 최적화를 위해 “결과가 같다면” 명령어 순서를 바꿀 수 있는데, 단일 스레드에서는 문제가 없지만 멀티스레드에서는 예상치 못한 결과가 발생할 수 있습니다.
 
-```text
+```java
 // Thread A
 data = loadData();       // 1번
 volatile ready = true;   // 2번

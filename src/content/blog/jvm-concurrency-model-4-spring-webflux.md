@@ -395,7 +395,7 @@ WebClient는 Part 3에서 다룬 Reactor의 연산자를 그대로 사용합니�
 
 ### 타임아웃과 재시도
 
-```xml
+```java
 Mono<User> resilientCall = webClient.get()
     .uri("/users/{id}", 1)
     .retrieve()
@@ -598,7 +598,7 @@ class UserControllerTest {
 
 Part 3에서 다루지 않았지만, Reactor의 `StepVerifier`는 리액티브 스트림의 동작을 단계별로 검증하는 도구입니다.
 
-```xml
+```java
 @Test
 void shouldEmitThreeUsersAndComplete() {
     Flux<User> users = userService.findActiveUsers();

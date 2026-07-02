@@ -172,7 +172,7 @@ class UserController(private val userService: UserService) {
 
 Spring은 이 `suspend fun`을 발견하면 내부적으로 [`CoroutinesUtils.invokeSuspendingFunction()`](https://docs.spring.io/spring-framework/reference/languages/kotlin/coroutines.html)을 호출하여, 개념적으로 이런 변환을 수행합니다.
 
-```xml
+```kotlin
 // Spring이 내부적으로 하는 일 (개념적)
 fun getUser(id: Long): Mono<User> = mono(Dispatchers.Unconfined) {
     userService.findById(id)
@@ -244,7 +244,7 @@ public class UserController {
     }
 }
 ```
-```xml
+```kotlin
 // Coroutine (Kotlin) — 같은 로직
 @RestController
 class UserController(

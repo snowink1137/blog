@@ -264,7 +264,7 @@ sudo vi /opt/aws/amazon-cloudwatch-agent/bin/config.json
 
 `collect_list` 배열에 여러 로그를 추가할 수 있습니다.
 
-```text
+```json
 "collect_list": [
   {
     "file_path": "/var/log/syslog",
@@ -614,12 +614,12 @@ tail -10 /var/log/syslog
 
 Agent 로그에서 `piping log from` 메시지가 해당 로그 파일에 대해 출력되지 않으면 권한 문제입니다.
 
-```xml
+```bash
 sudo cat /opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log | grep "piping"
 
-<em># 정상: 각 로그 파일에 대해 piping 메시지가 출력됨</em>
-<em># I! [logagent] piping log from /ec2/syslog/...</em>
-<em># I! [logagent] piping log from /ec2/auth/...</em>
+# 정상: 각 로그 파일에 대해 piping 메시지가 출력됨
+# I! [logagent] piping log from /ec2/syslog/...
+# I! [logagent] piping log from /ec2/auth/...
 ```
 
 **해결 방법 1: run\_as\_user 제거 (권장)**
@@ -639,11 +639,11 @@ sudo cat /opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log | gre
 
 보안상 cwagent 사용자를 유지하고 싶다면 필요한 그룹 권한을 추가합니다.
 
-```xml
-<em># syslog, auth.log 읽기 권한 (adm 그룹)</em>
+```bash
+# syslog, auth.log 읽기 권한 (adm 그룹)
 sudo usermod -aG adm cwagent
 
-<em># 그룹 변경 적용을 위해 Agent 재시작</em>
+# 그룹 변경 적용을 위해 Agent 재시작
 sudo systemctl restart amazon-cloudwatch-agent
 ```
 

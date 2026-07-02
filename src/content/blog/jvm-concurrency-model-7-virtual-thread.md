@@ -159,7 +159,7 @@ flowchart TD
 
 **호출자 입장에서는 변한 것이 없습니다.** `Thread.sleep(1000)`을 호출하면 1초 후에 다음 줄이 실행됩니다. 동기 블로킹 코드가 그대로 동작합니다. 달라진 것은 그 1초 동안 **carrier thread가 점유되지 않는다**는 것뿐입니다.
 
-```text
+```java
 // Virtual Thread에서 실행 — 코드는 완전히 동기적
 void handleRequest() {
     User user = userRepository.findById(id);     // JDBC 블로킹 → unmount → mount

@@ -59,14 +59,14 @@ t3.micro (vCPU 2개, 메모리 1GB)처럼 작은 인스턴스를 사용한다면
 
 Agent 설치 후 실제로 얼마나 리소스를 사용하는지 확인할 수 있습니다.
 
-```xml
-<em># 방법 1: ps 명령어로 확인</em>
+```bash
+# 방법 1: ps 명령어로 확인
 ps aux | grep amazon-cloudwatch-agent | grep -v grep
 
-<em># 방법 2: top에서 실시간 확인 (q로 종료)</em>
+# 방법 2: top에서 실시간 확인 (q로 종료)
 top -p $(pgrep -d',' amazon-cloudwatch)
 
-<em># 방법 3: htop 설치 후 확인 (더 보기 편함)</em>
+# 방법 3: htop 설치 후 확인 (더 보기 편함)
 sudo apt install htop -y
 htop
 ```
@@ -444,12 +444,12 @@ sudo cat /opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log
 
 최근 EC2 인스턴스는 보안이 강화된 **IMDSv2**를 사용하므로 토큰이 필요합니다.
 
-```xml
-<em># 토큰 발급</em>
+```bash
+# 토큰 발급
 TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" \
   -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
 
-<em># 토큰으로 IAM 역할 확인</em>
+# 토큰으로 IAM 역할 확인
 curl -H "X-aws-ec2-metadata-token: $TOKEN" \
   http://169.254.169.254/latest/meta-data/iam/security-credentials/
 ```

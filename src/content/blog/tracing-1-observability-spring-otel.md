@@ -67,7 +67,7 @@ tags: ['b3', 'micrometer', 'msa', 'observability', 'opentelemetry', 'spring-boot
 
 **Tracing에서는 당연히 Trace ID가 있습니다.** 이건 원래부터 그랬습니다.
 
-```yaml
+```text
 [Trace]
 trace_id: abc-123-xyz
 spans:
@@ -259,8 +259,8 @@ Micrometer Tracing은 같은 철학을 Tracing에 적용합니다.
 
 두 가지 방식으로 설정할 수 있습니다.
 
-```xml
-<em># 방식 1: type으로 한번에 설정 (인바운드/아웃바운드 동일하게 적용)</em>
+```yaml
+# 방식 1: type으로 한번에 설정 (인바운드/아웃바운드 동일하게 적용)
 management:
   tracing:
     propagation:
@@ -268,15 +268,15 @@ management:
         - w3c
         - b3_multi
 ```
-```xml
-<em># 방식 2: consume/produce 분리 (더 세밀한 제어)</em>
+```yaml
+# 방식 2: consume/produce 분리 (더 세밀한 제어)
 management:
   tracing:
     propagation:
-      consume:        <em># 인바운드: 두 포맷 모두 읽기</em>
+      consume:        # 인바운드: 두 포맷 모두 읽기
         - w3c
         - b3_multi
-      produce:        <em># 아웃바운드: W3C만 쓰기</em>
+      produce:        # 아웃바운드: W3C만 쓰기
         - w3c
 ```
 
@@ -286,8 +286,8 @@ management:
 
 OTel Bridge 사용 시, 해당 exporter dependency를 추가하면 **application.yaml만으로 여러 백엔드에 동시 전송**이 가능합니다.
 
-```xml
-<em># application.yml - OTLP와 Zipkin에 동시 전송</em>
+```yaml
+# application.yml - OTLP와 Zipkin에 동시 전송
 management:
   otlp:
     tracing:

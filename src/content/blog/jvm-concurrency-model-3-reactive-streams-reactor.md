@@ -460,7 +460,7 @@ Flux.range(1, 10000)
 
 리액티브 프로그래밍의 가장 큰 진입 장벽 중 하나는 **디버깅의 어려움**입니다. 일반적인 명령형 코드에서 예외가 발생하면 스택 트레이스가 코드의 호출 순서를 그대로 보여줍니다. 하지만 리액티브에서는 연산자 체인이 비동기로 실행되기 때문에, 스택 트레이스가 의미 없는 Reactor 내부 클래스로 가득 차 있습니다.
 
-```json
+```text
 // 일반적인 리액티브 에러 스택 트레이스 (어디서 에러가 났는지 알기 어려움)
 // reactor.core.publisher.Mono.map(Mono.java:...)
 // reactor.core.publisher.FluxMap$MapSubscriber.onNext(...)

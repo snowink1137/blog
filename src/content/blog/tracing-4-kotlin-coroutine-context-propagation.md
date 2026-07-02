@@ -146,7 +146,7 @@ val extended = base + Dispatchers.IO
 
 부모 Coroutine의 Context는 자식에게 **상속**됩니다. 자식은 필요한 Element만 추가하거나 덮어쓸 수 있습니다.
 
-```text
+```kotlin
 launch(Dispatchers.IO + CoroutineName("parent")) {
     // 부모 Context: Dispatchers.IO + CoroutineName("parent")
     
@@ -233,7 +233,7 @@ sequenceDiagram
 
 `asContextElement()`가 내부적으로 어떻게 동작하는지 이해하기 위해, 커스텀 ThreadContextElement를 직접 만들어봅시다. Spring Security의 SecurityContext를 Coroutine에서 유지하는 예제입니다.
 
-```xml
+```kotlin
 class SecurityCoroutineContext(
     // 1️⃣ 인스턴스 생성 시점의 SecurityContext를 캡처 (기본값)
     private val securityContext: SecurityContext = SecurityContextHolder.getContext()
@@ -342,7 +342,7 @@ dependencies {
 
 사용법:
 
-```text
+```kotlin
 import kotlinx.coroutines.slf4j.MDCContext
 
 MDC.put("traceId", "abc123")
@@ -360,7 +360,7 @@ launch(MDCContext()) {
 
 **중요한 함정**이 있습니다. Coroutine 내부에서 `MDC.put()`으로 값을 변경해도, 다음 suspension 이후에는 **원래 값으로 복원**됩니다.
 
-```text
+```kotlin
 MDC.put("traceId", "abc123")
 
 launch(MDCContext()) {
@@ -402,7 +402,7 @@ sequenceDiagram
 
 변경된 MDC 값을 유지하려면 `withContext(MDCContext())`로 새로운 캡처본을 만들어야 합니다.
 
-```text
+```kotlin
 MDC.put("traceId", "abc123")
 
 launch(MDCContext()) {
@@ -573,7 +573,7 @@ logging:
 
 ### Controller 예시
 
-```xml
+```kotlin
 @RestController
 class OrderController(
     private val orderService: OrderService
@@ -627,7 +627,7 @@ class OrderController(
 
 실행 결과 (`getOrder`):
 
-```yaml
+```text
 14:23:45.123 [abc123,111aaa] INFO  OrderController - 주문 조회 시작: 123
 14:23:45.230 [abc123,111aaa] INFO  OrderController - DB 조회 전
 14:23:45.456 [abc123,111aaa] INFO  OrderController - 주문 조회 완료
@@ -635,7 +635,7 @@ class OrderController(
 
 실행 결과 (`getAllOrders` – Flow):
 
-```yaml
+```text
 14:24:01.100 [def456,222bbb] INFO  OrderController - 전체 주문 조회 시작
 14:24:01.150 [def456,222bbb] INFO  OrderController - 주문 emit: order-1
 14:24:01.160 [def456,222bbb] INFO  OrderController - 주문 emit: order-2
@@ -767,7 +767,7 @@ suspend fun getOrder(@PathVariable id: String): Order {
 
 `runBlocking`으로 Coroutine을 시작할 때는 Context를 **명시적으로 전달**해야 합니다.
 
-```text
+```kotlin
 // ❌ Context 전달 안 됨
 runBlocking {
     log.info("작업")  // traceId 없음

@@ -109,7 +109,7 @@ private static Pageable getDefaultPageRequestFrom(MethodParameter parameter,
 
 ### oneIndexedParametersDefaultsIndexOutOfRange 테스트
 
-```kotlin
+```java
 @Test
 void oneIndexedParametersDefaultsIndexOutOfRange() {
     var resolver = getResolver();

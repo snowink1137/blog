@@ -52,7 +52,7 @@ JDK에 내장된 `InetAddress.getByName()`은 **블로킹(blocking)** 방식으�
 
 `build.gradle.kts`에 다음 의존성을 추가합니다.
 
-```text
+```kotlin
 dependencies {
     // macOS Apple Silicon에서 Netty가 시스템 DNS resolver를 사용하도록 native 라이브러리 추가
     if (System.getProperty("os.name").lowercase().contains("mac") 

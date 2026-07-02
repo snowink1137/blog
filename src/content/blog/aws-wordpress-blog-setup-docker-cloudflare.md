@@ -34,7 +34,7 @@ vim ~/.ssh/config
 
 config 파일에 아래 내용을 추가합니다. 들여쓰기도 해줘야 합니다.
 
-```xml
+```text
 Host wordpress
     HostName <EC2-퍼블릭-IP>  # 나중에 Elastic IP를 사용해서 IP가 고정되면 해당 IP로 변경해주세요.
     User ubuntu

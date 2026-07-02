@@ -95,7 +95,7 @@ spec:
 2.  **클라우드 LB가 자동 생성됨**
 3.  **LB가 NodePort로 트래픽을 보내도록 자동 설정됨**
 
-```text
+```bash
 # 생성 후 확인
 kubectl get svc ingress-nginx-controller -n ingress-nginx
 
@@ -254,7 +254,7 @@ spec:
 
 Ingress Controller는 이 리소스를 읽어서 대략 다음과 같은 nginx 설정으로 변환합니다.
 
-```text
+```nginx
 # 자동 생성된 nginx.conf (단순화된 예시)
 server {
     listen 80;

@@ -315,7 +315,7 @@ executor.submit(() -> {
 
 또 다른 문제는 메모리 누수입니다. ThreadLocalMap의 Entry는 ThreadLocal을 **WeakReference**로 참조하지만, 값(value)은 **강한 참조**입니다.
 
-```xml
+```text
 Entry(WeakReference<ThreadLocal>, value)
 ```
 
@@ -584,7 +584,7 @@ Logback 패턴에서 `%X{key}` 구문으로 MDC 값을 출력합니다:
 
 출력 결과:
 
-```yaml
+```text
 14:23:45.123 [abc-456-def] [user-123] 주문 생성 완료
 ```
 
