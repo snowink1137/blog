@@ -210,7 +210,7 @@ t3.micro 하나로 개인 블로그를 운영하는 수준이라면, **무료 �
 
 실제로 알람이 작동하는지 확인하고 싶다면, EC2에 SSH 접속 후 CPU 부하를 발생시켜볼 수 있습니다.
 
-```php
+```bash
 # CPU 부하 발생 (테스트 후 Ctrl+C로 중지)
 yes > /dev/null &
 yes > /dev/null &

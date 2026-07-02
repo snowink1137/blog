@@ -44,7 +44,7 @@ Spring MVC 으로 잘 개발하고 있다가도 성능에 대한 고민을 하�
 | **시그널 핸들러 (Signal Handler)** | OS나 다른 프로세스가 보내는 **이벤트** (시그널) 를 처리하는 함수입니다. `Ctrl+C`를 누르면 `SIGINT` 시그널이 프로세스에 전달되는데, 이때 실행되는 함수가 시그널 핸들러입니다. Java에서는 직접 다루는 경우가 많지 않지만, JVM이 내부적으로 사용합니다. |
 | **IPC (Inter-Process Communication)** | 서로 다른 프로세스가 **데이터를 주고받기 위한 통신 방법**의 총칭입니다. 파이프, 소켓, 메시지 큐, 공유 메모리 등이 있습니다. 프로세스는 메모리가 격리되어 있으므로, 데이터를 주고받으려면 반드시 OS가 제공하는 IPC 메커니즘을 사용해야 합니다. 스레드는 메모리를 공유하므로 IPC 없이도 직접 통신할 수 있습니다. |
 
-```
+```mermaid
 graph TB
     subgraph "Process A"
         direction TB
@@ -97,7 +97,7 @@ graph TB
 
 이것이 가능한 이유는 `clone()` 시스템 콜의 설계 덕분입니다. `fork()`처럼 프로세스를 생성하는 것과 `pthread_create()`처럼 스레드를 생성하는 것 모두 내부적으로 **`clone()`을 호출**하는데, 어떤 자원을 공유할지를 플래그로 세밀하게 제어합니다.
 
-```
+```mermaid
 graph LR
     FORK["fork()"] -->|"자원 복사"| CLONE["clone()"]
     PTHREAD["pthread_create()"] -->|"자원 공유"| CLONE
@@ -157,7 +157,7 @@ graph LR
 
 Java에서 `new Thread().start()`를 호출하면, JVM은 내부적으로 OS의 네이티브 스레드를 생성합니다. 리눅스에서는 `pthread_create()`를 호출하고, 이것은 다시 `clone()`으로 이어집니다. 즉, **Java Thread와 OS Thread는 1:1로 매핑**됩니다.
 
-```
+```mermaid
 flowchart TB
     JAVA["new Thread().start()"] --> JVM[JVM 내부]
     JVM --> PTHREAD["pthread_create()"]
@@ -184,7 +184,7 @@ flowchart TB
 
 **병렬성** (Parallelism) 은 여러 작업이 **물리적으로 같은 순간에 실행되는 것**입니다. 멀티코어 CPU가 필요합니다.
 
-```
+```mermaid
 gantt
     title 동시성 (싱글코어 — 시분할)
     dateFormat X
@@ -198,7 +198,7 @@ gantt
     Task A :a3, 8, 10
 ```
 
-```
+```mermaid
 gantt
     title 병렬성 (멀티코어 — 동시 실행)
     dateFormat X
@@ -229,7 +229,7 @@ gantt
 
 **비동기**는 작업을 요청한 뒤 **결과를 나중에 콜백이나 이벤트로 통보받는** 방식입니다. 호출자가 직접 결과를 확인하지 않고, 완료되면 알림이 옵니다.
 
-```
+```mermaid
 sequenceDiagram
     participant Caller as 호출자
     participant Worker as 작업자
@@ -241,7 +241,7 @@ sequenceDiagram
     Note over Caller: 호출자가 직접 결과를 받음
 ```
 
-```
+```mermaid
 sequenceDiagram
     participant Caller as 호출자
     participant Worker as 작업자
@@ -258,7 +258,7 @@ sequenceDiagram
 
 Java 코드로 비교하면 다음과 같습니다.
 
-```javascript
+```java
 // 동기 — 호출자가 직접 결과를 받음
 ResultSet rs = statement.executeQuery("SELECT * FROM users");
 // 이 줄에 도달했다면, 결과가 이미 존재
@@ -275,7 +275,7 @@ CompletableFuture.supplyAsync(() -> fetchUserData())
 
 **논블로킹**은 호출된 함수가 **즉시 제어권을 반환**하는 것입니다. 작업이 완료되지 않았더라도 호출자는 바로 다음 코드를 실행할 수 있습니다.
 
-```
+```mermaid
 sequenceDiagram
     participant Caller as 호출자
     participant IO as I/O 작업
@@ -315,7 +315,7 @@ sequenceDiagram
 
 **`Future`는 결과를 꺼내려면 `get()`을 호출해야 하고, 이때 스레드가 블로킹됩니다.** 반면 **`CompletableFuture`는 `thenApply()` 같은 콜백을 등록할 수 있어서, `get()`을 호출하지 않고도 결과를 처리할 수 있습니다.** 같은 “비동기 작업의 결과”를 나타내지만, 결과를 받는 방식이 블로킹이냐 논블로킹이냐의 차이인 것입니다.
 
-```
+```mermaid
 flowchart LR
     subgraph 실행도구
         THREAD[Thread]
@@ -344,7 +344,7 @@ flowchart LR
     style NONBLOCK fill:#c8e6c9
 ```
 
-```
+```mermaid
 quadrantChart
     title 동기/비동기 × 블로킹/논블로킹
     x-axis "블로킹" --> "논블로킹"
@@ -363,7 +363,7 @@ quadrantChart
 
 호출자가 직접 결과를 기다리며, 그동안 스레드는 멈춰 있습니다. **Spring MVC + JDBC** 조합이 대표적입니다.
 
-```
+```mermaid
 sequenceDiagram
     participant Thread as 서블릿 스레드
     participant JDBC as DB (JDBC)
@@ -375,7 +375,7 @@ sequenceDiagram
     Note over Thread: ▶️ 결과 직접 처리
 ```
 
-```javascript
+```java
 // 동기: 호출자가 직접 결과를 받음
 // 블로킹: executeQuery()가 완료될 때까지 스레드 멈춤
 ResultSet rs = statement.executeQuery("SELECT * FROM users");
@@ -433,7 +433,7 @@ Java NIO에서 채널을 논블로킹 모드로 설정하고 직접 체크하는
 
 논블로킹의 이점은 하나의 채널만 다룰 때보다 **여러 채널을 하나의 스레드에서 관리할 때** 명확해집니다. 블로킹이라면 채널마다 스레드가 필요하겠지만, 논블로킹이라면 하나의 루프에서 여러 채널을 순회할 수 있습니다.
 
-```
+```mermaid
 sequenceDiagram
     participant Thread as 단일 스레드
     participant ChA as Channel A
@@ -454,7 +454,7 @@ sequenceDiagram
     ChB-->>Thread: 0 (데이터 없음)
 ```
 
-```javascript
+```java
 // 두 서버에 동시에 연결 (논블로킹)
 SocketChannel channelA = SocketChannel.open();
 channelA.configureBlocking(false);
@@ -499,7 +499,7 @@ while (!doneA || !doneB) {
 
 Selector는 **여러 개의 논블로킹 채널을 하나의 스레드에서 효율적으로 감시**하는 도구입니다. 각 채널을 일일이 폴링하는 대신, Selector에 “이 채널에 데이터가 도착하면 알려줘”라고 등록해두면, `select()` 호출 한 번으로 준비된 채널만 골라서 처리할 수 있습니다.
 
-```
+```mermaid
 graph TB
     SEL["Selector(하나의 스레드)"]
     CH1["Channel A(데이터 없음)"]
@@ -520,7 +520,7 @@ graph TB
     style RESULT fill:#e3f2fd
 ```
 
-```javascript
+```java
 Selector selector = Selector.open();
 
 // 여러 채널을 Selector에 등록
@@ -575,7 +575,7 @@ while (true) {
 
 작업 자체는 비동기로 다른 스레드에 위임하지만, **결과를 받기 위해 호출자 스레드가 블로킹**되는 경우입니다.
 
-```
+```mermaid
 sequenceDiagram
     participant Main as 메인 스레드
     participant Pool as 스레드 풀
@@ -591,7 +591,7 @@ sequenceDiagram
     Note over Main: ▶️ 결과 처리
 ```
 
-```javascript
+```java
 ExecutorService executor = Executors.newFixedThreadPool(4);
 
 // 비동기: 작업을 다른 스레드에 위임
@@ -626,7 +626,7 @@ processResult(result);
 
 작업을 위임하고 즉시 제어권을 반환받으며, 결과는 콜백이나 이벤트로 처리합니다. **WebFlux, Netty, CompletableFuture 체인**이 이 조합에 해당합니다.
 
-```
+```mermaid
 sequenceDiagram
     participant Main as 메인 스레드
     participant EventLoop as 이벤트 루프
@@ -641,7 +641,7 @@ sequenceDiagram
     Note over EventLoop: 결과 처리 (콜백)
 ```
 
-```javascript
+```java
 // 비동기: 작업을 위임하고
 // 논블로킹: 즉시 반환됨
 CompletableFuture.supplyAsync(() -> fetchDataFromAPI())
@@ -658,7 +658,7 @@ log.info("작업을 요청했고, 다른 일을 하고 있습니다.");
 
 Spring WebFlux의 예도 이 조합입니다.
 
-```javascript
+```java
 // Reactor의 Mono/Flux — 비동기 + 논블로킹
 webClient.get()
     .uri("/api/users")
@@ -694,7 +694,7 @@ Java의 전통적인 동시성 모델은 **동기 + 블로킹**이 기본이었�
 
 이 한계를 극복하기 위해 **비동기 + 논블로킹** 방향으로 Reactor와 WebFlux가 등장했고, Kotlin Coroutine은 비동기 + 논블로킹의 복잡한 코드를 동기 스타일로 작성할 수 있게 해줬습니다. 가장 최근에 등장한 Virtual Thread는 아예 관점을 바꿔서, **동기 + 블로킹 스타일의 코드를 유지하면서도 스레드 비용 문제를 해결**하는 접근을 택했습니다.
 
-```
+```mermaid
 graph LR
     A["Thread(동기+블로킹)"] -->|"확장성 한계"| B["Reactor/WebFlux(비동기+논블로킹)"]
     B -->|"코드 복잡도"| C["Coroutine(비동기+논블로킹. but 동기 스타일로 코드 작성)"]

@@ -17,7 +17,7 @@ Spring Data의 Pageable은 기본적으로 0-based 인덱스를 사용합니다.
 
 이 문제를 해결하기 위해 Spring Boot는 다음 설정을 제공합니다:
 
-```javascript
+```yaml
 spring:
   data:
     web:
@@ -43,7 +43,7 @@ spring:
 
 ### 요청 파라미터 파싱: parseAndApplyBoundaries 메서드
 
-```javascript
+```java
 private Optional<Integer> parseAndApplyBoundaries(@Nullable String parameter, int upper, boolean shiftIndex) {
     if (!StringUtils.hasText(parameter)) {
         return Optional.empty();  // 파라미터가 없으면 빈 Optional 반환
@@ -59,7 +59,7 @@ private Optional<Integer> parseAndApplyBoundaries(@Nullable String parameter, in
 
 핵심 로직은 이 한 줄입니다:
 
-```
+```java
 int parsed = Integer.parseInt(parameter) - (oneIndexedParameters && shiftIndex ? 1 : 0);
 ```
 
@@ -67,7 +67,7 @@ int parsed = Integer.parseInt(parameter) - (oneIndexedParameters && shiftIndex ?
 
 ### 기본값 처리: getPageable 메서드
 
-```javascript
+```java
 protected Pageable getPageable(MethodParameter methodParameter, @Nullable String pageString,
         @Nullable String pageSizeString) {
     
@@ -86,7 +86,7 @@ protected Pageable getPageable(MethodParameter methodParameter, @Nullable String
 
 ### @PageableDefault 처리: getDefaultPageRequestFrom 메서드
 
-```php
+```java
 private static Pageable getDefaultPageRequestFrom(MethodParameter parameter,
         MergedAnnotation<PageableDefault> defaults) {
     
@@ -109,7 +109,7 @@ private static Pageable getDefaultPageRequestFrom(MethodParameter parameter,
 
 ### oneIndexedParametersDefaultsIndexOutOfRange 테스트
 
-```javascript
+```kotlin
 @Test
 void oneIndexedParametersDefaultsIndexOutOfRange() {
     var resolver = getResolver();
@@ -131,7 +131,7 @@ void oneIndexedParametersDefaultsIndexOutOfRange() {
 
 다음 컨트롤러로 직접 테스트해볼 수 있습니다:
 
-```javascript
+```java
 @RestController
 public class PageTestController {
 
@@ -161,7 +161,7 @@ public class PageTestController {
 
 ### ✅ 올바른 설정
 
-```css
+```java
 @GetMapping("/items")
 public Page<Item> getItems(
         @PageableDefault(page = 0, size = 20) Pageable pageable) {
@@ -171,7 +171,7 @@ public Page<Item> getItems(
 
 ### ❌ 잘못된 설정
 
-```php
+```java
 @GetMapping("/items")
 public Page<Item> getItems(
         @PageableDefault(page = 1, size = 20) Pageable pageable) {  // page=1은 두 번째 페이지!

@@ -139,7 +139,7 @@ CloudWatch Agent가 CloudWatch로 데이터를 보내려면 **권한**이 필요
 
 ### Agent 패키지 다운로드 및 설치
 
-```php
+```bash
 # 패키지 다운로드
 wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
 
@@ -162,7 +162,7 @@ Agent는 **설정 파일** (config.json) 을 읽어서 어떤 메트릭을 수�
 
 **방법 1: 설정 마법사 사용** ([AWS 문서](https://docs.aws.amazon.com/ko_kr/AmazonCloudWatch/latest/monitoring/create-cloudwatch-agent-configuration-file-wizard.html))
 
-```
+```bash
 sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-config-wizard
 ```
 
@@ -174,7 +174,7 @@ CLI에서 대화형으로 질문에 답하면 설정 파일이 자동 생성됩�
 
 아래 명령어로 설정 파일을 생성합니다.
 
-```
+```bash
 sudo vi /opt/aws/amazon-cloudwatch-agent/bin/config.json
 ```
 
@@ -267,7 +267,7 @@ sudo vi /opt/aws/amazon-cloudwatch-agent/bin/config.json
 
 설정 파일을 적용하고 Agent를 시작합니다.
 
-```javascript
+```bash
 sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
   -a fetch-config \
   -m ec2 \
@@ -284,7 +284,7 @@ sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
 
 ### Agent 상태 확인
 
-```
+```bash
 sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 ```
 
@@ -433,7 +433,7 @@ CloudWatch Agent가 수집하는 메트릭은 **커스텀 메트릭**으로 분�
 
 **1\. 권한 문제 확인**
 
-```php
+```bash
 # Agent 로그 확인
 sudo cat /opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log
 ```
@@ -444,7 +444,7 @@ sudo cat /opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log
 
 최근 EC2 인스턴스는 보안이 강화된 **IMDSv2**를 사용하므로 토큰이 필요합니다.
 
-```php
+```xml
 <em># 토큰 발급</em>
 TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" \
   -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
@@ -470,7 +470,7 @@ curl -H "X-aws-ec2-metadata-token: $TOKEN" \
 
 ### 설정 파일 문법 검증
 
-```php
+```bash
 # JSON 문법 검증
 cat /opt/aws/amazon-cloudwatch-agent/bin/config.json | python3 -m json.tool
 ```

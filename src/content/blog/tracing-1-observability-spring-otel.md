@@ -67,7 +67,7 @@ tags: ['b3', 'micrometer', 'msa', 'observability', 'opentelemetry', 'spring-boot
 
 **Tracing에서는 당연히 Trace ID가 있습니다.** 이건 원래부터 그랬습니다.
 
-```css
+```yaml
 [Trace]
 trace_id: abc-123-xyz
 spans:
@@ -77,7 +77,7 @@ spans:
 
 **Logging에 Trace ID를 추가합니다.** 로그를 남길 때 현재 처리 중인 요청의 Trace ID를 함께 기록합니다.
 
-```css
+```text
 2024-01-15 14:23:45 [trace_id=abc-123-xyz span_id=def-456] ERROR PaymentService - Insufficient funds
 2024-01-15 14:23:45 [trace_id=abc-123-xyz span_id=ghi-789] INFO  OrderService - Payment failed, rolling back
 ```
@@ -88,7 +88,7 @@ spans:
 
 **Metrics에도 Trace ID를 연결합니다.** 이건 조금 다른 방식으로 동작합니다. 모든 메트릭 데이터 포인트에 Trace ID를 붙이면 데이터가 폭발하니까요. 대신 **Exemplar**라는 개념을 사용합니다.
 
-```php
+```text
 http_request_duration_seconds{service="payment"} 2.1 # {trace_id="abc-123-xyz"} 4.3
 ```
 
@@ -224,7 +224,7 @@ Spring 생태계에서도 Tracing 지원은 여러 번의 변화를 거쳤습니
 -   로그에 Trace ID, Span ID 자동 추가 (MDC 활용)
 -   RestTemplate, WebClient 등 아웃바운드 요청에 자동 전파
 
-```css
+```text
 # Sleuth가 적용된 로그 예시
 2024-01-15 10:23:45.123 INFO [order-service,abc123,def456] OrderController - Order received
 ```
@@ -286,7 +286,7 @@ management:
 
 OTel Bridge 사용 시, 해당 exporter dependency를 추가하면 **application.yaml만으로 여러 백엔드에 동시 전송**이 가능합니다.
 
-```php
+```xml
 <em># application.yml - OTLP와 Zipkin에 동시 전송</em>
 management:
   otlp:
@@ -385,7 +385,7 @@ dependencies 예시:
 
 JVM 시작 시 `-javaagent` 옵션으로 붙이는 방식입니다. 애플리케이션 코드를 전혀 수정하지 않아도 됩니다.
 
-```css
+```bash
 java -javaagent:opentelemetry-javaagent.jar -jar myapp.jar
 ```
 

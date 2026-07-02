@@ -46,7 +46,7 @@ tags: ['calico', 'cilium', 'cni', 'container-network-interface', 'core-dns', 'ku
 
 `kubectl get pods -o wide`를 실행하면 각 Pod에 IP가 할당되어 있는 것을 볼 수 있습니다.
 
-```
+```text
 NAME                        READY   STATUS    IP            NODE
 user-app-7d4b8c6f5-abc12    1/1     Running   10.244.1.15   worker-1
 order-app-5f6a9d8e2-xyz34   1/1     Running   10.244.2.23   worker-2
@@ -64,7 +64,7 @@ CNI는 **컨테이너 네트워크를 구성하기 위한 표준 인터페이스
 
 Pod가 생성될 때 네트워크는 어떻게 설정될까요? [Kubernetes 공식 문서](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/)를 참고하면 다음과 같은 흐름으로 진행됩니다:
 
-```javascript
+```text
 1. API Server → kubelet: "이 노드에 Pod 생성해"
 2. kubelet → 컨테이너 런타임: "새 네트워크 네임스페이스 만들어"
 3. 컨테이너 런타임 → CNI 플러그인: "ADD 명령 실행" (네트워크 설정 요청)
@@ -84,7 +84,7 @@ CNI 플러그인은 `/opt/cni/bin/` 디렉토리에 실행 파일로 존재하�
 
 Pod IP는 보통 노드별로 다른 대역을 사용합니다. 여기서 **CIDR** (Classless Inter-Domain Routing) 은 IP 주소 범위를 표현하는 방식입니다. `/16`, `/24` 같은 숫자는 네트워크 주소의 비트 수를 의미합니다.
 
-```
+```text
 클러스터 Pod CIDR: 10.244.0.0/16 (전체 Pod 네트워크)
 ├── worker-1: 10.244.1.0/24 (이 노드의 Pod들은 10.244.1.x)
 ├── worker-2: 10.244.2.0/24 (이 노드의 Pod들은 10.244.2.x)
@@ -188,7 +188,7 @@ VXLAN은 Pod 간 패킷을 **UDP로 감싸서** 노드 간에 전달합니다. �
 
 **Direct Routing**은 물리 네트워크의 라우팅 테이블에 Pod 네트워크 경로를 직접 추가하는 방식입니다. 주로 **BGP** (Border Gateway Protocol) 를 사용합니다. BGP는 대규모 네트워크에서 라우팅 정보를 교환하는 표준 프로토콜입니다.
 
-```
+```text
 각 노드의 라우팅 테이블:
 
 worker-1:
@@ -247,7 +247,7 @@ BGP를 사용하면 이 라우팅 정보를 노드들끼리 자동으로 공유�
 > 
 > 보안이 중요한 프로덕션 환경에서는 필수적인 기능입니다. Flannel은 이 기능을 지원하지 않아서, 별도의 NetworkPolicy 솔루션(Calico 등)을 함께 사용하거나 다른 CNI를 선택해야 합니다.
 
-```php
+```bash
 # Flannel 설치
 kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
 ```
@@ -270,7 +270,7 @@ Flannel은 학습용이나 간단한 테스트 환경에 적합합니다. 프로
 -   Cilium 대비 Observability 기능 부족
 -   암호화(WireGuard)는 수동 설정 필요
 
-```php
+```bash
 # Calico 설치
 kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.0/manifests/calico.yaml
 ```
@@ -294,7 +294,7 @@ Calico는 **“프로덕션에서 무난하게 쓸 수 있는”** 선택지입�
 -   다른 CNI 대비 리소스 사용량 높음
 -   최신 Linux 커널 필요 (eBPF 지원)
 
-```php
+```text
 # Cilium 설치 (Helm 사용)
 helm install cilium cilium/cilium --namespace kube-system
 ```
@@ -341,7 +341,7 @@ helm install cilium cilium/cilium --namespace kube-system
 
 대신 우리는 **Service 이름**을 사용합니다:
 
-```php
+```bash
 # Pod 내부에서 (user-service는 K8s Service 이름)
 curl http://user-service.svc:8080/api/users
 ```
@@ -364,7 +364,7 @@ CoreDNS는 다음과 같이 동작합니다:
 
 Kubernetes에서 Service의 전체 도메인(FQDN)은 다음 형식입니다:
 
-```css
+```xml
 <service-name>.<namespace>.svc.cluster.local
 ```
 
@@ -377,7 +377,7 @@ Kubernetes에서 Service의 전체 도메인(FQDN)은 다음 형식입니다:
 
 모든 Pod의 `/etc/resolv.conf`에는 **search 도메인**이 설정되어 있습니다:
 
-```php
+```text
 # Pod 내부에서 cat /etc/resolv.conf
 nameserver 10.96.0.10
 search default.svc.cluster.local svc.cluster.local cluster.local
@@ -388,7 +388,7 @@ options ndots:5
 
 예를 들어 `curl http://user-service`를 실행하면, 시스템은 다음 순서로 DNS 조회를 시도합니다:
 
-```css
+```text
 1. user-service.default.svc.cluster.local → 성공하면 여기서 끝!
 2. user-service.svc.cluster.local → (1번 실패 시)
 3. user-service.cluster.local → (2번 실패 시)
@@ -405,7 +405,7 @@ options ndots:5
 
 이 search 도메인 덕분에, 같은 네임스페이스 내에서는 짧은 이름만 써도 됩니다:
 
-```php
+```bash
 # 같은 네임스페이스(default)에서
 curl http://user-service           # → user-service.default.svc.cluster.local
 
@@ -419,7 +419,7 @@ curl http://user-service.production  # → user-service.production.svc.cluster.l
 
 **외부 도메인 사용 시 (api.example.com)**:
 
-```
+```text
 Pod → CoreDNS → 외부 DNS → 공인 IP 획득
    → 외부 LB → Ingress Node → Ingress Controller 
    → Service → 대상 Pod
@@ -427,7 +427,7 @@ Pod → CoreDNS → 외부 DNS → 공인 IP 획득
 
 **Service 도메인 사용 시 (user-service)**:
 
-```
+```text
 Pod → CoreDNS → ClusterIP 획득 (10.96.100.50)
    → kube-proxy/eBPF가 ClusterIP를 Pod IP로 변환
    → 대상 Pod
@@ -452,7 +452,7 @@ Pod → CoreDNS → ClusterIP 획득 (10.96.100.50)
 
 이때 사용하는 것이 **Headless Service**입니다:
 
-```php
+```yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -465,7 +465,7 @@ spec:
 
 Headless Service를 DNS 조회하면 ClusterIP 대신 **모든 Pod의 IP 목록**이 반환됩니다:
 
-```css
+```bash
 # 일반 Service
 nslookup user-service
 # → 10.96.100.50 (ClusterIP)
@@ -481,7 +481,7 @@ Pod 간 통신이 안 될 때 어디를 봐야 할까요? 단계별 체크리스
 
 ### 1\. DNS 문제 확인
 
-```php
+```bash
 # Pod 내부에서 DNS 조회 테스트
 kubectl exec -it <pod-name> -- nslookup user-service
 kubectl exec -it <pod-name> -- nslookup kubernetes.default
@@ -506,7 +506,7 @@ kubectl exec -it <pod-name> -- curl <service-name>:<port>
 
 ### 3\. CNI 플러그인 상태 확인
 
-```php
+```bash
 # CNI 플러그인 Pod 상태 (예: Cilium)
 kubectl get pods -n kube-system -l k8s-app=cilium
 

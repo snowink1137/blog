@@ -125,7 +125,7 @@ tags: ['aws', 'cloud-watch', 'cloud-watch-agent', 'cloud-watch-logs', 'ec2', 'mo
 
 CloudWatch Logs의 구조를 이해하면 설정이 쉬워집니다.
 
-```javascript
+```text
 CloudWatch Logs
 └── 로그 그룹 (Log Group): /ec2/syslog
     ├── 로그 스트림 (Log Stream): i-0abc123... (인스턴스 1)
@@ -159,7 +159,7 @@ CloudWatch Logs
 
 기존 config.json을 열어서 `logs` 섹션을 추가합니다.
 
-```
+```bash
 sudo vi /opt/aws/amazon-cloudwatch-agent/bin/config.json
 ```
 
@@ -264,7 +264,7 @@ sudo vi /opt/aws/amazon-cloudwatch-agent/bin/config.json
 
 `collect_list` 배열에 여러 로그를 추가할 수 있습니다.
 
-```javascript
+```text
 "collect_list": [
   {
     "file_path": "/var/log/syslog",
@@ -289,7 +289,7 @@ Docker Compose로 WordPress와 MySQL을 운영 중이라면 컨테이너 로그�
 
 Docker는 기본적으로 로그 크기 제한이 없어서 디스크가 가득 찰 수 있습니다. `docker-compose.yml`에서 로그 용량을 제한하세요.
 
-```php
+```yaml
 # docker-compose.yml 예시
 services:
   wordpress:
@@ -322,7 +322,7 @@ services:
 
 설정 후 컨테이너 재생성:
 
-```
+```bash
 docker compose down
 docker compose up -d
 ```
@@ -366,7 +366,7 @@ docker compose up -d
 
 syslog와 auth.log는 Ubuntu의 logrotate가 자동으로 관리합니다. 기본 설정을 확인하려면:
 
-```
+```bash
 cat /etc/logrotate.d/rsyslog
 ```
 
@@ -390,7 +390,7 @@ CloudWatch Agent는 현재 활성 파일(`syslog`, `auth.log`)만 수집하므�
 
 설정 파일을 수정했으면 Agent를 재시작해야 적용됩니다.
 
-```javascript
+```bash
 sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
   -a fetch-config \
   -m ec2 \
@@ -400,7 +400,7 @@ sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
 
 상태 확인:
 
-```
+```bash
 sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 ```
 ![](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-05-image-30.png)
@@ -445,7 +445,7 @@ Agent가 정상 실행되면 1-2분 후 CloudWatch Logs에서 로그를 확인�
 
 Logs Insights에 처음 들어가면 기본 쿼리가 표시됩니다.
 
-```css
+```text
 fields @timestamp, @message
 | sort @timestamp desc
 | limit 20
@@ -471,7 +471,7 @@ fields @timestamp, @message
 
 **1\. 에러 로그 찾기**
 
-```css
+```text
 fields @timestamp, @message
 | filter @message like /(?i)error/
 | sort @timestamp desc
@@ -482,7 +482,7 @@ fields @timestamp, @message
 
 **2\. SSH 로그인 시도 확인** (auth.log 수집 시)
 
-```css
+```text
 fields @timestamp, @message
 | filter @message like /sshd/
 | filter @message like /Accepted|Failed/
@@ -492,7 +492,7 @@ fields @timestamp, @message
 
 **3\. 특정 시간대 로그 집계**
 
-```javascript
+```text
 fields @timestamp, @message
 | stats count(*) as count by bin(1h)
 | sort @timestamp desc
@@ -502,7 +502,7 @@ fields @timestamp, @message
 
 **4\. 특정 키워드 제외하고 검색**
 
-```css
+```text
 fields @timestamp, @message
 | filter @message not like /CRON/
 | sort @timestamp desc
@@ -580,7 +580,7 @@ CloudWatch의 무료 제공량은 **Always Free**로, 12개월 이후에도 계�
 
 **1\. Agent 로그 확인**
 
-```
+```bash
 sudo cat /opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log | tail -50
 ```
 
@@ -592,7 +592,7 @@ sudo cat /opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log | tai
 
 **3\. 로그 파일 경로 확인**
 
-```php
+```bash
 # 파일 존재 여부 확인
 ls -la /var/log/syslog
 
@@ -626,7 +626,7 @@ sudo cat /opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log | gre
 
 이 글처럼 `run_as_user` 설정을 제거하면 Agent가 root로 실행되어 모든 로그를 읽을 수 있습니다.
 
-```javascript
+```json
 {
   "agent": {
     "metrics_collection_interval": 60

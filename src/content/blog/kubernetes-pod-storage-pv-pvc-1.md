@@ -35,7 +35,7 @@ tags: ['csi', 'kubernetes', 'pv', 'pvc', 'storage']
 
 Kubernetes Volume은 **스토리지를 Pod에 연결하는 방법**을 정의하는 추상화입니다.
 
-```
+```text
 이미 존재하는 스토리지 (EBS 볼륨, NFS, 노드 디스크, ConfigMap 등)
     ↓
 Kubernetes Volume (Pod에 연결하기 위한 추상화)
@@ -59,7 +59,7 @@ Kubernetes Volume (Pod에 연결하기 위한 추상화)
 
 Pod에서 스토리지를 사용하려면 `spec.volumes[]`에 정의합니다. **`volumes`가 상위 개념**이고, 그 안에 여러 **타입**이 같은 레벨로 들어갑니다.
 
-```php
+```yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -108,13 +108,13 @@ spec:
 
 **“emptyDir”**이라는 이름은 Pod가 생성될 때 **빈 디렉토리** (empty directory) 로 시작하기 때문입니다.
 
-```
+```text
 Pod 스케줄링 → 노드에 빈 디렉토리 생성 → 컨테이너들이 데이터를 채워넣음 → Pod 삭제 시 함께 삭제
 ```
 
 Pod 내 컨테이너들이 데이터를 공유할 때 유용하지만, **Pod가 삭제되면 데이터도 사라집니다**.
 
-```css
+```yaml
 volumes:
   - name: cache
     emptyDir: {}  # Pod가 죽으면 데이터도 삭제
@@ -145,7 +145,7 @@ volumes:
 
 **Pod와 독립적으로 데이터를 유지**하려면 `persistentVolumeClaim` 타입을 사용합니다. 이 타입은 PVC라는 별도 리소스를 참조합니다.
 
-```php
+```yaml
 volumes:
   - name: db-data
     persistentVolumeClaim:
@@ -160,7 +160,7 @@ volumes:
 
 **PV는 클러스터에 프로비저닝된 실제 스토리지**입니다. AWS EBS, GCP PD, NFS 서버 등과 연결됩니다.
 
-```css
+```yaml
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -211,7 +211,7 @@ PV의 특징:
 
 **PVC는 개발자가 “이런 스토리지가 필요해”라고 요청하는 것**입니다. PV를 직접 지정하지 않고, 원하는 조건(용량, 접근 모드 등)만 명시합니다.
 
-```php
+```yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -250,7 +250,7 @@ PV와 PVC는 이름으로 매칭되지 않습니다. **조건 기반**으로 매
 
 **특정 PV에 바인딩하고 싶다면:**
 
-```php
+```yaml
 # 방법 1: volumeName으로 직접 지정
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -282,7 +282,7 @@ spec:
 
 ### Pod에서 PVC 사용하기
 
-```php
+```yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -339,7 +339,7 @@ Block Storage는 네트워크로 연결된 가상 블록 디바이스입니다.
 
 Block Storage의 경우 (단일 Pod 기준):
 
-```css
+```text
 [시나리오: Pod 재시작 → 같은 AZ의 다른 노드]
 
 1. Pod-A (Node-1, AZ-a) 삭제
@@ -352,7 +352,7 @@ Block Storage의 경우 (단일 Pod 기준):
 
 **하지만 다른 AZ의 노드로는 갈 수 없습니다:**
 
-```css
+```text
 [시나리오: Pod 재시작 → 다른 AZ의 노드?]
 
 볼륨이 AZ-a에 존재 → AZ-b 노드에 attach 불가!
@@ -427,7 +427,7 @@ Node Plugin은 **각 워커 노드**에서 실행됩니다:
 
 Controller가 “EBS를 EC2에 붙여!”라고 해서 `/dev/xvdf`가 생겼다고 해도, 그걸 **Pod 컨테이너 안에서 `/data`로 보이게** 하려면 마운트 작업이 필요합니다. 이걸 Node Plugin이 담당합니다.
 
-```
+```text
 Pod 스케줄링 → Controller: attach → Node: mount → Pod 사용 가능!
 ```
 
@@ -447,7 +447,7 @@ Pod 스케줄링 → Controller: attach → Node: mount → Pod 사용 가능!
 
 ### StorageClass 정의
 
-```php
+```yaml
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
@@ -472,7 +472,7 @@ volumeBindingMode: WaitForFirstConsumer  # Pod 스케줄링 후 바인딩
 
 ### 동적 프로비저닝 PVC 예시
 
-```php
+```yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -515,7 +515,7 @@ spec:
 
 동적 프로비저닝이 일반적이지만, 기존 스토리지를 재사용하거나 특수한 설정이 필요할 때는 수동으로 PV를 만들 수 있습니다.
 
-```php
+```yaml
 # 1. 관리자가 PV 생성
 apiVersion: v1
 kind: PersistentVolume

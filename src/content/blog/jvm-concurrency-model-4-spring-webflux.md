@@ -28,7 +28,7 @@ Part 3에서 Reactive Streams 스펙과 Project Reactor의 Mono/Flux, 연산자,
 
 Spring MVC는 **thread-per-request** 모델입니다. HTTP 요청이 들어오면 Tomcat이 스레드 풀에서 스레드 하나를 꺼내서 그 요청을 처리하고, 응답이 완료되면 스레드를 반환합니다.
 
-```
+```mermaid
 sequenceDiagram
     participant C as Client
     participant T as Tomcat 스레드
@@ -86,7 +86,7 @@ Spring WebFlux는 기본적으로 **Netty** 위에서 동작합니다. Netty는 
 
 이벤트 루프는 **하나의 스레드가 무한 루프를 돌며 이벤트를 감시하고 처리하는 구조**입니다. 스레드가 I/O를 기다리며 블로킹되는 대신, “I/O가 준비되면 알려줘”라고 등록해두고 다른 이벤트를 처리합니다.
 
-```php
+```java
 // 개념적인 이벤트 루프 (실제 Netty 코드와는 다름)
 while (true) {
     // 1단계: Selector에서 I/O 이벤트 확인 → 있으면 처리
@@ -121,7 +121,7 @@ Node.js도 같은 원리(이벤트 루프)를 사용하지만, Node.js는 **싱�
 
 Netty는 이벤트 루프를 두 그룹으로 나눕니다.
 
-```
+```mermaid
 flowchart TD
     C1[Client 1] --> B[Boss EventLoop - 연결 수락]
     C2[Client 2] --> B
@@ -156,7 +156,7 @@ flowchart TD
 
 ### MVC vs WebFlux 요청 처리 비교
 
-```
+```mermaid
 flowchart LR
     subgraph MVC - thread-per-request
         M1[요청 1 → 스레드 1] --> MW1[DB 조회 - 블로킹]
@@ -179,7 +179,7 @@ MVC에서는 요청마다 스레드가 배정되고, I/O 동안 해당 스레드
 
 MVC에서는 스레드가 200개이므로 하나가 블로킹되어도 나머지 199개가 일합니다. 하지만 Worker EventLoop 스레드는 **8~16개**뿐입니다(Boss 1개는 연결 수락 전담). 이 중 하나가 블로킹되면 그 EventLoop가 담당하던 **수백~수천 개의 연결이 모두 멈춥니다.**
 
-```javascript
+```java
 // WebFlux에서 절대 하면 안 되는 코드
 @GetMapping("/users/{id}")
 public Mono<User> getUser(@PathVariable Long id) {
@@ -252,7 +252,7 @@ WebFlux는 요청을 처리하는 두 가지 방법을 제공합니다.
 
 기존 MVC 개발자에게 가장 익숙한 방식입니다. 반환 타입만 `Mono`/`Flux`로 바꾸면 됩니다.
 
-```php
+```java
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -282,7 +282,7 @@ MVC의 Controller와 거의 동일합니다. `@RestController`, `@GetMapping`, `
 
 라우팅을 코드로 정의하는 방식입니다.
 
-```javascript
+```java
 @Configuration
 public class RouterConfig {
 
@@ -342,7 +342,7 @@ WebFlux에서 외부 API를 호출할 때는 **WebClient**를 사용합니다. S
 
 ### 기본 사용법
 
-```javascript
+```java
 WebClient client = WebClient.builder()
     .baseUrl("https://api.example.com")
     .build();
@@ -373,7 +373,7 @@ Mono<User> userWithErrorHandling = client.get()
 
 ### RestClient / RestTemplate과 비교
 
-```javascript
+```java
 // RestClient (Spring 6.1+) — 동기 블로킹, 플루언트 API
 User user = restClient.get()
     .uri("/users/1")
@@ -416,7 +416,7 @@ WebFlux의 강점이 가장 잘 드러나는 영역이 **스트리밍**입니다
 
 SSE는 **서버 → 클라이언트 단방향 스트리밍**입니다. 서버가 클라이언트에게 실시간으로 이벤트를 보내는 데 사용합니다. WebFlux에서는 `Flux`를 반환하면 SSE가 자동으로 동작합니다.
 
-```php
+```java
 @GetMapping(value = "/notifications", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 public Flux<Notification> streamNotifications() {
     return notificationService.getNotificationStream();
@@ -449,7 +449,7 @@ public Flux<String> streamTime() {
 
 WebSocket은 **클라이언트 ↔ 서버 양방향 실시간 통신**입니다. 채팅, 실시간 게임, 협업 도구 같은 곳에 사용합니다.
 
-```php
+```java
 @Component
 public class ChatWebSocketHandler implements WebSocketHandler {
 
@@ -510,7 +510,7 @@ WebFlux의 에러 처리는 두 계층으로 나뉩니다.
 
 MVC에서 사용하던 `@ExceptionHandler`가 WebFlux에서도 동일하게 동작합니다.
 
-```css
+```java
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -532,7 +532,7 @@ public class GlobalExceptionHandler {
 
 [Part 3](/jvm-concurrency-model-3-reactive-streams-reactor/)에서 다룬 `onErrorResume`, `onErrorReturn` 등을 파이프라인 안에서 사용합니다.
 
-```css
+```java
 @GetMapping("/users/{id}")
 public Mono<ResponseEntity<User>> getUser(@PathVariable Long id) {
     return userRepository.findById(id)
@@ -561,7 +561,7 @@ WebFlux는 전용 테스트 도구를 제공합니다. 먼저 MVC와 WebFlux의 
 
 `WebTestClient`는 WebFlux 애플리케이션을 테스트하는 논블로킹 HTTP 클라이언트입니다.
 
-```javascript
+```java
 @WebFluxTest(UserController.class)
 class UserControllerTest {
 
@@ -633,7 +633,7 @@ void shouldHandleErrorGracefully() {
 
 WebFlux를 도입할 때 가장 많이 하는 실수는 **“MVC보다 빠르다”**는 기대입니다. WebFlux는 MVC보다 **처리량(throughput)이 높은 것이지, 개별 요청의 응답 속도(latency)가 빠른 것이 아닙니다.** 같은 DB 조회가 100ms 걸리면, MVC든 WebFlux든 100ms입니다. WebFlux의 장점은 그 100ms 동안 스레드가 다른 요청을 처리할 수 있다는 것입니다.
 
-```
+```mermaid
 flowchart LR
     A[Spring MVC] -->|thread-per-request 한계| B[Spring WebFlux]
     B -->|리액티브 코드 복잡도| C[Kotlin Coroutines - Part 5]

@@ -22,7 +22,7 @@ tags: ['aws', 'cloudflare', 'docker', 'wordpress']
 
 EC2 인스턴스에 접속하려면 PEM 키 파일이 필요합니다. 매번 `-i` 옵션으로 키 파일을 지정하는 것은 번거로우니, SSH config를 설정해두면 편리합니다. 처음 인스턴스를 만들 때 다운로드 받으라는 내용이 있어서 아마 저장해놓으셨을 겁니다.
 
-```php
+```bash
 # PEM 파일을 .ssh 디렉토리로 이동
 mkdir -p ~/.ssh
 mv ~/Downloads/your-key.pem ~/.ssh/
@@ -47,7 +47,7 @@ Host wordpress
 
 Ubuntu 기본 저장소의 docker 패키지는 버전이 오래되었으므로, Docker [공식 문서 방식대로](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository) 설치합니다.
 
-```php
+```bash
 # 필요한 패키지 설치
 sudo apt update
 sudo apt install -y ca-certificates curl gnupg
@@ -77,14 +77,14 @@ sudo usermod -aG docker $USER
 
 프로젝트 디렉토리를 만들고 docker-compose.yml 파일을 작성합니다.
 
-```javascript
+```bash
 mkdir ~/wordpress && cd ~/wordpress
 vim docker-compose.yml
 ```
 
 기본적인 wordpress php apache 이미지를 사용했고, DB도 같은 인스턴스에서 띄우는 것으로 설정했습니다. 나중에 사용량이 많아지면 데이터를 AWS RDS 같은 곳으로 마이그레이션할 생각입니다. 그런데 t3.small 인스턴스(vCPU 2, 1GB memory)를 사용하다보니 실행 중 OOM이 나기도 했습니다. 그래서 DB command로 여러 최적화 옵션을 추가했습니다.
 
-```javascript
+```yaml
 services:
   wordpress:
     image: wordpress:6.8.3-php8.3-apache
@@ -125,7 +125,7 @@ volumes:
 
 컨테이너를 실행합니다.
 
-```css
+```bash
 docker compose -f wordpress-docker-compose.yaml -p wordpress up -d
 ```
 
@@ -192,7 +192,7 @@ Proxy를 On(주황색 구름)으로 설정하면 Cloudflare가 중간에서 트�
 
 Cloudflare Proxy를 사용하면 Let’s Encrypt 같은 별도 인증서 설정 없이 HTTPS를 적용할 수 있습니다.
 
-```css
+```text
 [클라이언트] ←── HTTPS ──→ [Cloudflare] ←── HTTP ──→ [EC2]
 ```
 

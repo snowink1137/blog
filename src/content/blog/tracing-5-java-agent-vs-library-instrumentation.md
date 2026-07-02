@@ -18,7 +18,7 @@ tags: ['byte-buddy', 'java', 'micrometer', 'opentelemetry', 'spring', 'tracing']
 
 [3편](/tracing-3-reactor-context-webflux/)에서 잠깐 언급했던 문제가 있습니다. **라이브러리 내부 로그에는 traceId가 없다**는 것이었죠. Reactive Mongo Client, R2DBC 드라이버, Netty 같은 라이브러리의 DEBUG 로그에서 이런 현상이 발생합니다.
 
-```javascript
+```text
 // 우리 애플리케이션 코드 - traceId 있음 ✅
 14:23:45.123 [abc123] INFO  OrderService - 주문 조회 시작
 
@@ -38,7 +38,7 @@ tags: ['byte-buddy', 'java', 'micrometer', 'opentelemetry', 'spring', 'tracing']
 
 Java 애플리케이션에 Tracing을 적용하는 방법은 크게 두 가지입니다.
 
-```
+```mermaid
 flowchart TB
     subgraph "Library Instrumentation"
         L1["의존성 추가<br/>(Micrometer, Spring Boot)"]
@@ -69,7 +69,7 @@ flowchart TB
 
 우리가 1~4편에서 사용한 방식입니다. Spring Boot가 제공하는 **자동 설정** (Auto-configuration) 과 **Micrometer Observation API**를 활용합니다.
 
-```javascript
+```kotlin
 // build.gradle.kts
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -77,7 +77,7 @@ dependencies {
     implementation("io.opentelemetry:opentelemetry-exporter-otlp")
 }
 ```
-```php
+```yaml
 # application.yml
 spring:
   application:
@@ -99,7 +99,7 @@ management:
 
 **방법 1: @Observed 어노테이션**
 
-```javascript
+```kotlin
 @Service
 class OrderService {
 
@@ -113,7 +113,7 @@ class OrderService {
 
 **방법 2: Observation API 직접 사용**
 
-```
+```kotlin
 @Service
 class OrderService(
     private val observationRegistry: ObservationRegistry
@@ -131,7 +131,7 @@ class OrderService(
 
 **방법 3: OpenTelemetry API 직접 사용**
 
-```javascript
+```kotlin
 @Service
 class OrderService {
     private val tracer = GlobalOpenTelemetry.getTracer("order-service")
@@ -169,7 +169,7 @@ class OrderService {
 
 Java Agent는 **JVM이 클래스를 로드하는 시점**에 바이트코드를 수정합니다. 컴파일된 `.class` 파일을 메모리에서 변경하는 것이죠.
 
-```
+```mermaid
 sequenceDiagram
     participant JVM
     participant Agent as Java Agent
@@ -194,7 +194,7 @@ sequenceDiagram
 
 Java Agent의 진입점은 `premain` 메서드입니다. JVM이 `main` 메서드를 호출하기 **전에** 실행됩니다.
 
-```javascript
+```java
 // Java Agent의 진입점 (간략화된 예시)
 public class OpenTelemetryAgent {
     public static void premain(String agentArgs, Instrumentation inst) {
@@ -206,7 +206,7 @@ public class OpenTelemetryAgent {
 
 `Instrumentation`과 `ClassFileTransformer`는 **JDK 표준 API**입니다 (`java.lang.instrument` 패키지). ByteBuddy는 이 API 위에 더 편리한 추상화를 제공하는 라이브러리입니다.
 
-```javascript
+```java
 // java.lang.instrument.ClassFileTransformer (JDK 표준 인터페이스)
 public interface ClassFileTransformer {
     // JVM이 클래스를 로드할 때마다 이 메서드를 호출
@@ -234,7 +234,7 @@ public interface ClassFileTransformer {
 
 ByteBuddy의 `@Advice` 어노테이션을 사용하면 기존 메서드의 시작과 끝에 코드를 주입할 수 있습니다.
 
-```javascript
+```java
 // OpenTelemetry Agent 내부 구조 (간략화)
 public class HttpClientInstrumentation {
 
@@ -280,7 +280,7 @@ public class HttpClientInstrumentation {
 
 ### 설치 및 실행
 
-```php
+```bash
 # 1. Agent JAR 다운로드
 curl -L -O https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
 
@@ -293,7 +293,7 @@ java -javaagent:opentelemetry-javaagent.jar \
 
 Docker 환경에서는:
 
-```php
+```text
 FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
@@ -328,7 +328,7 @@ OpenTelemetry Java Agent는 **150개 이상의 라이브러리**를 자동으로
 
 ### 주요 설정 옵션
 
-```php
+```properties
 # 서비스 이름
 -Dotel.service.name=order-service
 
@@ -383,7 +383,7 @@ class OrderController(
 
 Spring이 지원하는 컴포넌트들만 Span으로 나타납니다.
 
-```
+```mermaid
 flowchart TB
     subgraph "Trace: abc123def456 (3 Spans)"
         A["GET /orders/123<br/>150ms - Spring WebFlux"]
@@ -397,7 +397,7 @@ flowchart TB
 
 **로그 출력**:
 
-```javascript
+```text
 [abc123] INFO  OrderController - 주문 조회 시작
 [abc123] DEBUG WebClient - HTTP GET http://user-service/users/123
 [abc123] DEBUG JdbcTemplate - Executing SQL query
@@ -408,7 +408,7 @@ flowchart TB
 
 OpenTelemetry Java Agent는 **라이브러리 내부 동작까지 추적**합니다.
 
-```
+```mermaid
 flowchart TB
     subgraph "Trace: abc123def456 (8 Spans)"
         A["GET /orders/123<br/>150ms - Spring WebFlux"]
@@ -436,7 +436,7 @@ flowchart TB
 
 **로그 출력** (Agent가 라이브러리 로그에도 traceId 주입):
 
-```javascript
+```text
 [abc123] INFO  OrderController - 주문 조회 시작
 [abc123] DEBUG WebClient - HTTP GET http://user-service/users/123
 [abc123] DEBUG io.netty.resolver - Resolving user-service
@@ -464,7 +464,7 @@ flowchart TB
 
 ### Timeline 비교
 
-```
+```mermaid
 gantt
     title Library Instrumentation (3 Spans)
     dateFormat X
@@ -480,7 +480,7 @@ gantt
     SELECT orders             :95, 145
 ```
 
-```
+```mermaid
 gantt
     title Java Agent Instrumentation (8 Spans)
     dateFormat X
@@ -521,7 +521,7 @@ gantt
 
 **📦 사용 방법:**
 
-```javascript
+```kotlin
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("io.micrometer:micrometer-tracing-bridge-otel")
@@ -541,7 +541,7 @@ dependencies {
 
 **📦 사용 방법:**
 
-```
+```bash
 java -javaagent:opentelemetry-javaagent.jar \
      -Dotel.service.name=order-service \
      -jar your-app.jar
@@ -561,7 +561,7 @@ java -javaagent:opentelemetry-javaagent.jar \
 
 **IntelliJ에서 Java Agent 설정 방법:**
 
-```javascript
+```text
 Run > Edit Configurations > VM Options에 추가:
 -javaagent:/path/to/opentelemetry-javaagent.jar
 -Dotel.service.name=my-service
@@ -579,7 +579,7 @@ Run > Edit Configurations > VM Options에 추가:
 
 실제로는 **두 방식을 함께 사용**하는 것도 가능합니다!
 
-```javascript
+```kotlin
 // 1. Library Instrumentation: 비즈니스 로직에 커스텀 Span 추가
 @Service
 class OrderService {
@@ -589,7 +589,7 @@ class OrderService {
     }
 }
 ```
-```php
+```bash
 # 2. Java Agent: 인프라 레벨 자동 계측
 java -javaagent:opentelemetry-javaagent.jar \
      -Dotel.instrumentation.micrometer.enabled=true \  # Micrometer 브릿지 활성화
@@ -602,7 +602,7 @@ java -javaagent:opentelemetry-javaagent.jar \
 
 ### 선택 가이드 요약
 
-```
+```mermaid
 flowchart TD
     A["Tracing 도입 결정"] --> B{"GraalVM<br/>Native Image?"}
     
@@ -659,7 +659,7 @@ flowchart TD
 
 이것으로 **Tracing 시리즈**를 마무리합니다. 1편에서 Distributed Tracing의 개념부터 시작해서, ThreadLocal/MDC, Reactor Context, Kotlin Coroutine, 그리고 Instrumentation 방식까지 살펴봤습니다.
 
-```
+```mermaid
 flowchart LR
     subgraph "Tracing 시리즈"
         P1["1편<br/>개념과 Spring 생태계"]

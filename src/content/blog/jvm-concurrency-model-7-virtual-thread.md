@@ -22,7 +22,7 @@ tags: ['carrier-thread', 'jvm', 'project-loom', 'virtual-thread']
 
 지금까지 시리즈에서 비동기 세계의 발전을 따라왔습니다.
 
-```
+```mermaid
 flowchart LR
     A[Future] -->|콜백 지옥| B[CompletableFuture]
     B -->|선언적 파이프라인| C[Reactor]
@@ -35,7 +35,7 @@ Future에서 CompletableFuture로, 다시 Reactor로, 마지막으로 Coroutines
 
 Virtual Thread는 **완전히 다른 접근**입니다.
 
-```
+```mermaid
 flowchart TD
     subgraph 비동기 세계의 발전
         direction LR
@@ -55,7 +55,7 @@ flowchart TD
 
 [Part 2](/jvm-concurrency-model-2-java-traditional-concurrency/)에서 다뤘던 Java의 전통적인 스레드 모델을 떠올려 봅시다. Java의 `Thread`(이제부터 Platform Thread라 부릅니다)는 OS 커널 스레드와 **1:1로 매핑**됩니다.
 
-```
+```mermaid
 flowchart LR
     subgraph JVM
         direction TB
@@ -84,7 +84,7 @@ Platform Thread 하나를 생성하면 OS 커널 스레드 하나가 생기고, 
 
 Virtual Thread(JEP 444, Java 21 정식)는 **JVM이 관리하는 경량 스레드**입니다. OS 커널 스레드와 1:1이 아니라, **소수의 carrier thread 위에 수십만 개의 Virtual Thread가 스케줄링**됩니다.
 
-```
+```mermaid
 flowchart TD
     subgraph Virtual Threads
         direction LR
@@ -135,7 +135,7 @@ Virtual Thread의 메모리 비용은 약 수 KB로, Platform Thread(~1MB)와 �
 
 Virtual Thread의 핵심은 **블로킹 호출을 만나면 자동으로 carrier thread에서 분리되는 것**입니다.
 
-```
+```mermaid
 flowchart TD
     A[VT가 carrier thread에 mount] --> B[코드 실행]
     B --> C[블로킹 I/O 호출]
@@ -159,7 +159,7 @@ flowchart TD
 
 **호출자 입장에서는 변한 것이 없습니다.** `Thread.sleep(1000)`을 호출하면 1초 후에 다음 줄이 실행됩니다. 동기 블로킹 코드가 그대로 동작합니다. 달라진 것은 그 1초 동안 **carrier thread가 점유되지 않는다**는 것뿐입니다.
 
-```javascript
+```text
 // Virtual Thread에서 실행 — 코드는 완전히 동기적
 void handleRequest() {
     User user = userRepository.findById(id);     // JDBC 블로킹 → unmount → mount
@@ -178,7 +178,7 @@ void handleRequest() {
 
 [Part 5](/jvm-concurrency-model-5-kotlin-coroutines/)에서 다뤘듯이, Kotlin 컴파일러는 `suspend fun`을 **CPS(Continuation Passing Style) 변환**합니다. 함수가 suspend 지점에서 **상태 머신의 한 단계를 실행하고 반환**합니다.
 
-```javascript
+```kotlin
 // 개발자가 작성한 코드
 suspend fun fetchUser(id: Long): User {
     val response = httpClient.get("/users/$id")  // suspend point
@@ -219,7 +219,7 @@ Virtual Thread는 소스 코드나 바이트코드를 변환하지 않습니다.
 
 > 참고로 Reactor에는 `Hooks.onOperatorDebug()`라는 디버그 모드가 있어서, 이것도 “스택을 캡처”한다고 표현하기도 합니다. 하지만 이것은 Virtual Thread의 스택 캡처와는 **목적이 완전히 다릅니다**. Reactor debug는 모든 operator 생성 시점에 `new Exception().getStackTrace()`를 호출하여 “어떤 코드 경로에서 이 operator가 만들어졌는가”를 **읽기 전용 기록**으로 남깁니다. 에러 발생 시 원인을 추적하기 위한 **진단 정보**이지, 이 기록으로 실행을 이어갈 수는 없습니다. 반면 Virtual Thread가 캡처하는 스택 프레임에는 로컬 변수 값, 피연산자 스택, 실행 중이던 바이트코드 위치(program counter)까지 포함되어 있어, 복원하면 **그 지점부터 실행을 재개**할 수 있습니다. Reactor debug가 “여기서 사진을 찍었다”(기록)라면, Virtual Thread는 “여기서 게임을 세이브했다”(복원 가능한 상태)에 해당합니다. Reactor debug가 성능 이슈로 기본 off인 이유도 여기에 있습니다. `new Exception().getStackTrace()`를 호출하면 JVM이 현재 호출 스택을 순회하면서 각 프레임의 클래스명, 메서드명, 파일명을 **문자열 객체로 생성**합니다(일반적으로 20~50개 프레임). 이 연산이 **모든 operator마다** 실행됩니다. 파이프라인 하나에 operator가 10개이고 동시 요청이 1만 개면 `Exception` 객체 10만 개 + 그에 딸린 문자열 객체 수백만 개가 만들어지는 셈입니다. **횟수(모든 operator) × 횟수당 비용(Exception + String 객체 생성)** 이 곱해져서 CPU와 메모리 양쪽에 부담이 됩니다. 반면 Virtual Thread의 스택 복사는 로컬 변수 값이나 program counter 같은 primitive 위주의 메모리 블록을 통째로 옮기는(memcpy 수준) 연산이고, 블로킹 I/O 지점에서**만** 일어나므로 빈도도 비용도 훨씬 낮습니다.
 
-```javascript
+```java
 // 개발자가 작성한 코드 — 그리고 실제로 실행되는 코드. 변환 없음.
 User fetchUser(Long id) {
     Response response = httpClient.get("/users/" + id);  // 블로킹 호출
@@ -235,7 +235,7 @@ User fetchUser(Long id) {
 
 차이를 정리하면:
 
-```
+```mermaid
 flowchart LR
     subgraph Couroutine
         direction TB
@@ -274,7 +274,7 @@ flowchart LR
 
 Virtual Thread에서는 이 문제가 **구조적으로 존재하지 않습니다**:
 
-```javascript
+```java
 // Virtual Thread에서 실행 — AOP 프록시가 정상 동작
 @Transactional
 void transferMoney(Long from, Long to, BigDecimal amount) {
@@ -304,7 +304,7 @@ Virtual Thread가 만능은 아닙니다. carrier thread에서 unmount되지 못
 
 Java 21에서 가장 주요한 pinning 원인은 `synchronized` 블록입니다.
 
-```javascript
+```java
 // Java의 모든 객체는 내부에 모니터를 가지고 있어 synchronized의 락으로 사용 가능
 // 락 전용 객체를 따로 두는 것은 Java의 오래된 관용 패턴
 private final Object lock = new Object();
@@ -328,7 +328,7 @@ Pinning이 발생하면 carrier thread가 블로킹되므로, Platform Thread와
 
 **`ReentrantLock`으로 교체**: `synchronized` 대신 `java.util.concurrent.locks.ReentrantLock`을 사용하면 pinning이 발생하지 않습니다. `ReentrantLock`은 JVM 레벨에서 구현되어 Virtual Thread의 unmount와 호환됩니다.
 
-```php
+```java
 // Before — synchronized 사용, pinning 발생
 private final Object lock = new Object();
 
@@ -363,7 +363,7 @@ Java 24([JEP 491](https://openjdk.org/jeps/491))에서 `synchronized` 안에서�
 
 Spring Boot 3.2부터 Virtual Thread 지원이 포함되었습니다. `application.properties`에 한 줄만 추가하면 됩니다.
 
-```php
+```properties
 # application.properties
 spring.threads.virtual.enabled=true
 ```
@@ -381,7 +381,7 @@ spring.threads.virtual.enabled=true
 
 다만 **주의할 점**이 있습니다. Platform Thread는 풀에서 재사용되므로 수백 개 수준이었지만, Virtual Thread는 요청마다 생성되어 수만~수십만 개가 동시에 존재할 수 있습니다. ThreadLocal은 스레드별로 별도 복사본을 유지하므로, **스레드 수에 비례하여 메모리가 증가**합니다. 특히 ThreadLocal을 캐시 용도로 사용하는 패턴(커넥션 캐시, 포맷터 재사용 등)은 Virtual Thread 환경에서 메모리 문제가 될 수 있습니다. Java에서는 이를 대체할 `ScopedValue`(JEP 487, JDK 25 프리뷰)를 도입하고 있으며, 불변이고 스코프가 명확하여 Virtual Thread 환경에 더 적합합니다.
 
-```php
+```java
 // 기존 Spring MVC 코드 — 변경 없이 Virtual Thread 위에서 실행
 @RestController
 public class UserController {
@@ -420,7 +420,7 @@ public class UserController {
 
 [Part 5](/jvm-concurrency-model-5-kotlin-coroutines/)에서 코루틴의 구조화된 동시성을 다뤘습니다. 핵심은 “부모가 자식의 완료를 보장하고, 자식의 실패가 부모에게 전파되며, 부모가 취소되면 자식도 취소된다”는 것이었습니다.
 
-```javascript
+```kotlin
 // 코루틴의 구조화된 동시성
 suspend fun fetchUserWithOrders(userId: Long): UserWithOrders = coroutineScope {
     val user = async { userService.findById(userId) }
@@ -434,7 +434,7 @@ suspend fun fetchUserWithOrders(userId: Long): UserWithOrders = coroutineScope {
 
 Java에서도 **Structured Concurrency**가 도입되었습니다. JEP 428(JDK 19 인큐베이터)을 시작으로 여러 차례 프리뷰를 거치고 있으며, JDK 24에서는 [JEP 499](https://openjdk.org/jeps/499)(Fourth Preview), JDK 25에서는 [JEP 505](https://openjdk.org/jeps/505)(Fifth Preview)로 API 변경과 함께 계속 프리뷰 중입니다. `StructuredTaskScope`를 사용합니다.
 
-```php
+```java
 // Java의 구조화된 동시성 (프리뷰 기능)
 UserWithOrders fetchUserWithOrders(Long userId) throws Exception {
     try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
@@ -505,7 +505,7 @@ UserWithOrders fetchUserWithOrders(Long userId) throws Exception {
 
 Kotlin 코루틴에서 Virtual Thread를 활용하는 실험적 접근도 가능합니다.
 
-```javascript
+```kotlin
 // Dispatchers.IO 대신 Virtual Thread를 사용하는 디스패처
 val virtualThreadDispatcher = Executors.newVirtualThreadPerTaskExecutor().asCoroutineDispatcher()
 
@@ -520,7 +520,7 @@ suspend fun fetchData() = withContext(virtualThreadDispatcher) {
 
 ## 마무리 — 같은 문제, 다른 관점
 
-```
+```mermaid
 flowchart TD
     subgraph 비동기 세계
         direction LR

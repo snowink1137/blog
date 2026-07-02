@@ -43,7 +43,7 @@ Spring MVC 애플리케이션에서 요청이 들어오면 Controller → Servic
 
 ThreadLocal은 **스레드별로 독립된 변수 저장소**를 제공합니다. 같은 ThreadLocal 객체에 접근해도 각 스레드는 자신만의 값을 읽고 씁니다.
 
-```php
+```java
 // 같은 ThreadLocal 객체
 private static final ThreadLocal<String> context = new ThreadLocal<>();
 
@@ -71,7 +71,7 @@ context.get();          // "user-B" 반환 (Thread-1에 영향 없음)
 
 실제 구현도 이 비유와 거의 일치합니다.
 
-```
+```mermaid
 flowchart LR
     subgraph Thread1["Thread-1"]
         TLM1["ThreadLocalMap"]
@@ -102,7 +102,7 @@ flowchart LR
 
 Java 코드로 보면 더 명확합니다:
 
-```php
+```java
 // Thread 클래스 내부 (실제 JDK 코드 일부)
 public class Thread implements Runnable {
     // 각 스레드가 자신만의 ThreadLocalMap을 가짐
@@ -131,7 +131,7 @@ public T get() {
 
 ### 기본 API
 
-```javascript
+```java
 // 생성
 ThreadLocal<String> threadLocal = new ThreadLocal<>();
 
@@ -150,7 +150,7 @@ threadLocal.remove();
 
 ### 실전 예시: 사용자 컨텍스트 관리
 
-```php
+```java
 public class UserContextHolder {
     private static final ThreadLocal<UserContext> holder = new ThreadLocal<>();
     
@@ -206,7 +206,7 @@ ThreadLocal의 한계를 이해하려면 먼저 **스레드가 언제 바뀌는�
 
 일반적인 Spring MVC 애플리케이션에서는 **한 요청이 하나의 스레드를 끝까지 점유**합니다:
 
-```
+```mermaid
 flowchart LR
     subgraph Thread["Thread: http-nio-8080-exec-1"]
         A[요청 시작] --> B[Controller]
@@ -231,7 +231,7 @@ DB 호출이나 외부 API 호출에서 **blocking이 발생해도 스레드는 
 | `CompletableFuture.supplyAsync()` | ✅ ForkJoinPool 또는 지정 Executor |
 | `DeferredResult`, `Callable` 리턴 | ✅ Servlet 스레드 반납 → 작업 스레드 |
 
-```php
+```java
 // 이 경우 스레드가 바뀜!
 @Async
 public CompletableFuture<Result> asyncMethod() {
@@ -240,7 +240,7 @@ public CompletableFuture<Result> asyncMethod() {
 }
 ```
 
-```
+```mermaid
 sequenceDiagram
     participant S as Servlet Thread<br/>(http-nio-8080-exec-1)
     participant A as Async Thread<br/>(async-pool-1)
@@ -261,7 +261,7 @@ sequenceDiagram
 
 ThreadLocal은 “스레드가 요청마다 새로 생성되고 종료된다”는 가정 하에 잘 동작합니다. 하지만 현실의 서버 애플리케이션은 **스레드 풀**을 사용합니다.
 
-```javascript
+```java
 // 스레드 풀: 스레드를 미리 만들어두고 재사용
 ExecutorService executor = Executors.newFixedThreadPool(3);
 
@@ -279,7 +279,7 @@ for (int i = 1; i <= 5; i++) {
 
 출력 결과 (예시):
 
-```javascript
+```text
 Task 1 시작, context = null
 Task 1 종료, context = task-1
 Task 2 시작, context = null
@@ -298,7 +298,7 @@ Task 5 종료, context = task-5
 
 ### 해결책: 반드시 remove() 호출
 
-```javascript
+```java
 executor.submit(() -> {
     try {
         context.set("task-" + taskId);
@@ -331,7 +331,7 @@ ThreadLocal 객체가 GC되면 key는 `null`이 되지만, value는 여전히 En
 
 Java 표준 라이브러리가 제공하는 첫 번째 해결책입니다.
 
-```javascript
+```java
 // 부모 스레드의 값을 자식 스레드가 상속
 InheritableThreadLocal<String> context = new InheritableThreadLocal<>();
 
@@ -346,7 +346,7 @@ new Thread(() -> {
 
 **한계점**: 스레드 풀에서는 스레드가 미리 생성되어 있으므로 의미가 없습니다. Task를 submit하는 시점에 스레드가 새로 만들어지는 게 아니니까요.
 
-```javascript
+```java
 ExecutorService executor = Executors.newFixedThreadPool(2);
 InheritableThreadLocal<String> context = new InheritableThreadLocal<>();
 
@@ -370,7 +370,7 @@ executor.submit(() -> System.out.println(context.get()));  // value-1이 출력�
 
 Alibaba가 만든 오픈소스 라이브러리로, 스레드 풀 환경의 Context 전파 문제를 해결합니다.
 
-```javascript
+```java
 TransmittableThreadLocal<String> context = new TransmittableThreadLocal<>();
 ExecutorService executor = Executors.newFixedThreadPool(2);
 
@@ -400,7 +400,7 @@ TTL은 작업이 submit되는 시점에 ThreadLocal 값을 **스냅샷**으로 �
 
 Context Propagation의 원리는 의외로 단순합니다. **ThreadLocal 값들을 Map에 복사해두었다가, 다른 스레드에서 그 Map의 값들을 ThreadLocal에 다시 세팅**하는 것입니다.
 
-```javascript
+```java
 // 1. 원본 스레드에서 캡처 (ThreadLocal → Map 복사)
 ContextSnapshot snapshot = ContextSnapshotFactory.builder()
     .build()
@@ -428,7 +428,7 @@ executor.submit(() -> {
 
 정답은 **ThreadLocalAccessor**입니다. 각 ThreadLocal에 “어떻게 접근하는지”를 정의한 어댑터입니다.
 
-```javascript
+```java
 // MDC용 Accessor 예시
 public class MdcAccessor implements ThreadLocalAccessor<Map<String, String>> {
     
@@ -456,7 +456,7 @@ public class MdcAccessor implements ThreadLocalAccessor<Map<String, String>> {
 
 이 Accessor들이 **ContextRegistry**에 등록되고, `captureAll()` 호출 시 등록된 모든 Accessor의 `getValue()`를 호출해서 값을 수집합니다. `setThreadLocals()` 호출 시에는 각 Accessor의 `setValue()`를 호출합니다.
 
-```
+```mermaid
 flowchart TB
     subgraph Registry["ContextRegistry"]
         A1["ObservationThreadLocalAccessor"]
@@ -481,7 +481,7 @@ flowchart TB
 
 다른 스레드에서 `setThreadLocals()` 호출 시:
 
-```
+```mermaid
 flowchart TB
     subgraph Snapshot["ContextSnapshot"]
         S1["'mdc': {traceId: 'abc'}"]
@@ -512,7 +512,7 @@ Spring Boot 3에서는 `ObservationThreadLocalAccessor` 등이 **SPI(Service Pro
 
 **방법 1: TaskDecorator Bean 등록 (권장, 간단)**
 
-```php
+```java
 @Configuration
 public class ContextPropagationConfig {
     
@@ -529,7 +529,7 @@ Spring Boot가 `TaskDecorator` Bean을 자동으로 감지해서 `AsyncTaskExecu
 
 스레드 풀 설정을 직접 제어해야 하는 경우:
 
-```php
+```java
 @Configuration
 public class AsyncConfig implements AsyncConfigurer {
     
@@ -561,7 +561,7 @@ public class AsyncConfig implements AsyncConfigurer {
 
 MDC(Mapped Diagnostic Context)는 로깅 프레임워크(SLF4J, Logback, Log4j)가 제공하는 **로그 컨텍스트 저장소**입니다. 내부적으로 **ThreadLocal 기반의 Map**으로 구현되어 있습니다.
 
-```javascript
+```java
 import org.slf4j.MDC;
 
 // 값 설정
@@ -584,7 +584,7 @@ Logback 패턴에서 `%X{key}` 구문으로 MDC 값을 출력합니다:
 
 출력 결과:
 
-```css
+```yaml
 14:23:45.123 [abc-456-def] [user-123] 주문 생성 완료
 ```
 
@@ -592,7 +592,7 @@ Logback 패턴에서 `%X{key}` 구문으로 MDC 값을 출력합니다:
 
 Logback의 MDC 구현을 살펴보면 ([GitHub 소스코드](https://github.com/qos-ch/logback/blob/master/logback-classic/src/main/java/ch/qos/logback/classic/util/LogbackMDCAdapter.java)):
 
-```javascript
+```java
 // LogbackMDCAdapter.java (간략화)
 public class LogbackMDCAdapter implements MDCAdapter {
     
@@ -637,7 +637,7 @@ Spring Boot 3 + Micrometer Tracing 조합에서는 **`traceId`와 `spanId`가 �
 
 `application.yml` 설정만 하면 됩니다:
 
-```php
+```yaml
 # 로그 패턴에 traceId, spanId 포함
 logging:
   pattern:
@@ -646,7 +646,7 @@ logging:
 
 또는 Spring Cloud Sleuth 스타일로:
 
-```php
+```yaml
 logging:
   pattern:
     correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}] "
@@ -733,7 +733,7 @@ logging:
 
 설정 후 애플리케이션에서 로그를 출력하면:
 
-```css
+```text
 2024-01-15 14:23:45.123  INFO [abc123def456,789xyz] [http-nio-8080-exec-1] c.e.OrderService - 주문 생성 시작
 2024-01-15 14:23:45.234  INFO [abc123def456,012uvw] [http-nio-8080-exec-1] c.e.PaymentService - 결제 처리 중
 2024-01-15 14:23:45.345  INFO [abc123def456,345rst] [http-nio-8080-exec-1] c.e.InventoryService - 재고 차감 완료
@@ -747,7 +747,7 @@ logging:
 
 `traceId` 외에 비즈니스 정보(userId, orderId 등)도 로그에 남기고 싶다면:
 
-```php
+```java
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class MdcLoggingFilter implements Filter {
@@ -788,7 +788,7 @@ public class MdcLoggingFilter implements Filter {
 
 Micrometer Tracing의 Baggage를 MDC에 자동으로 전파할 수도 있습니다:
 
-```
+```yaml
 management:
   tracing:
     baggage:
@@ -838,7 +838,7 @@ management:
 
 ### 1\. MDC.clear()를 finally에서 호출하지 않음
 
-```javascript
+```java
 // ❌ 잘못된 예
 public void process() {
     MDC.put("key", "value");
@@ -859,7 +859,7 @@ public void process() {
 
 ### 2\. 비동기 호출 시 Context 유실
 
-```javascript
+```java
 // ❌ Context가 전파되지 않음
 @Async
 public void asyncProcess() {
@@ -872,7 +872,7 @@ public void asyncProcess() {
 
 ### 3\. 스레드 풀 공유 시 Context 오염
 
-```javascript
+```java
 // ❌ 위험: 여러 요청이 같은 스레드를 공유
 executor.submit(() -> {
     String traceId = MDC.get("traceId");  // 다른 요청의 traceId일 수 있음!
@@ -896,7 +896,7 @@ executor.submit(() -> {
 > 
 > 그래서 WebFlux에서는 ThreadLocal 대신 **Reactor Context**라는 “구독(Subscription)에 붙어있는 Map”을 저장소로 사용합니다. Micrometer Context Propagation이 이 둘을 연결하는 브릿지 역할을 하고요. 3편에서 자세히 다룹니다.
 
-```
+```mermaid
 flowchart TB
     subgraph MVC["Spring MVC (동기식)"]
         direction LR

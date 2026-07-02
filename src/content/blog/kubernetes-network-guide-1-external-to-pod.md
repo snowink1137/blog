@@ -17,7 +17,7 @@ Kubernetes를 사용하다 보면 “내 요청이 정확히 어떤 경로로 Po
 외부 요청이 Pod에 도달하는 전체 흐름은 다음과 같습니다.
 
 ![](/images/kubernetes-network-guide-1-external-to-pod/img-01-k8s-traffic-flow-overview-2.png)
-```
+```text
 사용자 → DNS → 외부 LB → Ingress Node Service → Ingress Controller Pod → Worker Node Service → Worker Node Pod
 ```
 
@@ -44,7 +44,7 @@ Kubernetes를 사용하다 보면 “내 요청이 정확히 어떤 경로로 Po
 
 Kubernetes에는 공식적으로 “Ingress Node”라는 노드 타입이 존재하지 않습니다. 모든 노드는 기본적으로 동일한 Worker Node이며, **라벨** (Label) 을 통해 역할을 구분합니다.
 
-```php
+```bash
 # 특정 노드에 ingress 역할 라벨 부여
 kubectl label node node-1 node-role=ingress
 kubectl label node node-2 node-role=ingress
@@ -52,7 +52,7 @@ kubectl label node node-2 node-role=ingress
 
 그리고 Ingress Controller를 배포할 때 `nodeSelector`나 `nodeAffinity`를 설정하여 해당 라벨이 있는 노드에만 Pod가 배포되도록 합니다.
 
-```php
+```yaml
 # Ingress Controller DaemonSet 예시 (일부)
 spec:
   template:
@@ -75,7 +75,7 @@ spec:
 
 `LoadBalancer` 타입의 Service를 생성하면 클라우드 프로바이더가 자동으로 처리합니다.
 
-```php
+```yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -95,7 +95,7 @@ spec:
 2.  **클라우드 LB가 자동 생성됨**
 3.  **LB가 NodePort로 트래픽을 보내도록 자동 설정됨**
 
-```php
+```text
 # 생성 후 확인
 kubectl get svc ingress-nginx-controller -n ingress-nginx
 
@@ -110,7 +110,7 @@ ingress-nginx-controller   LoadBalancer   52.12.34.56    80:31492/TCP,443:31917/
 
 **방법 1: NodePort 타입 + 외부 LB 수동 설정**
 
-```
+```yaml
 spec:
   type: NodePort
   ports:
@@ -225,7 +225,7 @@ Ingress Controller는 시작할 때 API Server에 watch 요청을 보냅니다. 
 
 다음과 같은 Ingress 리소스가 있다고 가정해 봅시다.
 
-```
+```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -254,7 +254,7 @@ spec:
 
 Ingress Controller는 이 리소스를 읽어서 대략 다음과 같은 nginx 설정으로 변환합니다.
 
-```php
+```text
 # 자동 생성된 nginx.conf (단순화된 예시)
 server {
     listen 80;
@@ -321,7 +321,7 @@ kube-proxy의 동작을 3단계로 나눠보면:
 
 kube-proxy가 만드는 iptables 규칙을 직접 확인해 봅시다.
 
-```php
+```bash
 # Service 관련 iptables 규칙 확인
 sudo iptables -t nat -L KUBE-SERVICES -n | head -20
 ```
@@ -346,7 +346,7 @@ sudo iptables -t nat -L KUBE-SERVICES -n | head -20
 
 실제 iptables 규칙은 다음과 같은 형태입니다.
 
-```css
+```text
 # 실제 iptables 규칙 예시 (단순화)
 -A KUBE-SVC-XXXX -m statistic --mode random --probability 0.5 -j KUBE-SEP-AAAA
 -A KUBE-SVC-XXXX -j KUBE-SEP-BBBB
@@ -377,7 +377,7 @@ Linux 커널의 **conntrack(Connection Tracking)** 모듈이 핵심 역할을 �
 
 응답 패킷이 Pod에서 나올 때, conntrack은 이 정보를 보고 **자동으로 역방향 NAT인 SNAT** (Source NAT) 를 수행합니다. DNAT이 목적지 IP를 변경했다면, SNAT은 출발지 IP를 변경합니다. 응답 패킷의 소스 IP가 Pod IP(10.244.1.15)에서 ClusterIP(10.96.100.50)로 변환되어 원래 요청자에게 돌아갑니다.
 
-```
+```text
 응답 흐름: Pod → (conntrack SNAT) → Service → Ingress Controller → LB → 사용자
 ```
 
@@ -404,7 +404,7 @@ Linux 커널의 **conntrack(Connection Tracking)** 모듈이 핵심 역할을 �
 
 Kubernetes의 NetworkPolicy는 Pod 간 트래픽을 제어하는 방화벽 규칙입니다. CNI 플러그인(Calico, Cilium 등)이 이를 구현합니다.
 
-```javascript
+```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -424,7 +424,7 @@ spec:
 
 앞서 언급한 모든 리소스(Ingress, Service, Endpoints, Pod 등)는 **etcd**에 저장됩니다. etcd는 Kubernetes의 유일한 영구 저장소로, Control Plane 노드(예전 용어로 Master 노드)에서 실행됩니다.
 
-```php
+```text
 # etcd 내부 저장 경로 예시
 /registry/services/specs/default/user-service
 /registry/services/endpoints/default/user-service
@@ -442,14 +442,14 @@ API Server만이 etcd와 직접 통신하며, 다른 모든 컴포넌트(kube-pr
 
 **1\. DNS 확인**
 
-```css
+```bash
 nslookup api.example.com
 dig api.example.com
 ```
 
 **2\. LB → Ingress Node 확인**
 
-```php
+```bash
 # Ingress Controller Pod 상태
 kubectl get pods -n ingress-nginx
 
@@ -459,20 +459,20 @@ kubectl get svc -n ingress-nginx
 
 **3\. Ingress Controller 로그**
 
-```
+```bash
 kubectl logs -n ingress-nginx -l app.kubernetes.io/name=ingress-nginx
 ```
 
 **4\. Ingress 리소스 확인**
 
-```javascript
+```bash
 kubectl get ingress -A
 kubectl describe ingress my-ingress -n production
 ```
 
 **5\. Service → Pod 확인**
 
-```php
+```bash
 # Service와 Endpoints 확인
 kubectl get svc,endpoints -n production
 
@@ -482,7 +482,7 @@ kubectl describe svc user-service -n production
 
 **6\. Pod 상태 및 로그**
 
-```javascript
+```bash
 kubectl get pods -n production
 kubectl logs user-app-abc123 -n production
 ```

@@ -56,7 +56,7 @@ tags: ['kubernetes', 'pv', 'pvc', 'storage']
 
 **“Deployment로 replicas: 3을 설정하면 어떻게 되나요?”**
 
-```php
+```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -107,7 +107,7 @@ spec:
 
 여러 Pod에서 동일한 데이터를 공유하려면 **ReadWriteMany** (RWX) 를 지원하는 스토리지가 필요합니다.
 
-```php
+```yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -135,7 +135,7 @@ RWX가 필요한 사용 사례:
 
 Deployment를 수정해서 volumes 섹션을 제거하더라도, PVC와 PV는 **독립적인 리소스**이므로 그대로 유지됩니다.
 
-```php
+```yaml
 # Before: PVC 마운트
 spec:
   volumes:
@@ -173,7 +173,7 @@ PVC를 삭제하면 바인딩된 PV는 어떻게 될까요? **Reclaim Policy**�
 | **Retain** | PV 유지, Released 상태로 전환 | 보존 |
 | **Delete** | PV와 실제 스토리지 **즉시** 삭제 | 삭제 |
 
-```php
+```yaml
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
@@ -190,7 +190,7 @@ reclaimPolicy: Retain  # PVC 삭제해도 PV와 데이터 유지
 
 **방법 1: 새 StorageClass 만들기** (권장)
 
-```php
+```yaml
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
@@ -203,7 +203,7 @@ parameters:
 
 **방법 2: 이미 생성된 PV의 reclaimPolicy 수정**
 
-```javascript
+```bash
 kubectl patch pv my-pv -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'
 ```
 
@@ -224,7 +224,7 @@ reclaimPolicy는 **PVC가 삭제되는 시점**에 참조됩니다. 따라서 PV
 3.  PV 상태가 `Available`로 변경됨
 4.  새 PVC가 바인딩 가능
 
-```php
+```bash
 # claimRef 제거 → Available 상태로 전환
 kubectl patch pv my-pv -p '{"spec":{"claimRef": null}}'
 ```
@@ -248,7 +248,7 @@ kubectl patch pv my-pv -p '{"spec":{"claimRef": null}}'
 
 Deployment는 PVC를 직접 참조하지만, StatefulSet은 **volumeClaimTemplates**를 사용해 **각 Pod마다 별도의 PVC를 자동 생성**합니다.
 
-```php
+```yaml
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -283,7 +283,7 @@ spec:
 
 이 StatefulSet을 생성하면:
 
-```
+```text
 Pod 이름          → PVC 이름
 postgres-0       → data-postgres-0
 postgres-1       → data-postgres-1
@@ -301,7 +301,7 @@ postgres-2       → data-postgres-2
 
 ### Pod 재시작 시 스토리지
 
-```
+```text
 postgres-0 종료 → postgres-0 재생성 → data-postgres-0에 다시 바인딩
 ```
 
@@ -311,7 +311,7 @@ StatefulSet의 Pod가 재시작되면, **같은 이름의 Pod가 같은 PVC에 �
 
 **스케일 업 (replicas: 3 → 5):**
 
-```
+```text
 기존: postgres-0, postgres-1, postgres-2
 추가: postgres-3 생성 → data-postgres-3 PVC 자동 생성
       postgres-4 생성 → data-postgres-4 PVC 자동 생성
@@ -319,7 +319,7 @@ StatefulSet의 Pod가 재시작되면, **같은 이름의 Pod가 같은 PVC에 �
 
 **스케일 다운 (replicas: 5 → 3):**
 
-```
+```text
 삭제: postgres-4 삭제 (Pod만)
       postgres-3 삭제 (Pod만)
 PVC:  data-postgres-3, data-postgres-4는 유지됨!
@@ -337,13 +337,13 @@ PVC:  data-postgres-3, data-postgres-4는 유지됨!
 
 ### StatefulSet 삭제 시 스토리지
 
-```javascript
+```bash
 kubectl delete statefulset postgres
 ```
 
 StatefulSet을 삭제해도 **PVC는 삭제되지 않습니다**. 완전히 정리하려면:
 
-```php
+```bash
 # StatefulSet 삭제
 kubectl delete statefulset postgres
 
@@ -357,14 +357,14 @@ StatefulSet은 PVC를 보존하지만, **분산 DB에서는 앱 레벨의 데이
 
 **일반 StatefulSet (예: 단순 웹앱):**
 
-```
+```text
 replicas: 5 → 3
 Pod-4, Pod-3 삭제 → PVC는 유지 → 데이터 손실 없음
 ```
 
 **분산 DB (예: Cassandra, MongoDB ReplicaSet):**
 
-```
+```text
 replicas: 5 → 3
 문제: Pod-3, Pod-4가 갖고 있던 데이터 샤드는?
 → 데이터가 다른 노드에 복제되어 있으면 OK
@@ -401,7 +401,7 @@ replicas: 5 → 3
 2.  **CSI 드라이버가 볼륨 확장 지원**
 3.  **동적 프로비저닝된 PVC**만 가능
 
-```php
+```yaml
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
@@ -414,7 +414,7 @@ allowVolumeExpansion: true  # 이게 있어야 확장 가능
 
 PVC의 `spec.resources.requests.storage`를 수정하면 됩니다.
 
-```php
+```bash
 # 기존 PVC 확인
 kubectl get pvc my-pvc
 # NAME     STATUS   VOLUME    CAPACITY   ACCESS MODES   STORAGECLASS
@@ -460,7 +460,7 @@ Kubernetes 1.24부터 볼륨 확장이 Stable 기능이 됐고, 대부분의 CSI
 
 Kubernetes의 PV/PVC 시스템은 **블록 스토리지**를 위한 것입니다. 디스크를 Pod에 마운트해서 파일시스템처럼 사용합니다.
 
-```php
+```yaml
 volumes:
   - name: data
     persistentVolumeClaim:
@@ -471,7 +471,7 @@ volumes:
 
 S3 같은 오브젝트 스토리지는 PV/PVC로 마운트하지 않습니다. 애플리케이션 코드에서 SDK로 직접 접근합니다.
 
-```php
+```yaml
 # S3 접근을 위한 환경변수/시크릿 주입
 env:
   - name: AWS_ACCESS_KEY_ID
@@ -496,7 +496,7 @@ env:
 
 ### PVC가 Pending 상태인 경우
 
-```php
+```bash
 kubectl get pvc
 # NAME     STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS
 # my-pvc   Pending                                       fast-ssd
@@ -511,7 +511,7 @@ kubectl get pvc
 | 용량 부족 | 클라우드 콘솔에서 할당량 확인 | 할당량 증가 요청 |
 | AZ 불일치 | `volumeBindingMode` 확인 | `WaitForFirstConsumer` 사용 |
 
-```php
+```bash
 # 상세 원인 확인
 kubectl describe pvc my-pvc
 # Events 섹션에서 에러 메시지 확인
@@ -519,7 +519,7 @@ kubectl describe pvc my-pvc
 
 ### Volume attach/detach history 확인
 
-```php
+```bash
 # PV 이벤트 확인
 kubectl describe pv my-pv
 

@@ -24,7 +24,7 @@ tags: ['aop', 'kotlin-coroutines', 'reactor', 'spring-mvc', 'spring-webflux']
 
 **Spring WebFlux는 Reactor 기반입니다.** [Part 4](/jvm-concurrency-model-4-spring-webflux/)에서 다뤘듯이, WebFlux의 요청 처리 파이프라인은 Mono/Flux를 통해 흐릅니다. 컨트롤러가 `Mono<User>`를 반환해야 Reactor가 처리할 수 있습니다. 그런데 코루틴 컨트롤러는 `suspend fun getUser(): User`를 선언합니다 — Mono도 Flux도 없습니다.
 
-```javascript
+```kotlin
 // 이 코드가 어떻게 Reactor 파이프라인에서 실행되는가?
 @GetMapping("/users/{id}")
 suspend fun getUser(@PathVariable id: Long): User {
@@ -44,7 +44,7 @@ suspend fun getUser(@PathVariable id: Long): User {
 
 “내가 작성한 코루틴 코드를 Reactor 파이프라인에 태우고 싶다” — 이때 `mono {}`와 `flux {}` 빌더를 사용합니다.
 
-```javascript
+```kotlin
 // mono {} — suspend fun의 결과를 Mono로 감싸기
 val userMono: Mono<User> = mono {
     // 이 블록은 코루틴으로 실행됨
@@ -67,7 +67,7 @@ val usersFlux: Flux<User> = flux {
 
 **3단계**: 코루틴이 값을 반환하면 `Mono.onNext(value)` → `onComplete()`로 전달됩니다. 예외가 발생하면 `Mono.onError(exception)`으로 전달됩니다.
 
-```
+```mermaid
 sequenceDiagram
     participant R as Reactor 파이프라인
     participant M as mono {} 어댑터
@@ -88,7 +88,7 @@ sequenceDiagram
 
 반대 방향입니다. “기존의 Reactor 코드(WebClient, R2DBC 등)를 코루틴 안에서 쓰고 싶다” — 이때 `awaitSingle()`, `asFlow()` 등의 확장 함수를 사용합니다.
 
-```javascript
+```kotlin
 suspend fun getUser(id: Long): User {
     // Mono를 반환하는 WebClient 호출 → awaitSingle()로 코루틴에서 사용
     return webClient.get()
@@ -120,7 +120,7 @@ suspend fun getAllUsers(): Flow<User> {
 
 [Part 5](/jvm-concurrency-model-5-kotlin-coroutines/)에서 다룬 `Continuation.resumeWith()`가 바로 여기서 쓰입니다. Mono의 `onNext` 콜백 안에서 코루틴의 continuation을 호출하여 중단된 코루틴을 깨우는 것입니다.
 
-```
+```mermaid
 sequenceDiagram
     participant C as 코루틴
     participant A as awaitSingle 어댑터
@@ -158,7 +158,7 @@ sequenceDiagram
 
 Spring WebFlux에서 컨트롤러를 `suspend fun`으로 선언하면, Spring이 내부적으로 어댑터를 사용해서 Reactor 파이프라인에 연결합니다.
 
-```
+```kotlin
 @RestController
 class UserController(private val userService: UserService) {
 
@@ -225,7 +225,7 @@ Spring은 suspend fun의 반환 타입을 Reactor 타입으로 자동 매핑합�
 
 같은 비즈니스 로직을 Reactor와 코루틴으로 작성한 컨트롤러를 비교해보겠습니다.
 
-```php
+```java
 // Reactor (Java) — WebFlux 컨트롤러
 @RestController
 public class UserController {
@@ -275,7 +275,7 @@ class UserController(
 
 외부 API를 호출할 때 WebClient를 코루틴과 함께 사용하면, `flatMap` 체이닝 없이 순차적으로 작성할 수 있습니다.
 
-```javascript
+```kotlin
 // Reactor — WebClient 체이닝
 fun getOrderWithProduct(orderId: Long): Mono<OrderWithProduct> {
     return webClient.get()
@@ -310,7 +310,7 @@ suspend fun getOrderWithProduct(orderId: Long): OrderWithProduct {
 
 Spring은 WebClient에 `awaitBody<T>()`, `awaitExchange {}` 같은 코루틴 확장 함수도 제공합니다. 이를 사용하면 더 간결해집니다.
 
-```javascript
+```kotlin
 suspend fun getOrderWithProduct(orderId: Long): OrderWithProduct {
     val order = webClient.get()
         .uri("/orders/$orderId")
@@ -329,7 +329,7 @@ suspend fun getOrderWithProduct(orderId: Long): OrderWithProduct {
 
 Spring MVC에서도 컨트롤러에 `suspend fun`을 선언할 수 있습니다. 문법은 WebFlux와 동일합니다.
 
-```
+```kotlin
 // Spring MVC 컨트롤러 — 문법은 WebFlux와 같다
 @RestController
 class UserController(private val userService: UserService) {
@@ -345,7 +345,7 @@ class UserController(private val userService: UserService) {
 
 ### 스레드 모델의 차이
 
-```
+```mermaid
 flowchart LR
     subgraph WebFlux
         A1[Netty 이벤트 루프] -->|suspend| A2[스레드 반환]
@@ -386,7 +386,7 @@ AOP와 `@Transactional` 관련 주의사항은 MVC/WebFlux 공통으로 다음 �
 
 “그렇다면 MVC 컨트롤러에서 R2DBC나 WebClient 같은 논블로킹 라이브러리를 쓰면 되지 않느냐?”는 자연스러운 질문입니다. 그리고 실제로 이 패턴은 실무에서 유효합니다.
 
-```
+```kotlin
 // MVC 컨트롤러 + 논블로킹 서비스 — 실무 하이브리드 패턴
 @RestController
 class UserController(private val userService: UserService) {
@@ -441,7 +441,7 @@ Spring MVC는 보안 컨텍스트, 요청 스코프 빈, 트랜잭션 상태 등
 
 `@Transactional`의 문제는 ThreadLocal 손실이 아니라 **AOP 라이프사이클 불일치**입니다. `suspend fun`은 CPS 변환을 거치면서, 첫 번째 suspend 지점에서 `COROUTINE_SUSPENDED`라는 특수한 값을 반환합니다. AOP 프록시는 이 반환을 “메서드가 끝났다”고 해석합니다.
 
-```javascript
+```kotlin
 // @Transactional + suspend fun — AOP 라이프사이클 불일치
 @Transactional
 suspend fun transferMoney(from: Long, to: Long, amount: BigDecimal) {
@@ -458,7 +458,7 @@ AOP 프록시가 `COROUTINE_SUSPENDED`를 어떻게 처리하느냐에 따라 �
 
 **`PlatformTransactionManager` — AOP가 깨지는 흐름:**
 
-```
+```mermaid
 flowchart TD
     A[TransactionInterceptor] --> B[PlatformTransactionManager: 트랜잭션 시작]
     B --> C[proceed - suspend fun 호출]
@@ -473,7 +473,7 @@ flowchart TD
 
 **`ReactiveTransactionManager` — 코루틴을 인식하는 흐름:**
 
-```
+```mermaid
 flowchart TD
     A[TransactionInterceptor] --> B[Continuation 파라미터 감지]
     B --> C[suspend fun을 Mono로 변환]
@@ -492,7 +492,7 @@ flowchart TD
 
 **`ReactiveTransactionManager` + R2DBC/Reactive MongoDB**: `ReactiveTransactionManager`는 Mono의 완료 시그널을 기준으로 트랜잭션을 관리하고, 트랜잭션 상태를 ThreadLocal이 아닌 [`Reactor Context`](https://projectreactor.io/docs/core/release/reference/#context)로 전파합니다. 커넥션 자체가 논블로킹이고 스레드에 바인딩되지 않으므로, 코루틴이 suspend/resume을 반복하며 스레드가 바뀌어도 트랜잭션이 유지됩니다. 이것은 **WebFlux뿐 아니라 MVC에서도 동작할 수 있습니다** — 핵심은 HTTP 서버가 아니라 TransactionManager와 데이터 접근 기술이 리액티브인지 여부입니다.
 
-```javascript
+```kotlin
 // PlatformTransactionManager + JDBC — suspend fun과 호환 불가
 @Transactional  // JpaTransactionManager (PlatformTransactionManager)
 suspend fun transfer(fromId: Long, toId: Long, amount: BigDecimal) {
@@ -523,7 +523,7 @@ suspend fun transfer() {
 
 AOP 라이프사이클 불일치는 `@Transactional`에만 해당하지 않습니다. **MVC든 WebFlux든, 모든 `@Around` 어드바이스**가 동일한 문제를 가집니다.
 
-```javascript
+```kotlin
 // 커스텀 @Around 어드바이스 — 실행 시간 측정
 @Around("@annotation(Measured)")
 fun measureExecutionTime(pjp: ProceedingJoinPoint): Any? {
@@ -545,7 +545,7 @@ fun measureExecutionTime(pjp: ProceedingJoinPoint): Any? {
 
 커스텀 `@Around` 어드바이스에는 코루틴 감지 처리가 없습니다. 그렇다면 Spring의 `TransactionInterceptor`처럼 직접 Mono 변환 로직을 구현하면 되지 않을까요?
 
-```javascript
+```kotlin
 // Spring처럼 직접 코루틴 감지 + Mono 변환을 시도한다면?
 @Around("@annotation(Measured)")
 fun measureExecutionTime(pjp: ProceedingJoinPoint): Any? {
@@ -575,7 +575,7 @@ fun measureExecutionTime(pjp: ProceedingJoinPoint): Any? {
 
 결국 현실적인 대안은 AOP 프록시를 거치지 않는 **코루틴 고차 함수 패턴**입니다.
 
-```javascript
+```kotlin
 // AOP @Around 대신 — 코루틴 친화적인 inline 함수
 suspend inline fun <T> measured(label: String, block: suspend () -> T): T {
     val start = System.nanoTime()
@@ -604,7 +604,7 @@ suspend fun getUser(id: Long): User = measured("getUser") {
 
 [Part 4](/jvm-concurrency-model-4-spring-webflux/)에서 “이벤트 루프 스레드를 블로킹하면 안 된다”는 규칙을 다뤘습니다. `runBlocking`은 현재 스레드를 블로킹하므로, WebFlux의 이벤트 루프 스레드에서 호출하면 그 규칙을 정면으로 위반합니다.
 
-```javascript
+```kotlin
 // 절대 하면 안 되는 코드
 @GetMapping("/users/{id}")
 fun getUser(@PathVariable id: Long): User {
@@ -626,7 +626,7 @@ suspend fun getUser(@PathVariable id: Long): User {
 
 코루틴 안에서 블로킹 라이브러리(JDBC, `Thread.sleep()`, 동기 HTTP 클라이언트)를 호출하면, 코루틴이 suspend되는 것이 아니라 **스레드가 블로킹**됩니다.
 
-```php
+```kotlin
 // 위험한 코드 — 코루틴 안에서 JDBC 호출
 suspend fun getUser(id: Long): User {
     // JDBC는 블로킹! 코루틴이 아무리 suspend fun이어도
@@ -644,7 +644,7 @@ suspend fun getUser(id: Long): User = withContext(Dispatchers.IO) {
 
 ### 3\. Reactive 스타일과 명령형 스타일 혼용
 
-```javascript
+```kotlin
 // 혼란스러운 코드 — 두 스타일이 섞임
 suspend fun getUser(id: Long): User {
     return userRepository.findById(id)   // Mono를 반환
@@ -676,7 +676,7 @@ suspend fun getUser(id: Long): User {
 
 코루틴이 바꾸는 것은 **코드의 형태**입니다. `flatMap` 체이닝 대신 순차 코드를, `onErrorResume` 대신 try-catch를 사용합니다. 하지만 코루틴만으로 논블로킹이 되는 것은 아닙니다 — 실제 논블로킹은 **인프라**(Netty, R2DBC, WebClient)가 제공하고, 코루틴은 그것을 읽기 좋은 코드로 표현하는 도구입니다.
 
-```
+```mermaid
 flowchart LR
     A[Reactor - 논블로킹] -->|가독성| B[Coroutines - 명령형 문법]
     B -->|Spring 통합| C[WebFlux + Coroutines]

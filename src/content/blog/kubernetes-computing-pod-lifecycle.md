@@ -66,7 +66,7 @@ Kubernetes 클러스터는 크게 **컨트롤 플레인** (Control Plane) 과 **
 
 먼저 Deployment yaml 파일의 기본 구조를 살펴보겠습니다.
 
-```php
+```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -106,7 +106,7 @@ spec:
 
 ### 1단계: kubectl → API Server
 
-```css
+```bash
 kubectl apply -f deployment.yaml
 ```
 
@@ -124,7 +124,7 @@ Deployment를 생성하면 **Controller Manager**가 개입합니다:
 2.  **ReplicaSet Controller**가 `replicas` 수만큼 Pod 생성
 3.  생성된 Pod는 etcd에 저장되고, 상태는 **Pending**
 
-```php
+```yaml
 status:
   phase: Pending
   # nodeName은 아직 비어 있음
@@ -207,7 +207,7 @@ Scheduler는 API Server를 지속적으로 감시(watch)합니다. `nodeName`이
 2.  **Scoring**: 남은 노드에 점수를 매겨 최적의 노드 선택
 3.  선택한 노드를 Pod의 `spec.nodeName`에 기록
 
-```php
+```yaml
 spec:
   nodeName: worker-2  # Scheduler가 결정
 ```
@@ -228,7 +228,7 @@ spec:
 
 모든 컨테이너가 정상적으로 시작되면 Pod의 상태가 **Running**으로 변경됩니다.
 
-```css
+```yaml
 status:
   phase: Running
   podIP: 10.244.2.15
@@ -274,7 +274,7 @@ Filtering을 통과한 노드들에 점수(0-100)를 매깁니다.
 
 특정 라벨이 있는 노드에만 배치합니다.
 
-```javascript
+```yaml
 spec:
   nodeSelector:
     disktype: ssd
@@ -285,7 +285,7 @@ spec:
 
 nodeSelector보다 유연한 조건을 지정할 수 있습니다.
 
-```css
+```yaml
 spec:
   affinity:
     nodeAffinity:
@@ -311,11 +311,11 @@ spec:
 
 **Taint**는 노드에 “경고 표시”를 하는 것입니다. 해당 Taint를 **Toleration**하는 Pod만 배치될 수 있습니다.
 
-```php
+```bash
 # 노드에 Taint 추가 (GPU 전용 노드)
 kubectl taint nodes gpu-node-1 gpu=true:NoSchedule
 ```
-```php
+```yaml
 # Pod에 Toleration 추가
 spec:
   tolerations:
@@ -360,7 +360,7 @@ kubelet은 워커 노드의 **에이전트**입니다. 다음과 같은 일을 �
 kubelet은 컨테이너를 직접 실행하지 않습니다. 대신 **CRI** (Container Runtime Interface) 라는 표준 인터페이스를 통해 컨테이너 런타임과 통신합니다.
 
 ![](/images/kubernetes-computing-pod-lifecycle/img-04-image-38.png)
-```
+```text
 kubelet
    ↓ (CRI - gRPC 프로토콜)
 컨테이너 런타임 (containerd, CRI-O)
@@ -400,7 +400,7 @@ Pod가 사용할 CPU와 Memory를 지정하는 것은 안정적인 클러스터 
 
 ### requests vs limits
 
-```php
+```yaml
 resources:
   requests:
     cpu: "100m"      # 0.1 CPU 코어
@@ -433,7 +433,7 @@ Kubernetes는 requests와 limits 설정에 따라 Pod에 **QoS(Quality of Servic
 | **Burstable** | requests < limits (하나라도) | 중간 우선순위 |
 | **BestEffort** | requests/limits 둘 다 없음 | 가장 먼저 종료 |
 
-```php
+```yaml
 # Guaranteed 예시: requests = limits
 resources:
   requests:
@@ -443,7 +443,7 @@ resources:
     cpu: "500m"
     memory: "256Mi"
 ```
-```php
+```yaml
 # Burstable 예시: requests < limits
 resources:
   requests:
@@ -453,7 +453,7 @@ resources:
     cpu: "500m"
     memory: "512Mi"
 ```
-```css
+```yaml
 # BestEffort 예시: 아무것도 지정 안 함
 resources: {}
 ```
@@ -464,7 +464,7 @@ resources: {}
 
 컨테이너는 워커 노드의 Linux 커널 위에서 실행되기 때문에, 메모리 관리도 해당 노드의 커널이 담당합니다.
 
-```php
+```bash
 kubectl describe pod my-pod
 # ...
 # Last State:     Terminated
@@ -508,7 +508,7 @@ Pod가 실행 중이라고 해서 반드시 정상인 것은 아닙니다. 애�
 
 ### Probe 설정 예시
 
-```php
+```yaml
 spec:
   containers:
     - name: app
@@ -544,7 +544,7 @@ spec:
 
 ### Probe 유형
 
-```php
+```yaml
 # HTTP GET 방식
 httpGet:
   path: /healthz
@@ -596,7 +596,7 @@ exec:
 
 ### CrashLoopBackOff: 왜 Pod가 계속 재시작될까?
 
-```php
+```bash
 kubectl get pods
 # NAME       READY   STATUS             RESTARTS   AGE
 # my-pod     0/1     CrashLoopBackOff   5          3m
@@ -611,7 +611,7 @@ kubectl get pods
 
 Kubernetes는 재시작 간격을 점점 늘립니다 (10초 → 20초 → 40초 → … 최대 5분). 이를 **exponential backoff**라고 합니다.
 
-```php
+```bash
 # 원인 확인
 kubectl describe pod my-pod
 kubectl logs my-pod --previous  # 이전 컨테이너 로그
@@ -625,7 +625,7 @@ kubectl logs my-pod --previous  # 이전 컨테이너 로그
 
 HPA는 **Metrics Server**에서 Pod의 리소스 사용량을 수집하고, 설정한 목표치와 비교해 replicas 수를 조정합니다.
 
-```
+```text
 Metrics Server → HPA → Deployment(replicas 조정) → ReplicaSet → Pod 생성/삭제
 ```
 
@@ -639,7 +639,7 @@ Metrics Server → HPA → Deployment(replicas 조정) → ReplicaSet → Pod �
 | 사용처 | `kubectl top`, HPA, VPA |
 | 설치 여부 | 기본 설치 아님, 별도 설치 필요 |
 
-```php
+```bash
 # Metrics Server 설치 확인
 kubectl get pods -n kube-system | grep metrics-server
 
@@ -653,7 +653,7 @@ kubectl top pods
 
 ### HPA 설정 예시
 
-```php
+```yaml
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -680,7 +680,7 @@ spec:
 -   CPU 사용률이 70% 미만이면 Pod를 줄임
 -   최소 2개, 최대 10개 유지
 
-```php
+```bash
 # HPA 상태 확인
 kubectl get hpa
 # NAME         REFERENCE           TARGETS   MINPODS   MAXPODS   REPLICAS
@@ -691,7 +691,7 @@ kubectl get hpa
 
 **HPA는 Deployment의 replicas를 직접 수정합니다.** 따라서 HPA를 사용할 때는:
 
-```php
+```yaml
 # HPA 사용 시 Deployment 설정
 apiVersion: apps/v1
 kind: Deployment
@@ -745,7 +745,7 @@ Pod가 제대로 실행되지 않을 때 확인할 포인트들입니다.
 
 ### 주요 확인 명령어
 
-```php
+```bash
 # Pod 상태 확인
 kubectl get pods -o wide
 

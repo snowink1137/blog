@@ -29,7 +29,7 @@ tags: ['context-propagation', 'micrometer', 'reactor', 'tracing']
 
 Spring MVC는 **Thread-per-Request** 모델을 사용합니다. 요청이 들어오면 스레드 풀에서 스레드 하나를 할당받고, 응답이 완료될 때까지 그 스레드가 요청을 전담합니다.
 
-```
+```mermaid
 sequenceDiagram
     participant R as 요청
     participant T as Thread-1
@@ -57,7 +57,7 @@ ThreadLocal이 완벽하게 동작하는 이유가 바로 이것입니다. 스�
 
 WebFlux는 완전히 다른 접근 방식을 취합니다. **Event Loop** 모델에서는 소수의 스레드(보통 CPU 코어 수)가 수천 개의 요청을 **비동기적으로** 처리합니다.
 
-```
+```mermaid
 sequenceDiagram
     participant R1 as 요청 1
     participant R2 as 요청 2
@@ -96,7 +96,7 @@ sequenceDiagram
 
 문제를 코드로 확인해보겠습니다:
 
-```php
+```java
 @RestController
 public class OrderController {
     
@@ -120,14 +120,14 @@ public class OrderController {
 
 실행 결과:
 
-```javascript
+```text
 [abc123] 주문 조회 시작        // reactor-http-nio-1
 [null] 주문 조회 완료          // reactor-http-nio-3 (ThreadLocal 값 없음!)
 ```
 
 **스레드가 바뀌면 ThreadLocal 값은 사라집니다.** 이것이 WebFlux에서 ThreadLocal을 직접 사용할 수 없는 근본적인 이유입니다.
 
-```
+```mermaid
 sequenceDiagram
     participant C as Client
     participant T1 as Thread-1
@@ -150,7 +150,7 @@ sequenceDiagram
 
 Project Reactor는 이 문제를 해결하기 위해 **Context**라는 개념을 도입했습니다. Context는 쉽게 말해 **Subscriber에 붙어있는 불변(immutable) Map**입니다.
 
-```javascript
+```java
 // ThreadLocal 방식 (❌ WebFlux에서 실패)
 ThreadLocal<String> traceId = new ThreadLocal<>();
 traceId.set("abc123");
@@ -180,7 +180,7 @@ Mono.just("data")
 
 Reactor Context에서 가장 중요하면서도 헷갈리는 개념이 **전파 방향**입니다. Context는 **아래에서 위로** 전파됩니다.
 
-```javascript
+```java
 Mono.deferContextual(ctx -> {
         // 3. 여기서 읽으면? → "World" (가장 가까운 contextWrite)
         log.info("message = {}", ctx.get("message"));
@@ -195,7 +195,7 @@ Mono.deferContextual(ctx -> {
 
 왜 “Hello”가 아니라 “World”일까요?
 
-```
+```mermaid
 flowchart TB
     subgraph " "
         A["deferContextual (읽기)"]
@@ -226,7 +226,7 @@ flowchart TB
 
 **쓰기: `contextWrite()`**
 
-```javascript
+```java
 // 방법 1: Function으로 수정
 .contextWrite(ctx -> ctx.put("key", "value"))
 
@@ -236,7 +236,7 @@ flowchart TB
 
 **읽기: `deferContextual()` 또는 `transformDeferredContextual()`**
 
-```javascript
+```java
 // 방법 1: Mono.deferContextual (가장 일반적)
 Mono.deferContextual(ctx -> {
     String traceId = ctx.get("traceId");
@@ -257,7 +257,7 @@ flux.transformDeferredContextual((original, ctx) -> {
 
 ### 실전 예제: WebFlux에서 traceId 전파
 
-```php
+```java
 @RestController
 @RequiredArgsConstructor
 public class OrderController {
@@ -293,7 +293,7 @@ public class OrderController {
 
 Reactor에서 연산자를 체이닝하면 내부적으로 **Subscriber 체인**이 만들어집니다. 각 연산자는 자신만의 Subscriber를 생성하고, 이 Subscriber들이 서로 연결됩니다.
 
-```php
+```java
 Flux.just(1, 2, 3)           // FluxArray
     .map(i -> i * 2)          // FluxMap (내부에 MapSubscriber)
     .filter(i -> i > 2)       // FluxFilter (내부에 FilterSubscriber)
@@ -312,7 +312,7 @@ Flux.just(1, 2, 3)           // FluxArray
 
 내부 구조:
 
-```
+```mermaid
 flowchart TB
     subgraph CODE["코드 작성 순서"]
         C1["Flux.just(1,2,3)"]
@@ -333,7 +333,7 @@ flowchart TB
     CODE ~~~ PUB
 ```
 
-```
+```mermaid
 sequenceDiagram
     participant USER as .subscribe(println)
     participant P3 as FluxFilter
@@ -357,7 +357,7 @@ sequenceDiagram
 
 Reactor의 모든 Subscriber는 `CoreSubscriber` 인터페이스를 구현합니다. 이 인터페이스에 Context 관련 메서드가 있습니다:
 
-```php
+```java
 public interface CoreSubscriber<T> extends Subscriber<T> {
     
     // 현재 Subscriber의 Context 반환
@@ -369,7 +369,7 @@ public interface CoreSubscriber<T> extends Subscriber<T> {
 
 연산자의 Subscriber 구현을 보면:
 
-```php
+```java
 // FluxMap 내부의 MapSubscriber (간략화)
 class MapSubscriber<T, R> implements CoreSubscriber<T> {
     
@@ -394,7 +394,7 @@ class MapSubscriber<T, R> implements CoreSubscriber<T> {
 
 실제 코드에서 Context가 어떻게 전파되는지 봅시다:
 
-```php
+```java
 Flux.just(1, 2, 3)
     .map(i -> i * 2)
     .filter(i -> i > 2)
@@ -402,7 +402,7 @@ Flux.just(1, 2, 3)
     .subscribe(System.out::println);
 ```
 
-```
+```mermaid
 flowchart BT
     subgraph TOP["Context 조회 가능 ✅"]
         S1["MapSubscriber"]
@@ -463,7 +463,7 @@ Reactor의 Context는 성능을 위해 **크기별로 다른 구현체**를 사�
 | 5개 | `Context5` | 5쌍의 key-value 필드 |
 | 6개+ | `ContextN` | `Map<Object, Object>` |
 
-```javascript
+```java
 // Context1 구현 (간략화)
 final class Context1 implements CoreContext {
     final Object key;
@@ -500,7 +500,7 @@ final class Context1 implements CoreContext {
 
 이제 핵심 질문에 답할 수 있습니다. **스레드가 바뀌어도 Context가 유지되는 이유**는 무엇일까요?
 
-```
+```mermaid
 sequenceDiagram
     participant T1 as Thread-1
     participant T2 as Thread-2
@@ -541,7 +541,7 @@ WebFlux에서 이들을 사용하려면 **Reactor Context ↔ ThreadLocal** 사�
 
 ### 동작 원리
 
-```
+```mermaid
 flowchart LR
     subgraph "Reactor 세계"
         RC["Reactor Context<br/>{traceId: 'abc123'}"]
@@ -563,7 +563,7 @@ flowchart LR
 
 핵심 인터페이스:
 
-```javascript
+```java
 // ThreadLocal 값에 접근하는 인터페이스
 public interface ThreadLocalAccessor<V> {
     Object key();                    // Context에서 사용할 키
@@ -591,7 +591,7 @@ Reactor Core 3.5.0부터 Context Propagation을 지원하며, 두 가지 모드�
 
 특정 연산자(`handle`, `tap`)에서만 ThreadLocal을 복원합니다:
 
-```javascript
+```java
 flux.handle((item, sink) -> {
     // 이 블록 안에서만 ThreadLocal 복원됨
     log.info("traceId = {}", MDC.get("traceId"));  // ✅ 동작
@@ -603,7 +603,7 @@ flux.handle((item, sink) -> {
 
 모든 연산자에서 ThreadLocal을 자동 복원합니다:
 
-```javascript
+```java
 // 애플리케이션 시작 시 활성화
 Hooks.enableAutomaticContextPropagation();
 
@@ -624,7 +624,7 @@ flux.map(item -> {
 
 `contextCapture()`는 **현재 스레드의 ThreadLocal 값들을 Reactor Context로 캡처**합니다:
 
-```javascript
+```java
 // ThreadLocal에 값이 있는 상태에서
 MDC.put("traceId", "abc123");
 
@@ -636,7 +636,7 @@ Mono.just("data")
 
 주로 **명령형 코드에서 리액티브 체인을 시작할 때** 사용합니다:
 
-```php
+```java
 @GetMapping("/order")
 public Mono<Order> createOrder(@RequestBody OrderRequest request) {
     // Controller에서 ThreadLocal에 traceId가 설정된 상태
@@ -735,7 +735,7 @@ public Mono<Order> createOrder(@RequestBody OrderRequest request) {
 
 ### application.yml 설정
 
-```php
+```yaml
 # application.yml
 spring:
   application:
@@ -814,7 +814,7 @@ logging:
 
 ### 실제 코드 예시
 
-```php
+```java
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -848,7 +848,7 @@ public class OrderController {
 
 출력 예시:
 
-```css
+```yaml
 14:23:45.123 [abc123def456,111aaa] [reactor-http-nio-1] INFO  c.e.OrderController - 주문 생성 시작: PROD-001
 14:23:45.234 [abc123def456,222bbb] [reactor-http-nio-2] INFO  c.e.OrderController - 주문 저장 완료: ORD-123
 14:23:45.345 [abc123def456,333ccc] [reactor-http-nio-3] INFO  c.e.OrderController - 재고 차감 완료
@@ -866,7 +866,7 @@ public class OrderController {
 
 **원인과 해결**:
 
-```javascript
+```java
 // ❌ 문제: 리액티브 체인 밖에서 subscribe
 new Thread(() -> {
     orderService.createOrder(request)
@@ -885,7 +885,7 @@ new Thread(() -> {
 
 **증상**: `flatMap` 안에서 새로운 Publisher를 생성할 때 Context 유실
 
-```javascript
+```java
 // ❌ 문제: 외부 Publisher 직접 사용
 .flatMap(data -> externalLibrary.getData())  // 외부 라이브러리가 Context 미지원
 
@@ -913,7 +913,7 @@ Automatic 모드 대신 Default 모드에서 `handle()`이나 `tap()`을 사용�
 | `handle()` | 변환 + 필터링 + 로깅 | ✅ `sink.next()`로 변환/필터 가능 |
 | `tap()` | 사이드 이펙트만 (로깅, 메트릭) | ❌ 데이터 그대로 통과 |
 
-```php
+```java
 // Default 모드 (spring.reactor.context-propagation 설정 없음)
 
 @GetMapping("/orders")
@@ -989,7 +989,7 @@ public Flux<Order> getOrders() {
 
 **증상 예시**: 애플리케이션 코드의 로그에는 traceId가 잘 나오는데, Reactive Mongo Client, R2DBC 드라이버 등 **라이브러리의 DEBUG 로그**에서는 traceId가 비어있음
 
-```javascript
+```yaml
 14:23:45.123 [abc123,111aaa] INFO  c.e.OrderService - 주문 조회 시작          // ✅ 정상
 14:23:45.124 [abc123,111aaa] DEBUG c.m.r.c.internal - Executing query       // ✅ 정상 (체인 안)
 14:23:45.125 [,]             DEBUG c.m.r.c.internal - Socket connected      // ❌ 유실 (체인 밖)
@@ -1001,7 +1001,7 @@ public Flux<Order> getOrders() {
 
 **원인**: 라이브러리 내부 구현에 따라 **로그를 찍는 위치**가 다를 수 있기 때문입니다.
 
-```
+```mermaid
 flowchart TB
     subgraph IN["체인 안 ✅ Context 있음"]
         A["repository.findById()"]
@@ -1041,7 +1041,7 @@ flowchart TB
 
 ### 5\. 테스트 시 Context 설정
 
-```javascript
+```java
 @Test
 void testWithContext() {
     StepVerifier.create(
@@ -1066,7 +1066,7 @@ void testWithContext() {
 | 설정 복잡도 | 낮음 | 중간 |
 | 성능 오버헤드 | 낮음 | 중간 (Automatic 모드) |
 
-```
+```mermaid
 flowchart TB
     subgraph MVC["Spring MVC"]
         direction LR

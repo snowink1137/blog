@@ -14,7 +14,7 @@ Apple silicon을 사용하는 Mac에서, 사내 VPN과 Spring Cloud Gateway 앱�
 
 사내 VPN에 연결한 상태에서 터미널로 `ping`이나 `traceroute`를 실행하면 시스템 DNS를 사용하여 내부 도메인이 잘 해석됩니다. 그런데 Spring Boot 애플리케이션을 로컬에서 실행하면 아래와 같은 오류가 발생합니다.
 
-```php
+```text
 io.netty.resolver.dns.DnsResolveContext$SearchDomainUnknownHostException: 
 Failed to resolve 'api-legacy.internal.example.com' [A(1), AAAA(28)]
 ```
@@ -52,7 +52,7 @@ JDK에 내장된 `InetAddress.getByName()`은 **블로킹(blocking)** 방식으�
 
 `build.gradle.kts`에 다음 의존성을 추가합니다.
 
-```javascript
+```text
 dependencies {
     // macOS Apple Silicon에서 Netty가 시스템 DNS resolver를 사용하도록 native 라이브러리 추가
     if (System.getProperty("os.name").lowercase().contains("mac") 
@@ -93,7 +93,7 @@ Spring Boot의 `bootJar` 태스크가 실행되면 다음 과정을 거칩니다
 
 최종 JAR 구조는 아래와 같습니다.
 
-```php
+```text
 app.jar
 ├── BOOT-INF/
 │   ├── classes/          ← 컴파일된 .class 파일
@@ -119,7 +119,7 @@ CI/CD 파이프라인이 Linux에서 실행된다면 빌드된 JAR에는 이 라
 
 의존성 추가 없이 JVM 옵션만으로 해결할 수도 있습니다.
 
-```php
+```bash
 # Gradle로 실행 시
 ./gradlew bootRun -Dio.netty.resolver.dns.macos.forceSyscall=true
 

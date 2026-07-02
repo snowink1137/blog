@@ -32,7 +32,7 @@ Java의 동시성 API는 한 번에 완성된 것이 아닙니다. `Thread`로 �
 
 Java에서 동시성의 출발점은 `Thread`입니다. 새로운 실행 흐름을 만들고 싶으면 Thread 객체를 생성하고 `start()`를 호출합니다.
 
-```javascript
+```java
 // 방법 1: Thread를 직접 상속
 Thread thread = new Thread() {
     @Override
@@ -63,7 +63,7 @@ Thread와 Runnable만으로 동시성 프로그래밍을 하면 세 가지 문�
 
 **셋째, 예외 처리가 불편합니다.** Runnable의 `run()` 메서드 시그니처는 `void run()`이라서 `throws IOException` 같은 선언을 붙일 수 없습니다. 그래서 스레드 안에서 checked exception이 발생하는 메서드를 호출하면 반드시 내부에서 try-catch로 잡아야 하고, 예외를 호출자에게 전달할 방법이 없습니다.
 
-```javascript
+```java
 Runnable task = () -> {
     try {
         String data = Files.readString(Path.of("data.txt")); // IOException 발생 가능
@@ -80,7 +80,7 @@ Runnable task = () -> {
 
 `Callable`은 Runnable의 한계를 보완하기 위해 Java 5에서 추가되었습니다. **값을 리턴할 수 있고, 예외를 throws로 선언할 수 있습니다.**
 
-```javascript
+```java
 // Callable: 리턴 있음, 예외를 throws로 선언 가능
 Callable<String> callable = () -> {
     String data = Files.readString(Path.of("data.txt"));  // IOException도 그냥 던질 수 있음
@@ -92,7 +92,7 @@ Callable에서 예외가 발생하면 사라지는 것이 아니라, `Future.get
 
 Callable을 실행하면 `Future` 객체를 받습니다. [Part 1](/jvm-concurrency-model-1-fundamentals/)에서 **세탁소 영수증**에 비유했던 바로 그것입니다. 영수증을 가지고 있다가 결과가 필요할 때 `get()`을 호출합니다.
 
-```javascript
+```java
 ExecutorService executor = Executors.newSingleThreadExecutor();
 Future<String> future = executor.submit(callable);
 
@@ -112,7 +112,7 @@ Future의 핵심 한계는 **결과를 가져오는 방법이 `get()` 하나뿐�
 
 여러 작업을 동시에 실행하고 결과를 모아야 하는 상황을 보겠습니다.
 
-```javascript
+```java
 ExecutorService executor = Executors.newFixedThreadPool(3);
 
 Future<String> futureA = executor.submit(() -> {
@@ -146,7 +146,7 @@ executor.shutdown();
 
 ### 왜 Thread를 직접 만들면 안 되는가
 
-```javascript
+```java
 // 요청마다 스레드를 생성하는 서버 (잘못된 예)
 while (true) {
     Socket client = serverSocket.accept();
@@ -158,7 +158,7 @@ while (true) {
 
 `ExecutorService`는 이 문제를 **스레드 풀**로 해결합니다. 스레드를 미리 일정 수만큼 만들어두고, 작업이 들어오면 풀에서 스레드를 꺼내 쓰고, 작업이 끝나면 반환합니다.
 
-```javascript
+```java
 // 스레드 풀 사용 (올바른 예)
 ExecutorService executor = Executors.newFixedThreadPool(20);
 while (true) {
@@ -192,7 +192,7 @@ CachedThreadPool의 코어 스레드가 0인 이유는, 작업이 없으면 **�
 
 ExecutorService는 명시적으로 종료해야 합니다. 종료하지 않으면 JVM이 끝나지 않습니다.
 
-```javascript
+```text
 executor.shutdown();       // 새 작업 거부, 진행 중인 작업은 완료까지 기다림
 executor.shutdownNow();    // 새 작업 거부, 진행 중인 작업에 interrupt 시도
 ```
@@ -205,7 +205,7 @@ executor.shutdownNow();    // 새 작업 거부, 진행 중인 작업에 interru
 
 ### 기본 체이닝: supplyAsync → thenApply → thenAccept
 
-```javascript
+```java
 CompletableFuture.supplyAsync(() -> {
         // 1단계: 비동기로 데이터 조회
         return fetchUserFromDB(userId);
@@ -234,7 +234,7 @@ CompletableFuture.supplyAsync(() -> {
 
 실무에서는 여러 API를 동시에 호출하고 결과를 합쳐야 하는 경우가 많습니다.
 
-```javascript
+```java
 CompletableFuture<String> userFuture = CompletableFuture.supplyAsync(
     () -> fetchUser(userId)
 );
@@ -252,7 +252,7 @@ CompletableFuture<String> combined = userFuture.thenCombine(orderFuture,
 
 비동기 작업의 결과로 다시 비동기 작업을 호출해야 할 때는 `thenCompose`를 사용합니다.
 
-```javascript
+```java
 // thenApply를 쓰면 CompletableFuture<CompletableFuture<Order>>가 되어 중첩됨
 // thenCompose는 이것을 평탄화해줌 (flatMap과 같은 역할)
 CompletableFuture<Order> orderFuture = fetchUser(userId)
@@ -263,7 +263,7 @@ CompletableFuture<Order> orderFuture = fetchUser(userId)
 
 동기 코드의 try-catch에 해당하는 것이 CompletableFuture의 예외 처리 메서드들입니다.
 
-```javascript
+```java
 CompletableFuture.supplyAsync(() -> {
         if (userId == null) throw new IllegalArgumentException("userId is null");
         return fetchUser(userId);
@@ -278,7 +278,7 @@ CompletableFuture.supplyAsync(() -> {
 
 `exceptionally`는 예외가 발생했을 때만 호출되고, 대체 값을 반환합니다. `handle`과 `whenComplete`은 **성공이든 실패든 항상 호출**되지만, 핵심적인 차이가 있습니다.
 
-```javascript
+```text
 // handle: 성공/실패 모두 받고, 결과를 변환할 수 있음 (try-catch + 변환)
 cf.handle((result, ex) -> {
     if (ex != null) return "기본값";   // 예외 시 대체 값
@@ -302,7 +302,7 @@ cf.whenComplete((result, ex) -> {
 
 `supplyAsync()`를 Executor 없이 호출하면 **ForkJoinPool.commonPool()** 에서 실행됩니다. 이 풀은 CPU 코어 수 – 1개의 스레드를 가지고 있어서, I/O 작업이 많으면 스레드가 부족해질 수 있습니다.
 
-```javascript
+```java
 // 기본: ForkJoinPool.commonPool() 사용
 CompletableFuture.supplyAsync(() -> fetchFromDB());
 
@@ -319,7 +319,7 @@ CompletableFuture.supplyAsync(() -> fetchFromDB(), ioExecutor);
 
 ### Race Condition (경쟁 상태)
 
-```php
+```java
 public class Counter {
     private int count = 0;
 
@@ -335,7 +335,7 @@ public class Counter {
 
 `count++`는 코드에서는 한 줄이지만, CPU 레벨에서는 세 단계입니다.
 
-```
+```mermaid
 sequenceDiagram
     participant T1 as Thread 1
     participant MEM as count = 0
@@ -354,7 +354,7 @@ sequenceDiagram
 
 ### Visibility 문제 (가시성 문제)
 
-```php
+```java
 public class StopFlag {
     private boolean running = true;
 
@@ -374,7 +374,7 @@ Thread 1이 `running = false`로 변경해도, Thread 2가 이 변경을 **못 �
 
 ### Deadlock (교착 상태)
 
-```javascript
+```java
 Object lockA = new Object();
 Object lockB = new Object();
 
@@ -401,7 +401,7 @@ new Thread(() -> {
 
 Thread 1은 lockA를 잡고 lockB를 기다리고, Thread 2는 lockB를 잡고 lockA를 기다립니다. 둘 다 영원히 기다리게 되는 것이 **교착 상태(Deadlock)** 입니다.
 
-```
+```mermaid
 flowchart LR
     T1[Thread 1] -->|보유| LA[Lock A]
     T1 -.->|대기| LB[Lock B]
@@ -434,7 +434,7 @@ Deadlock을 예방하는 가장 기본적인 전략은 **락 획득 순서를 �
 
 ### volatile — 가시성 보장
 
-```php
+```java
 public class StopFlag {
     private volatile boolean running = true;
 
@@ -452,7 +452,7 @@ public class StopFlag {
 
 volatile을 이해하려면, 먼저 **CPU 캐시가 기본**이라는 것을 알아야 합니다. 메인 메모리(RAM) 접근은 수백 CPU 사이클이 걸릴 정도로 느리기 때문에, 현대 CPU는 각 코어마다 L1/L2 캐시를 가지고 있습니다. 변수를 처음 읽으면 캐시에 복사해두고, 이후에는 캐시에서 읽습니다. 이것은 JVM이 아닌 **CPU 하드웨어 레벨의 최적화**입니다.
 
-```
+```mermaid
 flowchart LR
     subgraph Core-0
         C0[L1 캐시 - running=true]
@@ -472,7 +472,7 @@ Core 0에서 `running = false`로 변경하면, Core 0의 캐시는 업데이트
 
 참고로 이 메모리 배리어는 **명령어 재배치도 방지**합니다. CPU나 컴파일러는 성능 최적화를 위해 “결과가 같다면” 명령어 순서를 바꿀 수 있는데, 단일 스레드에서는 문제가 없지만 멀티스레드에서는 예상치 못한 결과가 발생할 수 있습니다.
 
-```php
+```text
 // Thread A
 data = loadData();       // 1번
 volatile ready = true;   // 2번
@@ -491,7 +491,7 @@ if (ready) {             // 3번
 
 ### synchronized — 가시성 + 상호 배제
 
-```php
+```java
 public class Counter {
     private int count = 0;
 
@@ -509,7 +509,7 @@ public class Counter {
 
 ### ReentrantLock — 더 세밀한 제어
 
-```php
+```java
 private final ReentrantLock lock = new ReentrantLock();
 
 public void doWork() {
@@ -530,7 +530,7 @@ public void doWork() {
 
 ### Atomic 클래스 — Lock-Free 동기화
 
-```php
+```java
 private final AtomicInteger count = new AtomicInteger(0);
 
 public void increment() {
@@ -574,7 +574,7 @@ Atomic 클래스는 **CAS(Compare-And-Swap)** 연산을 사용합니다. “현�
 
 **사용 시나리오**: 서버 시작 시 여러 초기화 작업(DB 연결, 캐시 로딩, 설정 로딩)이 모두 완료된 후에 요청을 받기 시작해야 할 때.
 
-```javascript
+```java
 CountDownLatch latch = new CountDownLatch(3); // 3개 작업 완료 대기
 
 executor.submit(() -> { initDB();    latch.countDown(); });
@@ -591,7 +591,7 @@ System.out.println("모든 초기화 완료, 서버 시작");
 
 **사용 시나리오**: 대용량 데이터를 여러 스레드가 각자 처리한 뒤, 모든 스레드가 끝나면 결과를 합치고, 다시 다음 배치를 처리하는 반복 작업.
 
-```javascript
+```java
 CyclicBarrier barrier = new CyclicBarrier(3, () -> {
     System.out.println("모든 스레드 도착 — 결과 합산");
 });
@@ -621,7 +621,7 @@ CountDownLatch와 비교하면, CyclicBarrier에는 `countDown()` 같은 메서�
 
 **사용 시나리오**: DB 커넥션 풀처럼, 동시에 사용할 수 있는 자원 수가 제한된 경우.
 
-```javascript
+```java
 Semaphore semaphore = new Semaphore(10); // 최대 10개 동시 접근
 
 public void accessResource() throws InterruptedException {
@@ -644,7 +644,7 @@ public void accessResource() throws InterruptedException {
 
 ConcurrentHashMap은 이 버킷 단위로 락을 걸기 때문에, 서로 다른 버킷에 대한 쓰기는 동시에 가능하고, 읽기는 대부분 락 없이 수행됩니다.
 
-```javascript
+```java
 ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>();
 
 // 원자적 업데이트
@@ -682,7 +682,7 @@ FixedThreadPool에서 4개 스레드가 각각 작업을 처리한다고 합시�
 
 ForkJoinPool은 이 문제를 **Work-Stealing**으로 해결합니다.
 
-```
+```mermaid
 flowchart TB
     subgraph ForkJoinPool
         direction LR
@@ -706,7 +706,7 @@ ForkJoinPool의 기본 스레드 수는 `Runtime.getRuntime().availableProcessor
 
 Java 8의 `parallelStream()`은 내부적으로 `ForkJoinPool.commonPool()`을 사용합니다.
 
-```php
+```java
 List<Integer> numbers = List.of(1, 2, 3, 4, 5, 6, 7, 8);
 
 // 순차 처리
@@ -738,7 +738,7 @@ numbers.parallelStream()
 
 이 글에서 다룬 도구들을 추상화 수준으로 정리하면 이런 흐름입니다.
 
-```
+```mermaid
 flowchart LR
     A[Thread] -->|결과 반환 불가| B[Callable + Future]
     B -->|get 블로킹| C[CompletableFuture]

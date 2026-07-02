@@ -16,23 +16,23 @@ AWS EC2에서 WordPress를 운영 중에 갑자기 사이트가 멈췄습니다.
 
 먼저 현재 디스크 상태를 확인합니다.
 
-```
+```bash
 df -h
 ```
-```php
+```text
 Filesystem      Size  Used Avail Use% Mounted on
 /dev/root       6.8G  6.7G    0  100% /
 ```
 
 Use%가 100%라면 문제가 확실합니다. 이제 어디서 용량을 많이 잡아먹는지 찾아봅니다.
 
-```
+```bash
 sudo du -sh /* 2>/dev/null | sort -hr | head -10
 ```
 
 보통 `/var/lib/docker`(Docker 이미지/볼륨)나 `/var/log`(로그 파일)가 주범인 경우가 많습니다. 더 깊이 파고 싶다면 해당 디렉토리를 다시 확인하면 됩니다.
 
-```javascript
+```bash
 sudo du -sh /var/lib/* 2>/dev/null | sort -hr | head -10
 ```
 
@@ -40,7 +40,7 @@ sudo du -sh /var/lib/* 2>/dev/null | sort -hr | head -10
 
 EBS 볼륨 확장 전에 급한 불부터 끄고 싶다면, 아래 명령어로 500MB~1GB 정도 확보할 수 있습니다.
 
-```php
+```bash
 # apt 캐시 정리 (~200MB)
 sudo apt clean
 sudo apt autoremove -y
@@ -57,7 +57,7 @@ Docker 정리 명령어 중 `docker system prune -a --volumes`는 주의가 필�
 -   문제는 컨테이너가 죽어서 stopped 상태라면, 해당 볼륨이 “미사용”으로 간주될 수 있다는 점입니다.
 -   DB 데이터가 볼륨에 있다면 날아갈 수 있으니, **`--volumes` 없이** 실행하는 게 안전합니다.
 
-```php
+```bash
 # 안전한 버전: 볼륨은 건드리지 않음
 docker system prune -a
 ```
@@ -94,10 +94,10 @@ AWS 콘솔에서 볼륨 크기를 변경해도 **EC2 내부에서는 자동으�
 
 ### 현재 상태 확인
 
-```
+```bash
 lsblk
 ```
-```
+```text
 NAME          SIZE  TYPE MOUNTPOINTS
 nvme0n1        20G  disk
 ├─nvme0n1p1     7G  part /
@@ -110,13 +110,13 @@ nvme0n1        20G  disk
 
 ### 파티션 확장
 
-```
+```bash
 sudo growpart /dev/nvme0n1 1
 ```
 
 이 명령어는 `nvme0n1` 디스크의 **1번 파티션을 디스크 끝까지 확장**합니다.
 
-```javascript
+```yaml
 CHANGED: partition=1 start=2099200 old: size=14677983 end=16777182 new: size=39843807 end=41943006
 ```
 
@@ -126,10 +126,10 @@ CHANGED: partition=1 start=2099200 old: size=14677983 end=16777182 new: size=398
 
 파티션을 늘렸지만 아직 끝이 아닙니다. `df -h`를 실행하면 여전히 6.8GB로 표시됩니다.
 
-```
+```bash
 sudo resize2fs /dev/nvme0n1p1
 ```
-```
+```bash
 resize2fs 1.47.0 (5-Feb-2023)
 Filesystem at /dev/nvme0n1p1 is mounted on /; on-line resizing required
 The filesystem on /dev/nvme0n1p1 is now 4980475 (4k) blocks long.
@@ -143,17 +143,17 @@ The filesystem on /dev/nvme0n1p1 is now 4980475 (4k) blocks long.
 
 ### 최종 확인
 
-```
+```bash
 df -h
 ```
-```php
+```text
 Filesystem      Size  Used Avail Use% Mounted on
 /dev/root        19G  6.6G   12G  36% /
 ```
 
 19GB로 늘어났고, 12GB 여유 공간이 생겼습니다! 이제 죽었던 컨테이너를 재시작하면 됩니다.
 
-```php
+```bash
 cd ~/wordpress  # docker-compose.yml 위치
 docker compose restart
 ```

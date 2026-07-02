@@ -49,7 +49,7 @@ Reactive Streams는 JVM에서 비동기 스트림 처리의 **표준 인터페�
 
 스펙은 딱 4개의 인터페이스로 구성됩니다.
 
-```php
+```java
 public interface Publisher<T> {
     void subscribe(Subscriber<? super T> s);
 }
@@ -80,7 +80,7 @@ public interface Processor<T, R> extends Subscriber<T>, Publisher<R> {
 
 이 4개가 어떻게 상호작용하는지 시퀀스로 보겠습니다.
 
-```
+```mermaid
 sequenceDiagram
     participant Sub as Subscriber
     participant Pub as Publisher
@@ -119,7 +119,7 @@ Reactor는 Reactive Streams의 `Publisher`를 두 가지 타입으로 특화합�
 
 ### Mono — 0 또는 1개의 값
 
-```php
+```java
 // HTTP 호출처럼 결과가 하나인 비동기 작업
 Mono<User> user = Mono.fromCallable(() -> userRepository.findById(id));
 
@@ -144,7 +144,7 @@ Mono<User> error = Mono.error(new UserNotFoundException());
 
 가장 중요한 차이는 **실행 시점**입니다. CompletableFuture는 생성하는 순간 내부 작업이 실행됩니다. 반면 Mono는 **subscribe()를 호출하기 전까지 아무 일도 일어나지 않습니다.** 이것을 “cold” 또는 “lazy” 실행이라고 합니다.
 
-```javascript
+```java
 // CompletableFuture — 이 줄이 실행되는 순간 API 호출 시작
 CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> callApi());
 
@@ -159,7 +159,7 @@ mono.subscribe(result -> System.out.println(result));
 
 ### Flux — 0 ~ N개의 값
 
-```javascript
+```java
 // 고정 값
 Flux<String> names = Flux.just("Alice", "Bob", "Charlie");
 
@@ -199,7 +199,7 @@ Publisher는 데이터를 언제 생성하느냐에 따라 두 가지로 나뉩�
 
 **Cold Publisher**는 구독할 때마다 데이터를 처음부터 새로 생성합니다. 넷플릭스에서 영화를 재생하는 것과 같습니다 — 각 시청자가 재생 버튼을 누르면 처음부터 시작합니다.
 
-```javascript
+```java
 Flux<Integer> cold = Flux.range(1, 3);
 
 cold.subscribe(i -> System.out.println("구독자A: " + i));
@@ -222,7 +222,7 @@ Reactor에서 Hot Publisher를 만드는 주요 도구는 **Sinks**입니다. `S
 
 코드의 `.onBackpressureBuffer()`는 Sinks 빌더 API의 일부로, “구독자가 아직 소비하지 못한 데이터를 버퍼에 쌓아두겠다”는 **생성 시 전략 설정**입니다. 뒤에서 다룰 Flux의 `onBackpressureBuffer()` 연산자와 이름은 같지만 위치가 다릅니다 — Sinks는 생성 시, Flux 연산자는 파이프라인 중간에 사용합니다.
 
-```javascript
+```java
 // multicast — 여러 구독자에게 동시에 데이터 전달
 Sinks.Many<String> sink = Sinks.many().multicast().onBackpressureBuffer();
 Flux<String> hot = sink.asFlux();
@@ -257,7 +257,7 @@ Reactor의 연산자는 스트림 데이터를 선언적으로 변환하는 도�
 
 `map`은 **동기 변환** — 함수가 값을 즉시 반환(`T → R`)하고, 그 동안 스레드가 기다립니다.
 
-```javascript
+```java
 Flux.just("alice", "bob")
     .map(name -> name.toUpperCase())
     // "ALICE", "BOB"
@@ -265,7 +265,7 @@ Flux.just("alice", "bob")
 
 `flatMap`은 **비동기 변환** — 함수가 Publisher를 반환(`T → Publisher<R>`)하고, 실제 값은 나중에 비동기로 도착합니다. 스레드가 기다리지 않고 다음 요소를 처리할 수 있습니다.
 
-```javascript
+```java
 Flux.just(1, 2, 3)
     .flatMap(id -> fetchUserById(id))  // 각 id로 비동기 HTTP 호출
     // User1, User3, User2 (순서 보장 안 됨!)
@@ -275,7 +275,7 @@ Flux.just(1, 2, 3)
 
 그리고 `flatMap`은 **순서를 보장하지 않습니다.** 여러 비동기 작업을 동시에 실행하고, 먼저 완료되는 순서대로 결과를 내보냅니다. [Part 2](/jvm-concurrency-model-2-java-traditional-concurrency/)에서 다룬 “동시성에서 순서는 기본적으로 보장되지 않는다”는 원칙이 여기서도 적용됩니다. 순서가 중요하다면 `flatMapSequential`을 사용합니다. 이 연산자는 비동기 작업은 동시에 시작하되, 결과는 원래 순서대로 내보냅니다.
 
-```javascript
+```java
 Flux.just(1, 2, 3)
     .flatMapSequential(id -> fetchUserById(id))
     // User1, User2, User3 (순서 보장)
@@ -285,7 +285,7 @@ Flux.just(1, 2, 3)
 
 여러 스트림을 합치는 방법은 세 가지입니다.
 
-```javascript
+```java
 Flux<String> names = Flux.just("Alice", "Bob");
 Flux<Integer> ages = Flux.just(30, 25);
 
@@ -316,7 +316,7 @@ Reactor에서 기본적으로 모든 연산은 **subscribe()를 호출한 스레
 
 **publishOn**은 **이후 연산자의 실행 스레드**를 변경합니다. 위치가 중요합니다 — publishOn 아래의 연산자들만 영향받습니다.
 
-```javascript
+```java
 Flux.fromCallable(() -> blockingDbQuery())    // ① 소스
     .subscribeOn(Schedulers.boundedElastic())  // ① → boundedElastic에서 실행
     .map(data -> transform(data))              // ② boundedElastic에서 실행
@@ -325,7 +325,7 @@ Flux.fromCallable(() -> blockingDbQuery())    // ① 소스
     .subscribe();
 ```
 
-```
+```mermaid
 flowchart LR
     subgraph boundedElastic
         A[소스: DB 조회] --> B[변환]
@@ -351,7 +351,7 @@ flowchart LR
 
 `boundedElastic()`이 중요한 이유가 하나 더 있습니다. 리액티브 파이프라인 안에서 **블로킹 코드를 호출해야 하는 경우**(레거시 JDBC, 파일 I/O 등), 이 스케줄러로 격리하지 않으면 다른 논블로킹 작업까지 블로킹됩니다. [Part 2](/jvm-concurrency-model-2-java-traditional-concurrency/)에서 parallelStream의 commonPool이 I/O 블로킹 스레드에 의해 전체 병렬 처리가 느려지는 문제를 다뤘는데, 같은 원리입니다.
 
-```javascript
+```java
 // 레거시 블로킹 코드를 리액티브 파이프라인에 통합
 Mono.fromCallable(() -> legacyJdbcQuery())
     .subscribeOn(Schedulers.boundedElastic())  // 블로킹 작업 격리
@@ -366,7 +366,7 @@ Mono.fromCallable(() -> legacyJdbcQuery())
 
 ### 대체 값과 대체 스트림
 
-```javascript
+```java
 // onErrorReturn — 기본값 반환 (catch + 기본값 return)
 Mono.fromCallable(() -> riskyCall())
     .onErrorReturn("기본값");
@@ -382,7 +382,7 @@ Mono.fromCallable(() -> externalCall())
 
 ### 재시도
 
-```javascript
+```java
 // 최대 3번 재시도
 Mono.fromCallable(() -> unstableApi())
     .retry(3);
@@ -413,14 +413,14 @@ Reactor가 재시도 전략(지수 백오프 등)을 연산자로 제공한다�
 
 대부분의 경우, 개발자가 `request(n)`을 직접 호출할 일은 없습니다. Reactor의 연산자들이 내부적으로 적절한 request를 보냅니다. 예를 들어 `subscribe()`는 기본적으로 `request(Long.MAX_VALUE)` — 즉 “전부 다 보내줘”를 요청합니다.
 
-```javascript
+```java
 // 기본 subscribe — unbounded request (전부 요청)
 flux.subscribe(data -> process(data));
 ```
 
 대부분은 이 기본 동작으로 충분하지만, 소비 속도를 정밀하게 제어해야 하는 경우에는 `BaseSubscriber`를 사용해서 직접 제어할 수도 있습니다.
 
-```javascript
+```java
 // request 양을 직접 제어하는 경우
 flux.subscribe(new BaseSubscriber<String>() {
     @Override
@@ -447,7 +447,7 @@ flux.subscribe(new BaseSubscriber<String>() {
 | **버림** | `onBackpressureDrop()` | 처리 못하는 데이터는 버림 |
 | **속도 제한** | `limitRate(n)` | 내부 request를 n개씩 나눠서 요청 |
 
-```javascript
+```java
 // 생산자가 빨라도 최대 100개씩 끊어서 요청
 Flux.range(1, 10000)
     .limitRate(100)
@@ -469,7 +469,7 @@ Flux.range(1, 10000)
 
 Reactor는 이를 돕기 위한 도구를 제공합니다.
 
-```javascript
+```java
 // log() — 시그널 흐름을 콘솔에 출력
 Flux.range(1, 3)
     .log()  // onSubscribe, request, onNext, onComplete 등 모든 시그널 출력
@@ -524,7 +524,7 @@ Hooks.onOperatorDebug();
 
 [Part 2](/jvm-concurrency-model-2-java-traditional-concurrency/)의 Java 전통 동시성과 Reactor를 비교하면, 가장 근본적인 변화는 **프로그래밍 패러다임의 전환**입니다.
 
-```php
+```java
 // 명령형 (Part 2) — "어떻게" 처리할지 직접 제어
 ExecutorService executor = Executors.newFixedThreadPool(4);
 List<Future<User>> futures = new ArrayList<>();
@@ -553,7 +553,7 @@ Flux.fromIterable(userIds)
 
 물론 트레이드오프도 있습니다. 디버깅의 어려움, 학습 곡선, 그리고 모든 라이브러리가 리액티브를 지원하지 않는다는 현실적 제약이 있습니다. 특히 블로킹 API(JDBC, 파일 I/O 등)를 리액티브 파이프라인에 통합하려면 `subscribeOn(Schedulers.boundedElastic())`으로 격리해야 하는데, 이런 코드가 많아지면 리액티브의 장점이 희석됩니다.
 
-```
+```mermaid
 flowchart LR
     A[CompletableFuture] -->|스트림 처리 한계| B[Reactive Streams 스펙]
     B -->|구현체| C[Project Reactor]

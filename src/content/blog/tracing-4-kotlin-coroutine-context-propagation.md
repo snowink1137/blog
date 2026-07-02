@@ -21,7 +21,7 @@ tags: ['context-propagation', 'coroutine', 'kotlin', 'micrometer', 'spring', 'tr
 
 그런데 Kotlin을 사용한다면 상황이 조금 더 복잡해집니다. Kotlin Coroutine은 **CoroutineContext**라는 자체 Context 시스템을 가지고 있기 때문입니다. 이제 우리가 다뤄야 할 Context가 세 가지가 되었습니다.
 
-```
+```mermaid
 flowchart LR
     subgraph "세 가지 Context"
         TL["ThreadLocal<br/>(MDC, TraceContext)"]
@@ -48,7 +48,7 @@ Coroutine의 핵심은 **중단(suspend)과 재개(resume)** 입니다. suspend 
 > 
 > 아닙니다. Coroutine은 **Dispatcher**가 스레드 풀에서 가용한 스레드를 할당하는 방식입니다. suspend 후 resume될 때 같은 스레드가 비어있지 않으면 다른 스레드가 할당될 수 있습니다. Event Loop와는 다른 메커니즘이지만, **“스레드가 바뀔 수 있다”**는 점에서 ThreadLocal 문제가 동일하게 발생합니다.
 
-```javascript
+```kotlin
 suspend fun processOrder(orderId: String) {
     // 1️⃣ Thread-1에서 실행
     MDC.put("traceId", "abc123")
@@ -63,12 +63,12 @@ suspend fun processOrder(orderId: String) {
 
 실행 결과:
 
-```javascript
+```text
 [abc123] 주문 처리 시작    // Thread-1
 [null] 주문 처리 완료      // Thread-2 (ThreadLocal 값 없음!)
 ```
 
-```
+```mermaid
 sequenceDiagram
     participant T1 as Thread-1
     participant T2 as Thread-2
@@ -103,7 +103,7 @@ Coroutine은 자체적인 Context 시스템이 있고, 이것이 Coroutine의 �
 
 CoroutineContext는 여러 **Element**들의 집합입니다. 각 Element는 고유한 **Key**를 가지며, Context에서 Key로 Element를 조회할 수 있습니다.
 
-```javascript
+```kotlin
 // CoroutineContext의 주요 Element들
 val context: CoroutineContext = 
     Job() +                          // 코루틴 생명주기 관리
@@ -116,7 +116,7 @@ val dispatcher = context[CoroutineDispatcher]
 val name = context[CoroutineName]
 ```
 
-```
+```mermaid
 flowchart LR
     CC["CoroutineContext"]
     
@@ -132,7 +132,7 @@ flowchart LR
 
 Context는 `+` 연산자로 결합할 수 있습니다. 같은 Key의 Element가 있으면 오른쪽 것이 왼쪽을 덮어씁니다.
 
-```php
+```kotlin
 val base = Dispatchers.Default + CoroutineName("base")
 // base = {Dispatcher: Default, CoroutineName: "base"}
 
@@ -146,7 +146,7 @@ val extended = base + Dispatchers.IO
 
 부모 Coroutine의 Context는 자식에게 **상속**됩니다. 자식은 필요한 Element만 추가하거나 덮어쓸 수 있습니다.
 
-```javascript
+```text
 launch(Dispatchers.IO + CoroutineName("parent")) {
     // 부모 Context: Dispatchers.IO + CoroutineName("parent")
     
@@ -169,7 +169,7 @@ launch(Dispatchers.IO + CoroutineName("parent")) {
 
 Kotlin Coroutines 라이브러리는 ThreadLocal을 Coroutine에서 사용할 수 있게 해주는 `asContextElement()` 확장 함수를 제공합니다.
 
-```javascript
+```kotlin
 val traceId = ThreadLocal<String>()
 
 fun main() = runBlocking {
@@ -195,7 +195,7 @@ fun main() = runBlocking {
 
 `asContextElement()`는 내부적으로 `ThreadContextElement` 인터페이스를 구현합니다.
 
-```javascript
+```kotlin
 interface ThreadContextElement<S> : CoroutineContext.Element {
     // Coroutine이 스레드에서 재개될 때 호출
     fun updateThreadContext(context: CoroutineContext): S
@@ -205,7 +205,7 @@ interface ThreadContextElement<S> : CoroutineContext.Element {
 }
 ```
 
-```
+```mermaid
 sequenceDiagram
     participant T1 as Thread-1
     participant T2 as Thread-2
@@ -272,7 +272,7 @@ class SecurityCoroutineContext(
 
 동작 흐름:
 
-```
+```mermaid
 sequenceDiagram
     participant App as 애플리케이션
     participant SCE as SecurityCoroutineContext
@@ -311,7 +311,7 @@ sequenceDiagram
 
 사용 예시:
 
-```javascript
+```kotlin
 // 현재 SecurityContext가 캡처됨
 launch(SecurityCoroutineContext()) {
     // Thread-1에서 실행
@@ -334,7 +334,7 @@ launch(SecurityCoroutineContext()) {
 
 MDC를 Coroutine에서 사용하는 경우가 많아서, 공식 라이브러리가 제공됩니다.
 
-```javascript
+```kotlin
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:1.8.0")
 }
@@ -342,7 +342,7 @@ dependencies {
 
 사용법:
 
-```javascript
+```text
 import kotlinx.coroutines.slf4j.MDCContext
 
 MDC.put("traceId", "abc123")
@@ -360,7 +360,7 @@ launch(MDCContext()) {
 
 **중요한 함정**이 있습니다. Coroutine 내부에서 `MDC.put()`으로 값을 변경해도, 다음 suspension 이후에는 **원래 값으로 복원**됩니다.
 
-```javascript
+```text
 MDC.put("traceId", "abc123")
 
 launch(MDCContext()) {
@@ -380,7 +380,7 @@ launch(MDCContext()) {
 
 `MDCContext()`는 **생성 시점의 MDC 값을 캡처**합니다. suspension 후 재개될 때, 캡처해둔 값을 ThreadLocal에 복원합니다. Coroutine 내부에서 변경한 값은 캡처본에 반영되지 않습니다.
 
-```
+```mermaid
 sequenceDiagram
     participant Code as Coroutine 코드
     participant MDCCtx as MDCContext
@@ -402,7 +402,7 @@ sequenceDiagram
 
 변경된 MDC 값을 유지하려면 `withContext(MDCContext())`로 새로운 캡처본을 만들어야 합니다.
 
-```javascript
+```text
 MDC.put("traceId", "abc123")
 
 launch(MDCContext()) {
@@ -431,7 +431,7 @@ Spring WebFlux에서 Kotlin Coroutine을 사용하면, 두 가지 Context 시스
 -   **Reactor Context**: WebFlux의 Subscriber 체인에 바인딩
 -   **CoroutineContext**: Kotlin Coroutine에 바인딩
 
-```javascript
+```kotlin
 @RestController
 class OrderController {
     
@@ -450,12 +450,12 @@ class OrderController {
 
 `kotlinx-coroutines-reactor` 라이브러리가 `ReactorContext`라는 브릿지를 제공합니다.
 
-```javascript
+```kotlin
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.8.0")
 }
 ```
-```javascript
+```kotlin
 import kotlinx.coroutines.reactor.ReactorContext
 
 // Reactor → Coroutine: Reactor Context를 CoroutineContext에 주입
@@ -475,7 +475,7 @@ val mono = mono(ReactorContext(Context.of("traceId", "abc123"))) {
 
 좋은 소식은, **Spring WebFlux가 이 통합을 자동으로 처리**한다는 것입니다. suspend 함수로 선언된 Controller 메서드는 내부적으로 Reactor의 `mono { }` 빌더로 감싸지고, Reactor Context가 자동으로 CoroutineContext에 주입됩니다.
 
-```javascript
+```kotlin
 // Spring이 내부적으로 이렇게 처리함 (간략화)
 fun invokeSuspendingFunction(method: Method, ...): Mono<*> {
     return mono(Dispatchers.Unconfined) {
@@ -489,7 +489,7 @@ fun invokeSuspendingFunction(method: Method, ...): Mono<*> {
 > 
 > 맞습니다! Spring은 suspend 함수의 **결과를 Mono로 변환**해서 Reactor 파이프라인에 연결합니다. 이 과정에서 `mono` 빌더가 자동으로 **현재 Reactor Context를 CoroutineContext에 주입**합니다. 결과적으로 suspend 함수 내부에서 Reactor Context에 접근할 수 있게 됩니다.
 
-```
+```mermaid
 flowchart TB
     subgraph "HTTP 요청 처리 흐름"
         A["HTTP 요청"] --> B["WebFilter<br/>(Observation 생성)"]
@@ -512,7 +512,7 @@ flowchart TB
 
 ### 의존성 구성
 
-```javascript
+```kotlin
 // build.gradle.kts
 dependencies {
     // Spring Boot WebFlux
@@ -532,7 +532,7 @@ dependencies {
 
 ### application.yml 설정
 
-```php
+```yaml
 spring:
   application:
     name: order-service
@@ -627,7 +627,7 @@ class OrderController(
 
 실행 결과 (`getOrder`):
 
-```css
+```yaml
 14:23:45.123 [abc123,111aaa] INFO  OrderController - 주문 조회 시작: 123
 14:23:45.230 [abc123,111aaa] INFO  OrderController - DB 조회 전
 14:23:45.456 [abc123,111aaa] INFO  OrderController - 주문 조회 완료
@@ -635,7 +635,7 @@ class OrderController(
 
 실행 결과 (`getAllOrders` – Flow):
 
-```css
+```yaml
 14:24:01.100 [def456,222bbb] INFO  OrderController - 전체 주문 조회 시작
 14:24:01.150 [def456,222bbb] INFO  OrderController - 주문 emit: order-1
 14:24:01.160 [def456,222bbb] INFO  OrderController - 주문 emit: order-2
@@ -662,7 +662,7 @@ class OrderController(
 
 HTTP 요청부터 Coroutine 내부까지 Context가 어떻게 전파되는지 전체 흐름을 정리해보겠습니다.
 
-```
+```mermaid
 sequenceDiagram
     participant Client
     participant Filter as WebFilter
@@ -735,7 +735,7 @@ sequenceDiagram
 
 `GlobalScope`는 **빈 Context**를 가지므로, 부모의 Context가 전파되지 않습니다.
 
-```javascript
+```kotlin
 @GetMapping("/orders/{id}")
 suspend fun getOrder(@PathVariable id: String): Order {
     log.info("시작")  // ✅ traceId 있음
@@ -751,7 +751,7 @@ suspend fun getOrder(@PathVariable id: String): Order {
 
 **해결**: `coroutineScope` 또는 주입받은 `CoroutineScope`를 사용하세요.
 
-```javascript
+```kotlin
 @GetMapping("/orders/{id}")
 suspend fun getOrder(@PathVariable id: String): Order {
     coroutineScope {
@@ -767,7 +767,7 @@ suspend fun getOrder(@PathVariable id: String): Order {
 
 `runBlocking`으로 Coroutine을 시작할 때는 Context를 **명시적으로 전달**해야 합니다.
 
-```javascript
+```text
 // ❌ Context 전달 안 됨
 runBlocking {
     log.info("작업")  // traceId 없음
@@ -783,7 +783,7 @@ runBlocking(MDCContext()) {
 
 `async`로 병렬 작업을 할 때도 부모 Context가 자동 상속됩니다.
 
-```javascript
+```kotlin
 suspend fun getOrderWithDetails(orderId: String): OrderWithDetails = coroutineScope {
     log.info("병렬 조회 시작")  // ✅ traceId
     
@@ -808,7 +808,7 @@ suspend fun getOrderWithDetails(orderId: String): OrderWithDetails = coroutineSc
 
 Flow를 `collect`할 때 Context가 제대로 전파되는지 확인하세요.
 
-```javascript
+```kotlin
 @GetMapping("/orders/stream")
 fun streamOrders(): Flow<Order> = flow {
     log.info("스트림 시작")  // ✅ traceId
@@ -824,7 +824,7 @@ fun streamOrders(): Flow<Order> = flow {
 
 테스트에서는 Context를 직접 설정해야 합니다.
 
-```javascript
+```kotlin
 @Test
 fun `주문 조회 시 traceId가 유지되어야 한다`() = runTest {
     // MDC 설정
@@ -852,7 +852,7 @@ Kotlin Coroutine을 Spring WebFlux와 함께 사용할 때, 세 가지 Context �
 4.  **Spring Boot 3.2+ 자동 설정**: `spring.reactor.context-propagation=auto` 한 줄로 대부분의 상황에서 자동 전파가 됩니다.
 5.  **GlobalScope 사용 금지**: Context가 상속되지 않으므로, `coroutineScope`나 structured concurrency를 사용하세요.
 
-```
+```mermaid
 flowchart LR
     subgraph "Context 전파 체인"
         TL["ThreadLocal<br/>(MDC)"]
