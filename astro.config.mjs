@@ -17,7 +17,9 @@ export default defineConfig({
       themes: ['github-light', 'github-dark'],
       themeCssSelector: (theme) => `.${theme.type === 'dark' ? 'dark' : 'light'}`,
       defaultProps: {
-        wrap: true,
+        // Long lines scroll horizontally inside the code block instead of
+        // wrapping — cleaner reading and no mid-identifier breaks.
+        wrap: false,
         preserveIndent: true,
       },
       styleOverrides: {

@@ -19,13 +19,12 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    /* Long code lines or wide tables would otherwise push the document past
-       viewport width and let the browser pinch-zoom below 1× on mobile. */
+    /* Guard against accidental horizontal overflow (wide tables, etc.) leaking
+       into the document. Doesn't affect sticky positioning. */
     overflow-x: clip;
   }
   body {
     @apply bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100;
-    max-width: 100vw;
     overflow-x: clip;
   }
 }
@@ -70,11 +69,3 @@
    wins over generic root vars, so we set them directly on the element. */
 .pswp { --pswp-bg: #ffffff; }
 html.dark .pswp { --pswp-bg: #020617; }
-
-/* Expressive-code's wrap: true uses overflow-wrap: break-word, which only breaks
-   long unbreakable words. Long method chains (with '.' but no spaces) still push
-   the code block past the viewport. Fall back to breaking anywhere so the block
-   always fits. */
-.expressive-code .ec-line .code {
-  overflow-wrap: anywhere;
-}
