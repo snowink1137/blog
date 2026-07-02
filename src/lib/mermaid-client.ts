@@ -10,6 +10,10 @@ const configFor = (isDark: boolean) => ({
   theme: themeFor(isDark),
   securityLevel: 'strict' as const,
   fontFamily: bodyFontFamily(),
+  // htmlLabels wrap flowchart labels in <foreignObject><div>… Chrome treats that
+  // region as an interactive HTML block on mobile and hijacks the page's
+  // pinch-zoom / scroll gesture. Plain SVG text labels stay out of the way.
+  flowchart: { htmlLabels: false },
 });
 
 const initAndRun = () => {

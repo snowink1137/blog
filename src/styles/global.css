@@ -41,6 +41,9 @@
   }
   .prose pre.mermaid svg {
     @apply mx-auto max-w-full h-auto cursor-zoom-in;
+    /* Mermaid's own touch handling can hijack page-level pinch/scroll — hand
+       pinch-zoom back to the browser so the page still behaves normally. */
+    touch-action: pan-x pan-y pinch-zoom;
   }
 
   /* Image gallery: 2-column grid with orphan last image spanning full width */
