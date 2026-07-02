@@ -1,6 +1,6 @@
 ---
 title: 'Tracing 이해하기 (3) – Reactor Context와 비동기 환경'
-description: '서론 이전 글에서 ThreadLocal과 MDC가 어떻게 Tracing Context를 저장하고 전파하는지 살펴봤습니다. 동기 환경에서는 “한 요청 = 한 스레드”라는 단순한 모델 덕분에 ThreadLocal만으로도 충분했습니다. 하지만 Spring WebFlux로 넘어오면 상황이 완전히 달라집니다. WebFlux는 소수의 스레드가 수천 개의 요청을 동시에 처리하는 Event Loop 모델을 사용합니다. 하나의 요청이 처리되는 동안 스레드가 수시로 바뀔 수 있죠. 이 환경에서 ThreadLocal은 더 …'
+description: 'WebFlux 이벤트 루프에서 ThreadLocal 기반 traceId 전파가 실패하는 이유와, Reactor Context의 Bottom-Up 전파 모델로 이를 해결하는 방법을 실전 예제로 다룬다.'
 pubDate: '2026-02-08'
 updatedDate: '2026-02-19'
 category: tech

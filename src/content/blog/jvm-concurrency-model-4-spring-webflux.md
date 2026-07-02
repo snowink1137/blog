@@ -1,6 +1,6 @@
 ---
 title: 'JVM 동시성 모델 이해하기 (4) – Spring WebFlux'
-description: 'Reactor가 웹을 만났을 때 — 적은 스레드로 많은 연결을 처리하는 법 Part 3에서 Reactive Streams 스펙과 Project Reactor의 Mono/Flux, 연산자, 스케줄러를 다뤘습니다. Reactor는 비동기 데이터 스트림을 처리하는 강력한 라이브러리이지만, 그 자체로는 HTTP 요청을 받거나 응답을 보내는 기능이 없습니다. 이 글에서는 Reactor 위에 Spring이 구축한 WebFlux 프레임워크를 다룹니다. Spring MVC의 어떤 한계를 해결하려고 만들어졌는지, 내부에서 Netty의 …'
+description: 'Spring MVC의 1요청-1스레드 한계에서 출발해 Netty 이벤트 루프 구조, MVC vs WebFlux 요청 처리 비교, 이벤트 루프에서 하면 안 되는 것까지 — WebFlux의 동작 원리를 파헤친다.'
 pubDate: '2026-03-15'
 updatedDate: '2026-05-16'
 category: tech

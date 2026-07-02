@@ -1,6 +1,6 @@
 ---
 title: 'Tracing 이해하기 (4) – Kotlin Coroutine과 Context Propagation'
-description: '들어가며 이전 글에서 Reactor Context가 WebFlux의 Event Loop 환경에서 어떻게 traceId를 유지하는지 살펴봤습니다. Subscriber 체인에 Context를 바인딩하는 방식으로 스레드 전환 문제를 해결했죠. 그런데 Kotlin을 사용한다면 상황이 조금 더 복잡해집니다. Kotlin Coroutine은 CoroutineContext라는 자체 Context 시스템을 가지고 있기 때문입니다. 이제 우리가 다뤄야 할 Context가 세 가지가 되었습니다. Spring WebFlux에서 Kotlin Coroutine을 사용하면, 이 세 가지 Context가 …'
+description: 'suspend 지점마다 스레드가 바뀌는 코루틴에서 컨텍스트를 전파하는 법 — CoroutineContext 구조, ThreadContextElement, asContextElement()로 ThreadLocal을 잇는 방법까지.'
 pubDate: '2026-02-13'
 updatedDate: '2026-02-19'
 category: tech

@@ -1,6 +1,6 @@
 ---
 title: 'JVM 동시성 모델 이해하기 (7) – Virtual Thread — 동기 세계의 해법'
-description: '왜 또 다른 동시성 모델인가 지금까지 시리즈에서 비동기 세계의 발전을 따라왔습니다. Future에서 CompletableFuture로, 다시 Reactor로, 마지막으로 Coroutines로 — 점점 가독성과 구조가 개선되었습니다. 하지만 이 모든 것은 “논블로킹 비동기”라는 패러다임 안의 발전이었습니다. 논블로킹 라이브러리(R2DBC, WebClient, Reactive MongoDB 등)를 사용해야만 그 이점을 누릴 수 있었고, JDBC나 JPA 같은 블로킹 코드와는 근본적으로 호환되지 않았습니다. Part 6에서 그 한계를 …'
+description: 'Virtual Thread의 Mount/Unmount 동작 원리, 코루틴 Continuation과의 차이, AOP 프록시가 문제없는 이유, 그리고 synchronized pinning 함정과 실무 대응까지.'
 pubDate: '2026-05-15'
 updatedDate: '2026-05-16'
 category: tech

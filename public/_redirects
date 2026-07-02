@@ -1,0 +1,4 @@
+# 한글 슬러그로 발행됐던 글 → 영문 슬러그 (301 영구 이동)
+# 요청은 percent-encoded 형태로 들어오므로 인코딩/디코딩 둘 다 등록
+/aws%ec%97%90-wordpress-%eb%b8%94%eb%a1%9c%ea%b7%b8-%ea%b5%ac%ec%b6%95%ed%95%98%ea%b8%b0feat-docker-cloudflare/ /aws-wordpress-blog-setup-docker-cloudflare/ 301
+/aws에-wordpress-블로그-구축하기feat-docker-cloudflare/ /aws-wordpress-blog-setup-docker-cloudflare/ 301

@@ -1,6 +1,6 @@
 ---
 title: 'Tracing 이해하기 (2) – ThreadLocal과 MDC의 이해'
-description: '왜 ThreadLocal을 알아야 할까? 1편에서 Distributed Tracing의 핵심이 Trace Context 전파라는 것을 살펴봤습니다. 서비스 간에는 HTTP 헤더(W3C Trace Context, B3)로 전파하면 되지만, 한 가지 의문이 남습니다. “서비스 내부에서는 Trace Context가 어디에 저장되어 있을까?” Spring MVC 애플리케이션에서 요청이 들어오면 Controller → Service → Repository를 거치는 동안 traceId와 spanId는 어딘가에 보관되어야 합니다. 매번 파라미터로 넘기는 건 비현실적이니까요. …'
+description: 'ThreadLocal의 내부 구조와 사용법, MDC가 로그에 traceId를 심는 원리, 그리고 Spring MVC에서 스레드가 바뀌는 순간 — 비동기로 가기 전에 알아야 할 기초.'
 pubDate: '2026-02-07'
 updatedDate: '2026-02-19'
 category: tech

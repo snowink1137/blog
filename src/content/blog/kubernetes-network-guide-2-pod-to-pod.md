@@ -1,6 +1,6 @@
 ---
 title: 'Kubernetes 네트워크 이해하기 (2): Pod 간 통신과 서비스 디스커버리'
-description: '들어가며 이전 글에서는 외부 사용자의 요청이 어떻게 Kubernetes 클러스터 내부의 Pod까지 도달하는지 살펴봤습니다. 외부 LB → NodePort → Ingress Controller → Service → Pod 으로 이어지는 흐름이었죠. 그런데 한 가지 의문이 남습니다. 클러스터 내부에서 Pod끼리는 어떻게 통신할까요? 예를 들어, 주문 서비스 Pod이 사용자 서비스 Pod의 API를 호출할 때 실제로 어떤 일이 벌어질까요? 이 글에서는 다음 …'
+description: 'Pod IP는 누가 할당하고 Pod끼리는 어떻게 통신하는가 — CNI, veth pair, Linux Bridge, 노드 간 라우팅, CoreDNS 서비스 디스커버리까지 패킷 흐름으로 이해한다.'
 pubDate: '2026-01-09'
 updatedDate: '2026-02-19'
 category: tech

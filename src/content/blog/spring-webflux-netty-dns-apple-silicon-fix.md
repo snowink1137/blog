@@ -1,6 +1,6 @@
 ---
 title: 'Apple Silicon Mac에서 Netty DNS 해석 실패 해결하기(feat. Gradle 의존성 Configuration 이해하기)'
-description: '서론 Apple silicon을 사용하는 Mac에서, 사내 VPN과 Spring Cloud Gateway 앱을 실행했을 때 Netty DNS 관련 오류를 겪었던 내용입니다. 더 나아가서 Spring WebFlux를 사용할 때 Netty가 시스템 DNS를 무시하는 이유와 해결법을 알아봅니다. VPN은 연결됐는데, Spring Cloud Gateway 앱에서만 DNS 오류가 난다? 사내 VPN에 연결한 상태에서 터미널로 ping이나 traceroute를 실행하면 시스템 DNS를 사용하여 내부 도메인이 잘 …'
+description: 'Apple Silicon Mac에서 Spring Cloud Gateway만 DNS 해석에 실패하는 문제의 원인(Netty의 자체 DNS resolver)과 해결책. 네이티브 라이브러리 의존성과 Gradle Configuration 개념까지 함께 정리.'
 pubDate: '2026-01-04'
 category: tech
 tags: ['apple-silicon', 'dns', 'gradle', 'netty', 'spring-cloud-gateway', 'spring-webflux']

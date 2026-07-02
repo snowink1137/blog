@@ -1,6 +1,6 @@
 ---
 title: 'Spring Boot one-indexed-parameters 옵션의 함정: @PageableDefault는 왜 0으로 설정해야 할까?'
-description: '서론 spring.data.web.pageable.one-indexed-parameters=true 옵션을 설정하면 페이지 번호가 1부터 시작합니다. 그렇다면 @PageableDefault의 page 값도 1로 설정해야 할까요? 결론부터 말씀드리면 아닙니다. 이 글에서는 Spring 소스 코드를 직접 분석하며 왜 그런지 정확히 알아보겠습니다. one-indexed-parameters 옵션이란? Spring Data의 Pageable은 기본적으로 0-based 인덱스를 사용합니다. 첫 번째 페이지는 page=0입니다. 하지만 프론트엔드나 API 클라이언트 입장에서는 page=1이 첫 페이지인 것이 더 직관적일 수 있습니다. …'
+description: 'one-indexed-parameters를 켜면 @PageableDefault(page = 1)이 오히려 두 번째 페이지를 가리키는 함정 — Spring Data 소스 코드와 테스트로 원인을 검증하고 올바른 사용법을 정리한다.'
 pubDate: '2026-01-03'
 updatedDate: '2026-02-19'
 category: tech

@@ -1,6 +1,6 @@
 ---
 title: 'AWS에 WordPress 블로그 구축하기(feat. docker, cloudflare)'
-description: 'AWS EC2와 Docker Compose로 WordPress 블로그 구축하기 개인 블로그를 시작하려고 할 때 가장 먼저 고민되는 것이 호스팅입니다. 티스토리나 네이버 블로그 같은 플랫폼을 사용할 수도 있지만, 저는 AWS 사용법도 익힐 겸 직접 서버를 구축해봤습니다. 이 글에서는 AWS EC2 인스턴스에 Docker Compose를 활용하여 WordPress를 설치하는 방법을 다룹니다. 사전 준비 SSH 설정하기 EC2 인스턴스에 접속하려면 PEM 키 파일이 …'
+description: 'AWS EC2에 Docker Compose로 WordPress를 올리고 Cloudflare로 도메인·HTTPS까지 연결하는 전 과정. SSH 설정, Security Group, Elastic IP 등 처음 서버를 만드는 사람 기준으로 정리했다.'
 pubDate: '2025-12-06'
 updatedDate: '2026-01-18'
 category: tech

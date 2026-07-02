@@ -1,6 +1,6 @@
 ---
 title: 'JVM 동시성 모델 이해하기 (3) – Reactive Streams와 Project Reactor'
-description: 'CompletableFuture 너머의 세계 — 스트림을 제어하는 새로운 방법 Part 2에서 Java 동시성 API의 발전을 따라갔습니다. Thread → ExecutorService → CompletableFuture로 추상화 수준이 올라가면서 비동기 프로그래밍이 점점 편해졌지만, CompletableFuture에는 두 가지 근본적인 한계가 남아 있었습니다. 첫째, 단건 처리에 특화되어 있습니다. CompletableFuture는 “하나의 비동기 작업이 완료되면 결과를 처리한다”는 모델입니다. 그런데 실시간으로 계속 들어오는 데이터 — 예를 들어 …'
+description: 'Pull vs Push 모델부터 Reactive Streams 4개 인터페이스, Reactor의 Mono/Flux와 핵심 연산자, backpressure까지 — 리액티브 프로그래밍의 뼈대를 잡는다.'
 pubDate: '2026-03-08'
 updatedDate: '2026-05-16'
 category: tech

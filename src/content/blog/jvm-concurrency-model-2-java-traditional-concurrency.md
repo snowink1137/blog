@@ -1,6 +1,6 @@
 ---
 title: 'JVM 동시성 모델 이해하기 (2) – Java의 전통적인 동시성 모델'
-description: 'Thread에서 CompletableFuture까지 — 추상화의 발전사 Part 1에서 동시성과 병렬성, 동기/비동기, 블로킹/논블로킹의 개념을 정리했습니다. 이번 글에서는 그 개념들이 Java 코드에서 어떤 모습으로 나타나는지 살펴봅니다. Java의 동시성 API는 한 번에 완성된 것이 아닙니다. Thread로 시작해서, 그 한계를 극복하기 위해 ExecutorService가 등장하고, 결과를 받기 위해 Future가 추가되고, 블로킹 없이 결과를 처리하기 위해 CompletableFuture가 나왔습니다. 각 도구는 이전 도구의 …'
+description: 'Thread와 Runnable에서 Callable/Future, ExecutorService, CompletableFuture까지 — Java 동시성 API가 "스레드를 직접 관리하지 마라"는 방향으로 발전해온 과정을 따라간다.'
 pubDate: '2026-03-03'
 updatedDate: '2026-05-16'
 category: tech

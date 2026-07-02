@@ -1,6 +1,6 @@
 ---
 title: 'AWS EC2 모니터링 가이드 (2) – CloudWatch Agent로 메모리/디스크 모니터링하기'
-description: '메모리 사용률은 어디서 볼 수 있을까? 모니터링 가이드 Part 1에서 EC2 기본 모니터링과 CloudWatch 알람을 설정했습니다. 그런데 막상 서버를 운영하다 보면 가장 궁금한 건 따로 있습니다. “메모리가 얼마나 남았지? 디스크가 꽉 차면 어떡하지?” t3.micro처럼 메모리가 1GB뿐인 인스턴스에서 WordPress와 MySQL을 Docker로 돌리고 있다면, 메모리 부족은 현실적인 걱정입니다. 하지만 EC2 기본 모니터링에서는 메모리 사용률과 디스크 용량을 제공하지 …'
+description: 'EC2 기본 모니터링엔 없는 메모리·디스크 지표를 CloudWatch Agent로 수집하는 방법. IAM 역할 생성부터 Agent 설치·설정, t3.micro에서의 리소스 오버헤드까지 단계별로 다룬다.'
 pubDate: '2026-01-06'
 updatedDate: '2026-02-19'
 category: tech

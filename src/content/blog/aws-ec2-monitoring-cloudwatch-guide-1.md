@@ -1,6 +1,6 @@
 ---
 title: 'AWS EC2 모니터링 가이드 (1) – CloudWatch로 서버 상태 확인하기'
-description: 'EC2를 띄웠는데, 서버가 죽으면 어떻게 알지? 이전 글에서 t3.micro에 Ubuntu를 올리고 Docker Compose로 WordPress와 MySQL을 띄웠습니다. 블로그가 잘 돌아가고 있는 것 같긴 한데, 문득 이런 생각이 듭니다. “CPU가 100%를 찍으면? 디스크가 꽉 차면? 내가 모르는 사이에 서버가 멈춰버리면?” 온프레미스 서버라면 모니터링 도구를 직접 설치해야 하지만, AWS는 다릅니다. EC2를 생성하는 순간부터 기본적인 모니터링이 자동으로 시작됩니다. 이 …'
+description: 'EC2 모니터링 탭과 CloudWatch의 관계, 기본 vs 세부 모니터링의 차이와 비용, 무료 범위까지 — EC2 서버 상태 모니터링의 기초를 잡는 시리즈 첫 편.'
 pubDate: '2026-01-06'
 updatedDate: '2026-02-19'
 category: tech

@@ -1,6 +1,6 @@
 ---
 title: 'Tracing 이해하기 (5) – Java Agent vs Library Instrumentation'
-description: '들어가며 3편에서 잠깐 언급했던 문제가 있습니다. 라이브러리 내부 로그에는 traceId가 없다는 것이었죠. Reactive Mongo Client, R2DBC 드라이버, Netty 같은 라이브러리의 DEBUG 로그에서 이런 현상이 발생합니다. 왜 이런 일이 발생할까요? 우리가 4편까지 설정한 Library Instrumentation 방식은 우리 애플리케이션 코드와 Spring이 지원하는 컴포넌트만 계측(instrument)합니다. 라이브러리가 자체적으로 Micrometer를 지원하지 않으면, 그 내부 코드는 계측되지 않습니다. 이 문제를 해결하는 …'
+description: 'Micrometer 방식(Library)과 OTel Java Agent 방식(바이트코드 조작)의 동작 원리를 비교. premain과 Instrumentation API, ByteBuddy 코드 주입까지 내부를 들여다본다.'
 pubDate: '2026-02-19'
 category: tech
 tags: ['byte-buddy', 'java', 'micrometer', 'opentelemetry', 'spring', 'tracing']

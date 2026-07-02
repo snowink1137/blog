@@ -1,6 +1,6 @@
 ---
 title: 'Kubernetes 스토리지 이해하기 (1): Pod는 데이터를 어떻게 저장하고 유지하는가'
-description: '들어가며 이전 글에서는 Kubernetes에서 Pod가 어떻게 생성되고 실행되는지 살펴봤습니다. Scheduler가 노드를 선택하고, kubelet이 컨테이너를 실행하는 과정을 알게 됐죠. 그런데 한 가지 문제가 있습니다. Pod가 죽으면 그 안의 데이터도 함께 사라집니다. 데이터베이스를 Pod로 운영한다고 생각해보세요. Pod가 재시작될 때마다 데이터가 날아간다면 서비스가 될 수 없겠죠. 그래서 Kubernetes는 Pod의 라이프사이클과 독립적인 영구 저장소(Persistent Storage)를 제공합니다. 이 글에서는 다음 …'
+description: 'Kubernetes 볼륨 개념부터 emptyDir·hostPath 같은 Volume 타입, 그리고 PV/PVC로 Pod와 스토리지의 생명주기를 분리하는 구조까지 — 스토리지 시리즈 첫 편.'
 pubDate: '2026-01-11'
 updatedDate: '2026-01-08'
 category: tech

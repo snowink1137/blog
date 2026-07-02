@@ -1,6 +1,6 @@
 ---
 title: 'Kubernetes 컴퓨팅 이해하기 (1): Pod는 어떻게 배치되고 실행되는가'
-description: '들어가며 이전 글에서는 Kubernetes 클러스터 내부에서 Pod끼리 어떻게 통신하는지 살펴봤습니다. CNI 플러그인이 네트워크를 구성하고, CoreDNS가 서비스 디스커버리를 담당한다는 것을 알게 됐죠. 그런데 그 Pod는 애초에 어떻게 생성되고 실행되는 걸까요? kubectl apply -f deployment.yaml을 실행하면 마법처럼 Pod가 생성됩니다. 하지만 그 사이에는 여러 구성요소가 협력하는 복잡한 과정이 있습니다. 이 글에서는 다음 질문들에 답합니다: 전체 그림: 컨트롤 플레인과 …'
+description: 'kubectl apply부터 컨테이너 실행까지 — API Server, Controller Manager, Scheduler, kubelet이 각자 어떤 역할로 Pod를 배치하고 실행하는지 단계별로 추적한다.'
 pubDate: '2026-01-10'
 updatedDate: '2026-01-08'
 category: tech

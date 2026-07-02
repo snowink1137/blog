@@ -1,6 +1,6 @@
 ---
 title: 'Tracing 이해하기 (1) – Observability의 역사부터 Spring 생태계까지 (feat. OTel)'
-description: '서론 “이 API 왜 이렇게 느려요?” MSA 환경에서 이 질문에 답하려면, 요청이 어떤 서비스를 거쳐 어디서 시간을 소비했는지 추적해야 합니다. 서비스가 3개일 때는 로그를 뒤져가며 찾을 수 있지만, 수십 개의 서비스가 얽혀있다면? Distributed Tracing 없이는 사실상 불가능합니다. 이 글에서는 Distributed Tracing이 왜 필요한지, OpenTelemetry가 어떻게 업계 표준이 되었는지, 그리고 Spring Boot 생태계에서는 어떤 선택지가 있는지 …'
+description: 'Observability 세 기둥과 Distributed Tracing이 필요한 이유, Zipkin B3에서 OpenTracing/OpenCensus 분열을 거쳐 OpenTelemetry로 통합되기까지의 역사, 그리고 Spring 생태계의 현재.'
 pubDate: '2026-02-07'
 updatedDate: '2026-03-03'
 category: tech

@@ -1,6 +1,6 @@
 ---
 title: 'Kubernetes 스토리지 이해하기 (2): PV/PVC 실전 활용과 관리'
-description: '들어가며 이전 글에서는 Kubernetes 볼륨의 개념과 PV, PVC, StorageClass, CSI 드라이버의 동작 원리를 살펴봤습니다. 이번 글에서는 실전 활용과 운영에 초점을 맞춥니다: AccessModes: 누가 어떻게 접근할 수 있나? “다른 Pod에서도 이 볼륨을 쓸 수 있나요?”라는 질문의 답은 AccessMode에 달려 있습니다. 세 가지 AccessMode AccessMode 약어 의미 ReadWriteOnce RWO 단일 노드에서 읽기/쓰기 ReadOnlyMany ROX 여러 노드에서 읽기 …'
+description: 'AccessModes 세 가지의 실제 의미, Deployment + RWO PVC 조합의 함정, PV 라이프사이클과 Reclaim Policy까지 — PV/PVC 실전 운영에서 마주치는 문제들.'
 pubDate: '2026-01-12'
 updatedDate: '2026-02-19'
 category: tech

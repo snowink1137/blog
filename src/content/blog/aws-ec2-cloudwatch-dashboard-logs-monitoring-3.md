@@ -1,6 +1,6 @@
 ---
 title: 'AWS EC2 모니터링 가이드 (3) – CloudWatch 대시보드와 로그 수집으로 완성하기'
-description: '흩어진 메트릭을 한 화면에 Part 1에서 기본 모니터링과 CPU 알람을, Part 2에서 CloudWatch Agent로 메모리/디스크 모니터링을 설정했습니다. 이제 CPU, 메모리, 디스크, 네트워크 메트릭을 수집하고 있지만 확인하려면 여기저기 클릭해야 합니다. 이번 글에서는 CloudWatch 대시보드로 모든 메트릭을 한 화면에 정리하고, CloudWatch Logs로 서버 로그까지 수집해서 EC2 모니터링 시스템을 완성합니다. CloudWatch 대시보드 만들기 대시보드는 여러 메트릭을 위젯 형태로 …'
+description: 'CPU·메모리·디스크·네트워크 지표를 CloudWatch 대시보드 한 화면에 모으고, 로그 수집과 알람까지 연결해 EC2 모니터링을 완성하는 과정.'
 pubDate: '2026-01-06'
 updatedDate: '2026-02-19'
 category: tech

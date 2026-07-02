@@ -1,6 +1,6 @@
 ---
 title: 'AWS EC2 용량 부족? 5분 만에 EBS 볼륨 늘리기'
-description: '서론 AWS EC2에서 WordPress를 운영 중에 갑자기 사이트가 멈췄습니다. SSH로 접속해보니 MySQL이 죽어있었고, 원인은 단순했습니다. 디스크 100%. t3.micro Ubuntu AMI 기본값인 8GB로는 Docker 이미지 몇 개만 올려도 금방 차버리더라고요. 이 글에서는 제가 직접 겪은 디스크 풀 상황에서 EBS 볼륨을 확장하고, 재부팅 없이 바로 적용한 과정을 공유합니다. 문제 진단: 디스크 상태 확인하기 먼저 현재 디스크 상태를 …'
+description: '디스크가 가득 찬 EC2에서 EBS 볼륨을 무중단으로 확장하는 방법. 디스크 상태 진단, docker system prune 응급 처치, 볼륨 확장 후 파티션·파일시스템 적용까지.'
 pubDate: '2026-01-02'
 category: tech
 tags: ['aws', 'ebs', 'ec2', 'linux']
