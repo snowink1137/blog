@@ -70,24 +70,12 @@ document
     img.addEventListener('click', () => openImage(img));
   });
 
-// Mermaid SVGs are inserted by mermaid.js after page load and re-inserted on
-// theme toggles, so bind clicks via event delegation instead of per-element
-// listeners.
+// Mermaid SVGs are inserted after page load and swapped again on theme
+// toggles, so bind clicks via event delegation instead of per-element
+// listeners. (The zoom-in cursor is set in global.css.)
 document.addEventListener('click', (event) => {
   const target = event.target as Element | null;
   if (!target) return;
   const svg = target.closest<SVGSVGElement>('article .prose pre.mermaid svg');
   if (svg) openSvg(svg);
 });
-
-// Style cursor once the SVG appears.
-const styleMermaidCursor = () => {
-  document
-    .querySelectorAll<SVGSVGElement>('article .prose pre.mermaid svg')
-    .forEach((svg) => (svg.style.cursor = 'zoom-in'));
-};
-new MutationObserver(styleMermaidCursor).observe(document.body, {
-  childList: true,
-  subtree: true,
-});
-styleMermaidCursor();
