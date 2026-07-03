@@ -2,6 +2,7 @@
 title: '서울 도심 속 숲 속 호캉스, 워커힐 더글라스 하우스 크리스마스 1박 2일 후기'
 description: '김수근이 설계한 1963년 건축을 살린 워커힐 더글라스 하우스에서 보낸 크리스마스 1박 2일. 객실, 라운지, 조식, 산책로까지.'
 pubDate: '2025-12-27'
+heroImage: '../../assets/heroes/walkerhill.png'
 category: life
 tags: ['호텔', '워커힐', '크리스마스', '호캉스', '리뷰']
 ---
