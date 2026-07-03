@@ -1,0 +1,54 @@
+---
+import BaseHead from '../../astro/components/BaseHead.astro';
+import Footer from '../../astro/components/Footer.astro';
+import Header from '../../astro/components/Header.astro';
+import Pagination from '../../astro/components/Pagination.astro';
+import PostCard from '../../astro/components/PostCard.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import { getSortedPosts, POSTS_PER_PAGE } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getSortedPosts();
+  const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE);
+  // 1페이지는 홈(/)이 담당하므로 2페이지부터 생성
+  return Array.from({ length: totalPages - 1 }, (_, i) => {
+    const page = i + 2;
+    return {
+      params: { page: String(page) },
+      props: {
+        posts: posts.slice((page - 1) * POSTS_PER_PAGE, page * POSTS_PER_PAGE),
+        page,
+        totalPages,
+      },
+    };
+  });
+}
+
+const { posts, page, totalPages } = Astro.props;
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <BaseHead title={`${SITE_TITLE} — ${page}페이지`} description={SITE_DESCRIPTION} />
+  </head>
+  <body>
+    <Header />
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-16">
+      <section>
+        <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-6">
+          최근 글 <span class="text-slate-500 dark:text-slate-400 font-normal">— {page}페이지</span>
+        </h2>
+        <ul class="space-y-8">
+          {posts.map((post) => (
+            <li>
+              <PostCard post={post} />
+            </li>
+          ))}
+        </ul>
+        <Pagination currentPage={page} totalPages={totalPages} />
+      </section>
+    </main>
+    <Footer />
+  </body>
+</html>

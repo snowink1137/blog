@@ -12,18 +12,7 @@ const categoryLabel = post.data.category === 'tech' ? 'Tech' : 'Life';
 ---
 
 <a href={`/${post.id}/`} class="group block">
-  <article class="flex flex-col sm:flex-row gap-5">
-    {post.data.heroImage && (
-      <div class="sm:w-56 shrink-0">
-        <Image
-          width={448}
-          height={252}
-          src={post.data.heroImage}
-          alt=""
-          class="w-full aspect-video object-cover rounded-md"
-        />
-      </div>
-    )}
+  <article class="flex items-start justify-between gap-5">
     <div class="flex-1 min-w-0">
       <div class="flex items-center gap-2 mb-2">
         <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
@@ -42,5 +31,16 @@ const categoryLabel = post.data.category === 'tech' ? 'Tech' : 'Life';
         </p>
       )}
     </div>
+    {post.data.heroImage && (
+      <div class="hidden sm:block w-36 shrink-0">
+        <Image
+          width={288}
+          height={192}
+          src={post.data.heroImage}
+          alt=""
+          class="w-full aspect-[3/2] object-cover rounded-md"
+        />
+      </div>
+    )}
   </article>
 </a>
