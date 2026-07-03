@@ -23,9 +23,9 @@ const posts = (await getCollection('blog'))
         <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">Life</h1>
         <p class="text-slate-600 dark:text-slate-400">일상과 기록 · {posts.length}개의 글</p>
       </header>
-      <ul class="space-y-8">
+      <ul class="divide-y divide-slate-100 dark:divide-slate-800/70">
         {posts.map((post) => (
-          <li>
+          <li class="py-6 first:pt-0 last:pb-0">
             <PostCard post={post} />
           </li>
         ))}

@@ -39,9 +39,9 @@ const { posts, page, totalPages } = Astro.props;
         <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-6">
           최근 글 <span class="text-slate-500 dark:text-slate-400 font-normal">— {page}페이지</span>
         </h2>
-        <ul class="space-y-8">
+        <ul class="divide-y divide-slate-100 dark:divide-slate-800/70">
           {posts.map((post) => (
-            <li>
+            <li class="py-6 first:pt-0 last:pb-0">
               <PostCard post={post} />
             </li>
           ))}

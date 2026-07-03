@@ -31,9 +31,9 @@ const totalPages = Math.ceil(allPosts.length / POSTS_PER_PAGE);
 
       <section>
         <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-6">최근 글</h2>
-        <ul class="space-y-8">
+        <ul class="divide-y divide-slate-100 dark:divide-slate-800/70">
           {posts.map((post) => (
-            <li>
+            <li class="py-6 first:pt-0 last:pb-0">
               <PostCard post={post} />
             </li>
           ))}

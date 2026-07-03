@@ -12,7 +12,7 @@ const categoryLabel = post.data.category === 'tech' ? 'Tech' : 'Life';
 ---
 
 <a href={`/${post.id}/`} class="group block">
-  <article class="flex items-start justify-between gap-5">
+  <article class="flex items-center justify-between gap-4 sm:gap-5">
     <div class="flex-1 min-w-0">
       <div class="flex items-center gap-2 mb-2">
         <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
@@ -22,7 +22,7 @@ const categoryLabel = post.data.category === 'tech' ? 'Tech' : 'Life';
           <FormattedDate date={post.data.pubDate} />
         </span>
       </div>
-      <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100 group-hover:text-(--color-accent) transition-colors mb-2 leading-snug">
+      <h2 class="text-lg sm:text-xl font-semibold text-slate-900 dark:text-slate-100 group-hover:text-(--color-accent) transition-colors mb-2 leading-snug line-clamp-2">
         {post.data.title}
       </h2>
       {post.data.description && (
@@ -32,13 +32,13 @@ const categoryLabel = post.data.category === 'tech' ? 'Tech' : 'Life';
       )}
     </div>
     {post.data.heroImage && (
-      <div class="w-24 sm:w-36 shrink-0">
+      <div class="w-20 sm:w-36 shrink-0">
         <Image
           width={288}
-          height={192}
+          height={288}
           src={post.data.heroImage}
           alt=""
-          class="w-full aspect-[3/2] object-cover rounded-md"
+          class="w-full aspect-square sm:aspect-[3/2] object-cover rounded-lg"
         />
       </div>
     )}
