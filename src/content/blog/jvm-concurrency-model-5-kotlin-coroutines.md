@@ -7,6 +7,17 @@ category: tech
 tags: ['jvm', 'kotlin', 'kotlin-coroutines', 'coroutines', 'flow', 'channel', '동시성']
 ---
 
+> **JVM 동시성 모델 이해하기 시리즈**
+> 
+> 1.  [동시성과 병렬성의 기초](/jvm-concurrency-model-1-fundamentals)
+> 2.  [Java의 전통적인 동시성 모델](/jvm-concurrency-model-2-java-traditional-concurrency)
+> 3.  [Reactive Streams와 Project Reactor](/jvm-concurrency-model-3-reactive-streams-reactor)
+> 4.  [Spring WebFlux](/jvm-concurrency-model-4-spring-webflux)
+> 5.  **[Kotlin Coroutines](/jvm-concurrency-model-5-kotlin-coroutines) ← 현재 글**
+> 6.  [Spring + Coroutines 통합 — WebFlux, MVC, 그리고 AOP의 한계](/jvm-concurrency-model-6-spring-coroutines)
+> 7.  [Virtual Thread — 동기 세계의 해법](/jvm-concurrency-model-7-virtual-thread)
+> 8.  [총정리 — 언제 무엇을 선택할 것인가](/jvm-concurrency-model-8-conclusion-decision-framework/)
+
 ## 동기 코드의 가독성으로 논블로킹을 — suspend 하나로 바뀌는 세상
 
 이전 글에서 Reactor의 `flatMap` 체이닝이 깊어질 때 가독성이 떨어진다는 문제를 다뤘습니다. 같은 논블로킹 처리를 Kotlin Coroutines로 작성하면 일반 함수처럼 위에서 아래로 읽히는 순차적 코드가 됩니다.

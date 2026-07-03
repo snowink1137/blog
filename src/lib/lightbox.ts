@@ -8,6 +8,10 @@ const lightbox = new PhotoSwipeLightbox({
   secondaryZoomLevel: 2,
   maxZoomLevel: 4,
   bgOpacity: 0.9,
+  // Mobile: single tap closes (matches desktop click-to-close);
+  // double-tap zoom still works — PhotoSwipe waits to disambiguate.
+  tapAction: 'close',
+  doubleTapAction: 'zoom',
 });
 
 lightbox.init();
