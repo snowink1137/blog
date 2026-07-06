@@ -4,6 +4,7 @@ description: 'Spring MVC의 1요청-1스레드 한계에서 출발해 Netty 이�
 pubDate: '2026-03-15'
 updatedDate: '2026-05-16'
 category: tech
+subcategory: 'JVM'
 tags: ['event-loop', 'netty', 'reactor', 'spring-webflux', '동시성']
 ---
 

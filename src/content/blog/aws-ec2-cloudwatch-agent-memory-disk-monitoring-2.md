@@ -4,6 +4,7 @@ description: 'EC2 기본 모니터링엔 없는 메모리·디스크 지표를 C
 pubDate: '2026-01-06'
 updatedDate: '2026-02-19'
 category: tech
+subcategory: 'AWS'
 tags: ['aws', 'cloud-watch', 'cloud-watch-agent', 'ec2', 'monitoring']
 ---
 

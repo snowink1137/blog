@@ -4,6 +4,7 @@ description: 'Virtual Thread의 Mount/Unmount 동작 원리, 코루틴 Continuat
 pubDate: '2026-05-15'
 updatedDate: '2026-05-16'
 category: tech
+subcategory: 'JVM'
 tags: ['carrier-thread', 'jvm', 'project-loom', 'virtual-thread']
 ---
 

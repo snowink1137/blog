@@ -4,6 +4,7 @@ description: 'EC2 모니터링 탭과 CloudWatch의 관계, 기본 vs 세부 모
 pubDate: '2026-01-06'
 updatedDate: '2026-02-19'
 category: tech
+subcategory: 'AWS'
 tags: ['aws', 'cloud', 'cloud-watch', 'ec2', 'monitoring']
 ---
 

@@ -4,6 +4,7 @@ description: 'AccessModes 세 가지의 실제 의미, Deployment + RWO PVC 조�
 pubDate: '2026-01-12'
 updatedDate: '2026-02-19'
 category: tech
+subcategory: 'Kubernetes'
 tags: ['kubernetes', 'pv', 'pvc', 'storage']
 ---
 

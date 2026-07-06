@@ -12,10 +12,11 @@ interface Props {
   updatedDate?: Date;
   heroImage?: ImageMetadata;
   category?: 'tech' | 'life';
+  subcategory?: string;
   tags?: string[];
 }
 
-const { title, description, pubDate, updatedDate, heroImage, category, tags = [] } = Astro.props;
+const { title, description, pubDate, updatedDate, category, subcategory, tags = [] } = Astro.props;
 const categoryLabel = category === 'tech' ? 'Tech' : category === 'life' ? 'Life' : null;
 const categoryHref = category === 'tech' ? '/tech' : category === 'life' ? '/life' : null;
 ---
@@ -30,13 +31,24 @@ const categoryHref = category === 'tech' ? '/tech' : category === 'life' ? '/lif
       <article data-pagefind-body data-pagefind-meta={`category:${category ?? ''}`}>
         <header class="mb-10 pb-8 border-b border-slate-200 dark:border-slate-800">
           {categoryLabel && categoryHref && (
-            <div class="mb-4">
+            <div class="mb-4 flex items-center gap-1.5">
               <a
                 href={categoryHref}
                 class="inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
               >
                 {categoryLabel}
               </a>
+              {subcategory && (
+                <>
+                  <span class="text-xs text-slate-400 dark:text-slate-600">›</span>
+                  <a
+                    href={`/tech/${subcategory}/`}
+                    class="inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    {subcategory}
+                  </a>
+                </>
+              )}
             </div>
           )}
           <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-4 leading-tight">

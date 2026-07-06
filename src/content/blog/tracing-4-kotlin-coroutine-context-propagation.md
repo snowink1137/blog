@@ -4,6 +4,7 @@ description: 'suspend 지점마다 스레드가 바뀌는 코루틴에서 컨텍
 pubDate: '2026-02-13'
 updatedDate: '2026-02-19'
 category: tech
+subcategory: 'Tracing'
 tags: ['context-propagation', 'coroutine', 'kotlin', 'micrometer', 'spring', 'tracing']
 ---
 

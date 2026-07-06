@@ -4,6 +4,7 @@ description: 'Pod IP는 누가 할당하고 Pod끼리는 어떻게 통신하는�
 pubDate: '2026-01-09'
 updatedDate: '2026-02-19'
 category: tech
+subcategory: 'Kubernetes'
 tags: ['calico', 'cilium', 'cni', 'container-network-interface', 'core-dns', 'kubernetes', 'network']
 ---
 

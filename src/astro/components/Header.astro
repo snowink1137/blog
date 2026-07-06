@@ -1,7 +1,10 @@
 ---
 import { SITE_TITLE } from '../../consts';
+import { getTechSubcategories } from '../../lib/posts';
 import HeaderLink from './HeaderLink.astro';
 import ThemeToggle from './ThemeToggle.astro';
+
+const techSubcategories = await getTechSubcategories();
 ---
 
 <header class="border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur sticky top-0 z-50">
@@ -15,7 +18,33 @@ import ThemeToggle from './ThemeToggle.astro';
 
     <!-- Desktop nav: hidden below sm -->
     <div class="hidden sm:flex items-center gap-5">
-      <HeaderLink href="/tech">Tech</HeaderLink>
+      <!-- Tech: click = /tech, hover = subcategory dropdown -->
+      <div class="relative group">
+        <HeaderLink href="/tech">
+          Tech<span class="ml-0.5 text-slate-400 dark:text-slate-500 text-xs">▾</span>
+        </HeaderLink>
+        <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity duration-150 absolute left-1/2 -translate-x-1/2 top-full pt-3 z-50">
+          <div class="min-w-44 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-lg py-2">
+            {techSubcategories.map(({ name, count }) => (
+              <a
+                href={`/tech/${name}/`}
+                class="flex items-center justify-between gap-4 px-4 py-1.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap"
+              >
+                <span>{name}</span>
+                <span class="text-xs text-slate-400 dark:text-slate-500">{count}</span>
+              </a>
+            ))}
+            <div class="border-t border-slate-100 dark:border-slate-800 mt-2 pt-2">
+              <a
+                href="/tech/"
+                class="block px-4 py-1.5 text-sm text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap"
+              >
+                전체 보기 →
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
       <HeaderLink href="/life">Life</HeaderLink>
       <HeaderLink href="/tags">Tags</HeaderLink>
       <HeaderLink href="/about">About</HeaderLink>
@@ -84,6 +113,17 @@ import ThemeToggle from './ThemeToggle.astro';
   >
     <div class="max-w-3xl mx-auto px-4 py-3 flex flex-col gap-1">
       <a href="/tech" class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">Tech</a>
+      <div class="pl-4 flex flex-col border-l border-slate-200 dark:border-slate-800 ml-1 mb-1">
+        {techSubcategories.map(({ name, count }) => (
+          <a
+            href={`/tech/${name}/`}
+            class="py-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-(--color-accent) flex items-center justify-between"
+          >
+            <span>{name}</span>
+            <span class="text-xs text-slate-400 dark:text-slate-500">{count}</span>
+          </a>
+        ))}
+      </div>
       <a href="/life" class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">Life</a>
       <a href="/tags" class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">Tags</a>
       <a href="/about" class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">About</a>

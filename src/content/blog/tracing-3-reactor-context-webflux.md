@@ -4,6 +4,7 @@ description: 'WebFlux 이벤트 루프에서 ThreadLocal 기반 traceId 전파�
 pubDate: '2026-02-08'
 updatedDate: '2026-02-19'
 category: tech
+subcategory: 'Tracing'
 tags: ['context-propagation', 'micrometer', 'reactor', 'tracing']
 ---
 

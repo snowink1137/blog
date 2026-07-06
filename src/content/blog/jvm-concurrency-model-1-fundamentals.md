@@ -4,6 +4,7 @@ description: 'Process와 Thread의 차이, 동시성 vs 병렬성, 그리고 동
 pubDate: '2026-02-28'
 updatedDate: '2026-05-16'
 category: tech
+subcategory: 'JVM'
 tags: ['asynchronous', 'blocking', 'jvm', 'non-blocking', 'synchronous', '동시성', '병렬성']
 ---
 

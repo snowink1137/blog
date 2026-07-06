@@ -4,6 +4,7 @@ description: 'ThreadLocal의 내부 구조와 사용법, MDC가 로그에 traceI
 pubDate: '2026-02-07'
 updatedDate: '2026-02-19'
 category: tech
+subcategory: 'Tracing'
 tags: ['context-propagation', 'mdc', 'micrometer', 'thread-local', 'tracing']
 ---
 

@@ -4,6 +4,7 @@ description: 'one-indexed-parameters를 켜면 @PageableDefault(page = 1)이 오
 pubDate: '2026-01-03'
 updatedDate: '2026-02-19'
 category: tech
+subcategory: 'Spring'
 tags: ['one-indexed-parameters', 'pageable', 'pageable-default', 'pagination', 'spring-boot', 'spring-data']
 ---
 

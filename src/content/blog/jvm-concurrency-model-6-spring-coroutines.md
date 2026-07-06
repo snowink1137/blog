@@ -4,6 +4,7 @@ description: 'Spring이 suspend fun을 mono {}로 감싸 Reactor 파이프라인
 pubDate: '2026-04-20'
 updatedDate: '2026-05-16'
 category: tech
+subcategory: 'JVM'
 tags: ['aop', 'kotlin-coroutines', 'reactor', 'spring-mvc', 'spring-webflux']
 ---
 

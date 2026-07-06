@@ -4,6 +4,7 @@ description: 'Kubernetes 볼륨 개념부터 emptyDir·hostPath 같은 Volume �
 pubDate: '2026-01-11'
 updatedDate: '2026-01-08'
 category: tech
+subcategory: 'Kubernetes'
 tags: ['csi', 'kubernetes', 'pv', 'pvc', 'storage']
 ---
 

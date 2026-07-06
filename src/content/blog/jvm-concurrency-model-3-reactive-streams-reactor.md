@@ -4,6 +4,7 @@ description: 'Pull vs Push 모델부터 Reactive Streams 4개 인터페이스, R
 pubDate: '2026-03-08'
 updatedDate: '2026-05-16'
 category: tech
+subcategory: 'JVM'
 tags: ['java', 'reactive-streams', 'reactor', '동시성']
 ---
 

@@ -4,6 +4,7 @@ description: 'Kotlin Coroutines로 Reactor의 깊은 flatMap 체이닝을 순차
 pubDate: '2026-03-21'
 updatedDate: '2026-05-16'
 category: tech
+subcategory: 'JVM'
 tags: ['jvm', 'kotlin', 'kotlin-coroutines', 'coroutines', 'flow', 'channel', '동시성']
 ---
 

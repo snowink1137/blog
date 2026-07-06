@@ -4,6 +4,7 @@ description: 'Observability 세 기둥과 Distributed Tracing이 필요한 이�
 pubDate: '2026-02-07'
 updatedDate: '2026-03-03'
 category: tech
+subcategory: 'Tracing'
 tags: ['b3', 'micrometer', 'msa', 'observability', 'opentelemetry', 'spring-boot', 'tracing', 'w3c']
 ---
 

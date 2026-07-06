@@ -4,6 +4,7 @@ description: 'AWS EC2에 Docker Compose로 WordPress를 올리고 Cloudflare로 
 pubDate: '2025-12-06'
 updatedDate: '2026-01-18'
 category: tech
+subcategory: 'AWS'
 tags: ['aws', 'cloudflare', 'docker', 'wordpress']
 ---
 

@@ -3,6 +3,7 @@ title: 'Tracing 이해하기 (5) – Java Agent vs Library Instrumentation'
 description: 'Micrometer 방식(Library)과 OTel Java Agent 방식(바이트코드 조작)의 동작 원리를 비교. premain과 Instrumentation API, ByteBuddy 코드 주입까지 내부를 들여다본다.'
 pubDate: '2026-02-19'
 category: tech
+subcategory: 'Tracing'
 tags: ['byte-buddy', 'java', 'micrometer', 'opentelemetry', 'spring', 'tracing']
 ---
 

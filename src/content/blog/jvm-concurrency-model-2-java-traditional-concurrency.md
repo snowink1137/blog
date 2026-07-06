@@ -4,6 +4,7 @@ description: 'Thread와 Runnable에서 Callable/Future, ExecutorService, Complet
 pubDate: '2026-03-03'
 updatedDate: '2026-05-16'
 category: tech
+subcategory: 'JVM'
 tags: ['completable-future', 'executor-service', 'fork-join-pool', 'future', 'java', 'synchronized', 'thread', 'thread-pool', '동시성']
 ---
 

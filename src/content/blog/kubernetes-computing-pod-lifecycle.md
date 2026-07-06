@@ -4,6 +4,7 @@ description: 'kubectl apply부터 컨테이너 실행까지 — API Server, Cont
 pubDate: '2026-01-10'
 updatedDate: '2026-01-08'
 category: tech
+subcategory: 'Kubernetes'
 tags: ['kubelet', 'kubernetes', 'pod', 'scheduler']
 ---
 

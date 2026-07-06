@@ -6,3 +6,16 @@ export async function getSortedPosts(): Promise<CollectionEntry<'blog'>[]> {
   const posts = await getCollection('blog');
   return posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 }
+
+/** tech 글의 서브카테고리 목록을 글 수 내림차순으로 반환 */
+export async function getTechSubcategories(): Promise<{ name: string; count: number }[]> {
+  const posts = await getSortedPosts();
+  const counts = new Map<string, number>();
+  for (const post of posts) {
+    if (post.data.category !== 'tech' || !post.data.subcategory) continue;
+    counts.set(post.data.subcategory, (counts.get(post.data.subcategory) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+}
