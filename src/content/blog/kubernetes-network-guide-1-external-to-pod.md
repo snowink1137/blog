@@ -1,7 +1,7 @@
 ---
 title: 'Kubernetes 네트워크 이해하기 (1): 외부 요청이 Pod에 도달하기까지'
 description: '외부 HTTP 요청이 LB → Ingress Controller → Service → Pod까지 도달하는 전체 경로를 추적. kube-proxy와 iptables, conntrack, 그리고 구간별 트러블슈팅 명령어까지.'
-pubDate: '2026-01-08'
+pubDate: '2026-01-08T20:00:00'
 category: tech
 subcategory: 'Kubernetes'
 tags: ['ingress', 'kubernetes', 'network', 'service']

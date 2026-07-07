@@ -1,7 +1,7 @@
 ---
 title: 'Tracing 이해하기 (3) – Reactor Context와 비동기 환경'
 description: 'WebFlux 이벤트 루프에서 ThreadLocal 기반 traceId 전파가 실패하는 이유와, Reactor Context의 Bottom-Up 전파 모델로 이를 해결하는 방법을 실전 예제로 다룬다.'
-pubDate: '2026-02-08'
+pubDate: '2026-02-08T20:28:09'
 updatedDate: '2026-02-19'
 category: tech
 subcategory: 'Tracing'

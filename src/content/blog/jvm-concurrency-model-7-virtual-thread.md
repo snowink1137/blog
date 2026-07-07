@@ -1,7 +1,7 @@
 ---
 title: 'JVM 동시성 모델 이해하기 (7) – Virtual Thread — 동기 세계의 해법'
 description: 'Virtual Thread의 Mount/Unmount 동작 원리, 코루틴 Continuation과의 차이, AOP 프록시가 문제없는 이유, 그리고 synchronized pinning 함정과 실무 대응까지.'
-pubDate: '2026-05-15'
+pubDate: '2026-05-15T21:11:08'
 updatedDate: '2026-05-16'
 category: tech
 subcategory: 'JVM'

@@ -1,7 +1,7 @@
 ---
 title: 'JVM 동시성 모델 이해하기 (4) – Spring WebFlux'
 description: 'Spring MVC의 1요청-1스레드 한계에서 출발해 Netty 이벤트 루프 구조, MVC vs WebFlux 요청 처리 비교, 이벤트 루프에서 하면 안 되는 것까지 — WebFlux의 동작 원리를 파헤친다.'
-pubDate: '2026-03-15'
+pubDate: '2026-03-15T17:09:24'
 updatedDate: '2026-05-16'
 category: tech
 subcategory: 'JVM'

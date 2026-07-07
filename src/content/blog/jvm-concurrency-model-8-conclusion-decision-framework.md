@@ -1,7 +1,7 @@
 ---
 title: 'JVM 동시성 모델 이해하기 (8) – 총정리 — 언제 무엇을 선택할 것인가'
 description: 'JVM 동시성 8부작 시리즈의 마지막. Virtual Thread, Reactor, Coroutines 중 무엇을 선택할지 네 가지 질문으로 정리하고, 기술별 고유 강점과 흔한 오해를 짚는다.'
-pubDate: '2026-05-16'
+pubDate: '2026-05-16T01:02:36'
 category: tech
 subcategory: 'JVM'
 tags: ['jvm', 'kotlin', 'java', 'reactor', 'kotlin-coroutines', 'spring-webflux', 'virtual-thread', '동시성']

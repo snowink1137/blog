@@ -1,7 +1,7 @@
 ---
 title: 'JVM 동시성 모델 이해하기 (3) – Reactive Streams와 Project Reactor'
 description: 'Pull vs Push 모델부터 Reactive Streams 4개 인터페이스, Reactor의 Mono/Flux와 핵심 연산자, backpressure까지 — 리액티브 프로그래밍의 뼈대를 잡는다.'
-pubDate: '2026-03-08'
+pubDate: '2026-03-08T18:33:02'
 updatedDate: '2026-05-16'
 category: tech
 subcategory: 'JVM'

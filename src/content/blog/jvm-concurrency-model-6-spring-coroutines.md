@@ -1,7 +1,7 @@
 ---
 title: 'JVM 동시성 모델 이해하기 (6) – Spring + Coroutines 통합 — WebFlux, MVC, 그리고 AOP의 한계'
 description: 'Spring이 suspend fun을 mono {}로 감싸 Reactor 파이프라인에 태우는 방식과, AOP 프록시가 COROUTINE_SUSPENDED를 메서드 종료로 오인하는 구조적 한계 — @Transactional + 코루틴이 안 되는 이유까지.'
-pubDate: '2026-04-20'
+pubDate: '2026-04-20T18:23:57'
 updatedDate: '2026-05-16'
 category: tech
 subcategory: 'JVM'

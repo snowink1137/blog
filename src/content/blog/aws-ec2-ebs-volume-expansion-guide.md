@@ -1,7 +1,7 @@
 ---
 title: 'AWS EC2 용량 부족? 5분 만에 EBS 볼륨 늘리기'
 description: '디스크가 가득 찬 EC2에서 EBS 볼륨을 무중단으로 확장하는 방법. 디스크 상태 진단, docker system prune 응급 처치, 볼륨 확장 후 파티션·파일시스템 적용까지.'
-pubDate: '2026-01-02'
+pubDate: '2026-01-02T13:50:07'
 category: tech
 subcategory: 'AWS'
 tags: ['aws', 'ebs', 'ec2', 'linux']

@@ -1,7 +1,7 @@
 ---
 title: 'Kubernetes 스토리지 이해하기 (2): PV/PVC 실전 활용과 관리'
 description: 'AccessModes 세 가지의 실제 의미, Deployment + RWO PVC 조합의 함정, PV 라이프사이클과 Reclaim Policy까지 — PV/PVC 실전 운영에서 마주치는 문제들.'
-pubDate: '2026-01-12'
+pubDate: '2026-01-12T19:01:00'
 updatedDate: '2026-02-19'
 category: tech
 subcategory: 'Kubernetes'
