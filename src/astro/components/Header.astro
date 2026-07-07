@@ -49,7 +49,7 @@ const techTotal = (await getSortedPosts()).filter((p) => p.data.category === 'te
                 href="/tech/"
                 class="flex items-center justify-between gap-4 px-4 py-1.5 text-sm text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 whitespace-nowrap"
               >
-                <span>전체 보기 →</span>
+                <span>전체 보기</span>
                 <span class="text-xs text-slate-400 dark:text-slate-500">{techTotal}</span>
               </a>
             </div>
@@ -134,6 +134,13 @@ const techTotal = (await getSortedPosts()).filter((p) => p.data.category === 'te
             <span class="text-xs text-slate-400 dark:text-slate-500">{count}</span>
           </a>
         ))}
+        <a
+          href="/tech/"
+          class="py-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-(--color-accent) flex items-center justify-between border-t border-slate-100 dark:border-slate-800/70 mt-1 pt-2"
+        >
+          <span>전체 보기</span>
+          <span class="text-xs text-slate-400 dark:text-slate-500">{techTotal}</span>
+        </a>
       </div>
       <a href="/life" class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">Life</a>
       <a href="/tags" class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">Tags</a>
