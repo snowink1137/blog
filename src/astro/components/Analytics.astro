@@ -1,22 +1,29 @@
 ---
-// 프로덕션 빌드에서만 렌더 — 로컬 dev/preview 트래픽이 통계에 안 섞이도록.
+// 프로덕션 빌드 + 실제 서비스 도메인에서만 동작.
+//  - import.meta.env.PROD: 로컬 dev 는 제외 (빌드 시점 가드)
+//  - location.hostname === 프로덕션 호스트: workers.dev 프리뷰·미리보기
+//    트래픽이 기존 GA 속성에 섞이지 않도록 (런타임 가드)
 import { CF_BEACON_TOKEN, GA_MEASUREMENT_ID } from '../../consts';
 
 const enabled = import.meta.env.PROD;
 const gaId = GA_MEASUREMENT_ID;
 const cfToken = CF_BEACON_TOKEN;
+const prodHost = Astro.site ? new URL(Astro.site).hostname : '';
 ---
 
 {enabled && gaId && (
-  <>
-    <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
-    <script define:vars={{ gaId }}>
+  <script define:vars={{ gaId, prodHost }}>
+    if (!prodHost || location.hostname === prodHost) {
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+      document.head.appendChild(s);
       window.dataLayer = window.dataLayer || [];
-      function gtag() { dataLayer.push(arguments); }
-      gtag('js', new Date());
-      gtag('config', gaId);
-    </script>
-  </>
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      window.gtag('js', new Date());
+      window.gtag('config', gaId);
+    }
+  </script>
 )}
 
 {enabled && cfToken && (
