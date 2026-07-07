@@ -1,0 +1,28 @@
+---
+// 프로덕션 빌드에서만 렌더 — 로컬 dev/preview 트래픽이 통계에 안 섞이도록.
+import { CF_BEACON_TOKEN, GA_MEASUREMENT_ID } from '../../consts';
+
+const enabled = import.meta.env.PROD;
+const gaId = GA_MEASUREMENT_ID;
+const cfToken = CF_BEACON_TOKEN;
+---
+
+{enabled && gaId && (
+  <>
+    <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
+    <script define:vars={{ gaId }}>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', gaId);
+    </script>
+  </>
+)}
+
+{enabled && cfToken && (
+  <script
+    defer
+    src="https://static.cloudflareinsights.com/beacon.min.js"
+    data-cf-beacon={`{"token": "${cfToken}"}`}
+  ></script>
+)}
