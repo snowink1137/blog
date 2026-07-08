@@ -1,13 +1,14 @@
 ---
-// 프로덕션 빌드 + 실제 서비스 도메인에서만 동작.
+// Google Analytics(GA4) — 프로덕션 빌드 + 실제 서비스 도메인에서만 동작.
 //  - import.meta.env.PROD: 로컬 dev 는 제외 (빌드 시점 가드)
 //  - location.hostname === 프로덕션 호스트: workers.dev 프리뷰·미리보기
 //    트래픽이 기존 GA 속성에 섞이지 않도록 (런타임 가드)
-import { CF_BEACON_TOKEN, GA_MEASUREMENT_ID } from '../../consts';
+// Cloudflare Web Analytics 는 Cloudflare 가 엣지에서 비콘을 자동 주입(Automatic
+// setup)하므로 여기서 코드로 넣지 않는다.
+import { GA_MEASUREMENT_ID } from '../../consts';
 
 const enabled = import.meta.env.PROD;
 const gaId = GA_MEASUREMENT_ID;
-const cfToken = CF_BEACON_TOKEN;
 const prodHost = Astro.site ? new URL(Astro.site).hostname : '';
 ---
 
@@ -24,12 +25,4 @@ const prodHost = Astro.site ? new URL(Astro.site).hostname : '';
       window.gtag('config', gaId);
     }
   </script>
-)}
-
-{enabled && cfToken && (
-  <script
-    defer
-    src="https://static.cloudflareinsights.com/beacon.min.js"
-    data-cf-beacon={`{"token": "${cfToken}"}`}
-  ></script>
 )}
