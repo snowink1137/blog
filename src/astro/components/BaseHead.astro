@@ -3,6 +3,7 @@ import '../../styles/global.css';
 import type { ImageMetadata } from 'astro';
 import FallbackImage from '../../assets/blog-placeholder-1.jpg';
 import { SITE_TITLE } from '../../consts';
+import Ads from './Ads.astro';
 import Analytics from './Analytics.astro';
 
 interface Props {
@@ -32,6 +33,7 @@ const { title, description, image = FallbackImage } = Astro.props;
 <meta name="generator" content={Astro.generator} />
 
 <Analytics />
+<Ads />
 
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />

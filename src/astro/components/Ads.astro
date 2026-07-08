@@ -1,0 +1,26 @@
+---
+// Google AdSense 로더 — 프로덕션 빌드 + 실제 서비스 도메인에서만 로드.
+//  - import.meta.env.PROD: 로컬 dev 제외 (빌드 시점 가드)
+//  - location.hostname === 프로덕션 호스트(Astro.site): 프리뷰·스테이징
+//    도메인엔 아예 로더를 안 실음. AdSense 는 승인된 도메인에서만 광고를
+//    게재하므로, 미승인 도메인에서 광고 코드가 도는 상황을 애초에 차단해
+//    계정을 깨끗하게 유지 (자동광고 방식 — 배치는 구글이 처리).
+import { ADSENSE_CLIENT_ID } from '../../consts';
+
+const enabled = import.meta.env.PROD;
+const client = ADSENSE_CLIENT_ID;
+const prodHost = Astro.site ? new URL(Astro.site).hostname : '';
+---
+
+{enabled && client && (
+  <script define:vars={{ client, prodHost }}>
+    if (!prodHost || location.hostname === prodHost) {
+      var s = document.createElement('script');
+      s.async = true;
+      s.crossOrigin = 'anonymous';
+      s.src =
+        'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + client;
+      document.head.appendChild(s);
+    }
+  </script>
+)}
