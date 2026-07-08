@@ -9,3 +9,6 @@
 /category/tech /tech/ 301
 /category/life /life/ 301
 /tag/* /tags/:splat 301
+
+# 워프(Yoast) 사이트맵 경로(_) → Astro 사이트맵(-). 서치콘솔 등록된 옛 URL 보존
+/sitemap_index.xml /sitemap-index.xml 301
