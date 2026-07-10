@@ -12,6 +12,9 @@ const { date } = Astro.props;
 			year: 'numeric',
 			month: 'short',
 			day: 'numeric',
+			// KST 고정 — 빌드 환경(UTC/KST)에 상관없이 한국 날짜로 표시.
+			// pubDate 가 +09:00 이라 timeZone 미지정 시 UTC 빌드에서 하루 밀림.
+			timeZone: 'Asia/Seoul',
 		})
 	}
 </time>

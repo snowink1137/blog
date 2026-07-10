@@ -1,8 +1,8 @@
 ---
 title: 'JVM 동시성 모델 이해하기 (5) - Kotlin Coroutines'
 description: 'Kotlin Coroutines로 Reactor의 깊은 flatMap 체이닝을 순차적 동기 코드처럼 작성하기. suspend, CPS 변환, 상태 머신, Flow, Channel, 구조화된 동시성까지.'
-pubDate: '2026-03-21T21:18:17'
-updatedDate: '2026-05-16'
+pubDate: '2026-03-21T21:18:17+09:00'
+updatedDate: '2026-03-21T21:18:17+09:00'
 category: tech
 subcategory: 'JVM'
 tags: ['jvm', 'kotlin', 'kotlin-coroutines', 'coroutines', 'flow', 'channel', '동시성']

@@ -1,8 +1,8 @@
 ---
 title: '가평 쁘띠프랑스, 어린왕자와 K-드라마가 만나는 프랑스 문화마을'
 description: '서울 근교 1시간, 가평 쁘띠프랑스 방문 후기. 어린왕자 테마 공간과 K-드라마 촬영지, 유럽 골동품 컬렉션, 옆의 이탈리아 마을까지 — 방문 전 알아두면 좋은 정보 포함.'
-pubDate: '2025-12-28T15:37:02'
-updatedDate: '2026-01-12'
+pubDate: '2025-12-28T15:37:02+09:00'
+updatedDate: '2025-12-28T15:37:02+09:00'
 heroImage: '../../assets/heroes/petite-france.png'
 category: life
 tags: ['가평', '쁘띠프랑스']

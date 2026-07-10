@@ -1,8 +1,8 @@
 ---
 title: 'Tracing 이해하기 (4) – Kotlin Coroutine과 Context Propagation'
 description: 'suspend 지점마다 스레드가 바뀌는 코루틴에서 컨텍스트를 전파하는 법 — CoroutineContext 구조, ThreadContextElement, asContextElement()로 ThreadLocal을 잇는 방법까지.'
-pubDate: '2026-02-13T19:14:59'
-updatedDate: '2026-02-19'
+pubDate: '2026-02-13T19:14:59+09:00'
+updatedDate: '2026-02-13T19:14:59+09:00'
 category: tech
 subcategory: 'Tracing'
 tags: ['context-propagation', 'coroutine', 'kotlin', 'micrometer', 'spring', 'tracing']

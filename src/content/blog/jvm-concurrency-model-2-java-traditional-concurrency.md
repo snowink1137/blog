@@ -1,8 +1,8 @@
 ---
 title: 'JVM 동시성 모델 이해하기 (2) – Java의 전통적인 동시성 모델'
 description: 'Thread와 Runnable에서 Callable/Future, ExecutorService, CompletableFuture까지 — Java 동시성 API가 "스레드를 직접 관리하지 마라"는 방향으로 발전해온 과정을 따라간다.'
-pubDate: '2026-03-03T23:30:48'
-updatedDate: '2026-05-16'
+pubDate: '2026-03-03T23:30:48+09:00'
+updatedDate: '2026-03-03T23:30:48+09:00'
 category: tech
 subcategory: 'JVM'
 tags: ['completable-future', 'executor-service', 'fork-join-pool', 'future', 'java', 'synchronized', 'thread', 'thread-pool', '동시성']

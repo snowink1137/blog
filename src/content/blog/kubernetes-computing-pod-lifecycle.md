@@ -1,8 +1,8 @@
 ---
 title: 'Kubernetes 컴퓨팅 이해하기 (1): Pod는 어떻게 배치되고 실행되는가'
 description: 'kubectl apply부터 컨테이너 실행까지 — API Server, Controller Manager, Scheduler, kubelet이 각자 어떤 역할로 Pod를 배치하고 실행하는지 단계별로 추적한다.'
-pubDate: '2026-01-10T19:54:00'
-updatedDate: '2026-01-08'
+pubDate: '2026-01-10T19:54:00+09:00'
+updatedDate: '2026-01-10T19:54:00+09:00'
 category: tech
 subcategory: 'Kubernetes'
 tags: ['kubelet', 'kubernetes', 'pod', 'scheduler']

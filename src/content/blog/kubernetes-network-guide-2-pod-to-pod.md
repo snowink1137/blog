@@ -1,8 +1,8 @@
 ---
 title: 'Kubernetes 네트워크 이해하기 (2): Pod 간 통신과 서비스 디스커버리'
 description: 'Pod IP는 누가 할당하고 Pod끼리는 어떻게 통신하는가 — CNI, veth pair, Linux Bridge, 노드 간 라우팅, CoreDNS 서비스 디스커버리까지 패킷 흐름으로 이해한다.'
-pubDate: '2026-01-09T20:01:00'
-updatedDate: '2026-02-19'
+pubDate: '2026-01-09T20:01:00+09:00'
+updatedDate: '2026-01-09T20:01:00+09:00'
 category: tech
 subcategory: 'Kubernetes'
 tags: ['calico', 'cilium', 'cni', 'container-network-interface', 'core-dns', 'kubernetes', 'network']

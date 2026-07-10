@@ -1,8 +1,8 @@
 ---
 title: 'Kubernetes 스토리지 이해하기 (1): Pod는 데이터를 어떻게 저장하고 유지하는가'
 description: 'Kubernetes 볼륨 개념부터 emptyDir·hostPath 같은 Volume 타입, 그리고 PV/PVC로 Pod와 스토리지의 생명주기를 분리하는 구조까지 — 스토리지 시리즈 첫 편.'
-pubDate: '2026-01-11T19:56:00'
-updatedDate: '2026-01-08'
+pubDate: '2026-01-11T19:56:00+09:00'
+updatedDate: '2026-01-11T19:56:00+09:00'
 category: tech
 subcategory: 'Kubernetes'
 tags: ['csi', 'kubernetes', 'pv', 'pvc', 'storage']

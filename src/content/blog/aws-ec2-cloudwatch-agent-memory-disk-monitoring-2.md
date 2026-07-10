@@ -1,8 +1,8 @@
 ---
 title: 'AWS EC2 모니터링 가이드 (2) – CloudWatch Agent로 메모리/디스크 모니터링하기'
 description: 'EC2 기본 모니터링엔 없는 메모리·디스크 지표를 CloudWatch Agent로 수집하는 방법. IAM 역할 생성부터 Agent 설치·설정, t3.micro에서의 리소스 오버헤드까지 단계별로 다룬다.'
-pubDate: '2026-01-06T22:32:45'
-updatedDate: '2026-02-19'
+pubDate: '2026-01-06T22:32:45+09:00'
+updatedDate: '2026-01-06T22:32:45+09:00'
 category: tech
 subcategory: 'AWS'
 tags: ['aws', 'cloud-watch', 'cloud-watch-agent', 'ec2', 'monitoring']

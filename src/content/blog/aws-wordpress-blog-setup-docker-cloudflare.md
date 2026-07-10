@@ -1,8 +1,8 @@
 ---
 title: 'AWS에 WordPress 블로그 구축하기(feat. docker, cloudflare)'
 description: 'AWS EC2에 Docker Compose로 WordPress를 올리고 Cloudflare로 도메인·HTTPS까지 연결하는 전 과정. SSH 설정, Security Group, Elastic IP 등 처음 서버를 만드는 사람 기준으로 정리했다.'
-pubDate: '2025-12-06T15:48:02'
-updatedDate: '2026-01-18'
+pubDate: '2025-12-06T15:48:02+09:00'
+updatedDate: '2025-12-06T15:48:02+09:00'
 category: tech
 subcategory: 'AWS'
 tags: ['aws', 'cloudflare', 'docker', 'wordpress']

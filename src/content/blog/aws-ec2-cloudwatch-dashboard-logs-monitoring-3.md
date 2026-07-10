@@ -1,8 +1,8 @@
 ---
 title: 'AWS EC2 모니터링 가이드 (3) – CloudWatch 대시보드와 로그 수집으로 완성하기'
 description: 'CPU·메모리·디스크·네트워크 지표를 CloudWatch 대시보드 한 화면에 모으고, 로그 수집과 알람까지 연결해 EC2 모니터링을 완성하는 과정.'
-pubDate: '2026-01-06T22:36:55'
-updatedDate: '2026-02-19'
+pubDate: '2026-01-06T22:36:55+09:00'
+updatedDate: '2026-01-06T22:36:55+09:00'
 category: tech
 subcategory: 'AWS'
 tags: ['aws', 'cloud-watch', 'cloud-watch-agent', 'cloud-watch-logs', 'ec2', 'monitoring']

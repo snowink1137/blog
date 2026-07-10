@@ -1,8 +1,8 @@
 ---
 title: 'Tracing 이해하기 (2) – ThreadLocal과 MDC의 이해'
 description: 'ThreadLocal의 내부 구조와 사용법, MDC가 로그에 traceId를 심는 원리, 그리고 Spring MVC에서 스레드가 바뀌는 순간 — 비동기로 가기 전에 알아야 할 기초.'
-pubDate: '2026-02-07T20:33:34'
-updatedDate: '2026-02-19'
+pubDate: '2026-02-07T20:33:34+09:00'
+updatedDate: '2026-02-07T20:33:34+09:00'
 category: tech
 subcategory: 'Tracing'
 tags: ['context-propagation', 'mdc', 'micrometer', 'thread-local', 'tracing']

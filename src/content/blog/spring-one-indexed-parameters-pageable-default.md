@@ -1,8 +1,8 @@
 ---
 title: 'Spring Boot one-indexed-parameters 옵션의 함정: @PageableDefault는 왜 0으로 설정해야 할까?'
 description: 'one-indexed-parameters를 켜면 @PageableDefault(page = 1)이 오히려 두 번째 페이지를 가리키는 함정 — Spring Data 소스 코드와 테스트로 원인을 검증하고 올바른 사용법을 정리한다.'
-pubDate: '2026-01-03T17:06:46'
-updatedDate: '2026-02-19'
+pubDate: '2026-01-03T17:06:46+09:00'
+updatedDate: '2026-01-03T17:06:46+09:00'
 category: tech
 subcategory: 'Spring'
 tags: ['one-indexed-parameters', 'pageable', 'pageable-default', 'pagination', 'spring-boot', 'spring-data']

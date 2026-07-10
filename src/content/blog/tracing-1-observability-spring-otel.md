@@ -1,8 +1,8 @@
 ---
 title: 'Tracing 이해하기 (1) – Observability의 역사부터 Spring 생태계까지 (feat. OTel)'
 description: 'Observability 세 기둥과 Distributed Tracing이 필요한 이유, Zipkin B3에서 OpenTracing/OpenCensus 분열을 거쳐 OpenTelemetry로 통합되기까지의 역사, 그리고 Spring 생태계의 현재.'
-pubDate: '2026-02-07T20:26:31'
-updatedDate: '2026-03-03'
+pubDate: '2026-02-07T20:26:31+09:00'
+updatedDate: '2026-02-07T20:26:31+09:00'
 category: tech
 subcategory: 'Tracing'
 tags: ['b3', 'micrometer', 'msa', 'observability', 'opentelemetry', 'spring-boot', 'tracing', 'w3c']
