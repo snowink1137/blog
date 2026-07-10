@@ -3,6 +3,9 @@ import BaseHead from '../astro/components/BaseHead.astro';
 import Footer from '../astro/components/Footer.astro';
 import Header from '../astro/components/Header.astro';
 import { SITE_TITLE } from '../consts';
+
+// 이 페이지 최종 수정일 (KST). 내용 고치면 이 값을 갱신 → sitemap <lastmod> 동기화.
+const updatedDate = '2026-07-11T02:51:19+09:00';
 ---
 
 <!doctype html>
@@ -16,7 +19,7 @@ import { SITE_TITLE } from '../consts';
       <article class="prose prose-slate dark:prose-invert max-w-none prose-a:text-(--color-accent) prose-a:no-underline hover:prose-a:underline">
         <h1>About</h1>
 
-        <p>안녕하세요. hello world log를 운영하는 chris입니다.</p>
+        <p>안녕하세요. hello world log를 운영하고 있습니다.</p>
 
         <p>관심 있는 기술에 대해 공유하고 일상의 이야기를 기록하고 있습니다.</p>
 

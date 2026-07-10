@@ -13,22 +13,43 @@ import rehypeMermaidClient from './src/lib/rehype-mermaid-client.js';
 
 // 글 slug → 최종 수정일(updatedDate ?? pubDate) 매핑. sitemap <lastmod> 용.
 // frontmatter 포맷이 단순(따옴표 감싼 ISO 문자열)해서 의존성 없이 정규식으로 파싱.
-const blogDir = new URL('./src/content/blog/', import.meta.url);
+// 날짜 문자열 → sitemap lastmod(UTC ISO). 오프셋이 없으면 KST(+09:00)로 간주해
+// 정확한 순간을 보존하면서 빌드 환경(로컬/UTC)에 무관하게 결정론적으로 만든다.
+function toLastmod(raw) {
+  let s = (raw || '').trim();
+  if (!s) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) s += 'T00:00:00+09:00';
+  else if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(s)) s += '+09:00';
+  const d = new Date(s);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
 const lastmodByPath = {};
+
+// 글: frontmatter updatedDate(없으면 pubDate) 기준
+const blogDir = new URL('./src/content/blog/', import.meta.url);
 for (const file of readdirSync(blogDir)) {
   if (!/\.mdx?$/.test(file)) continue;
   const fm = readFileSync(new URL(file, blogDir), 'utf-8').match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!fm) continue;
   const pub = fm[1].match(/^pubDate:\s*['"]?([^'"\n]+)['"]?\s*$/m);
   const upd = fm[1].match(/^updatedDate:\s*['"]?([^'"\n]+)['"]?\s*$/m);
-  // 워프 시절 날짜는 KST(한국) 벽시계 기준. 오프셋이 없으면 +09:00 을 명시해
-  // 정확한 순간을 보존하면서 빌드 환경(로컬/UTC)에 무관하게 결정론적으로 만든다.
-  let dateStr = (upd?.[1] || pub?.[1] || '').trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) dateStr += 'T00:00:00+09:00';
-  else if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(dateStr)) dateStr += '+09:00';
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) continue;
-  lastmodByPath['/' + file.replace(/\.mdx?$/, '') + '/'] = d.toISOString();
+  const lastmod = toLastmod(upd?.[1] || pub?.[1]);
+  if (lastmod) lastmodByPath['/' + file.replace(/\.mdx?$/, '') + '/'] = lastmod;
+}
+
+// 정적 콘텐츠 페이지(about·privacy): 페이지 파일 안 `const updatedDate = '...'` 에서 읽음.
+// 목록·홈은 자연스러운 수정일이 없어 제외.
+const staticPages = {
+  '/about/': './src/pages/about.astro',
+  '/privacy-policy/': './src/pages/privacy-policy.astro',
+};
+for (const [urlPath, rel] of Object.entries(staticPages)) {
+  const m = readFileSync(new URL(rel, import.meta.url), 'utf-8').match(
+    /updatedDate\s*=\s*['"]([^'"]+)['"]/,
+  );
+  const lastmod = m ? toLastmod(m[1]) : null;
+  if (lastmod) lastmodByPath[urlPath] = lastmod;
 }
 
 export default defineConfig({
