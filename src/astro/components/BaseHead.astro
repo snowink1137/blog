@@ -10,10 +10,11 @@ interface Props {
   title: string;
   description: string;
   image?: ImageMetadata;
+  noindex?: boolean;
 }
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const { title, description, image = FallbackImage } = Astro.props;
+const { title, description, image = FallbackImage, noindex = false } = Astro.props;
 ---
 
 <!-- Global Metadata -->
@@ -31,6 +32,9 @@ const { title, description, image = FallbackImage } = Astro.props;
 	href={new URL('rss.xml', Astro.site)}
 />
 <meta name="generator" content={Astro.generator} />
+
+{/* 얇은 아카이브(태그·페이지네이션)는 색인 제외하되 링크는 따라가게 (crawl equity 보존) */}
+{noindex && <meta name="robots" content="noindex, follow" />}
 
 <!-- 검색엔진 소유권 확인 (워프에서 이관) -->
 <meta name="google-site-verification" content="uhoTDC6qz332q6wtVvyZJyw4N_SxOvOexkXM6RydxrA" />

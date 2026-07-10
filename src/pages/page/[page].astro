@@ -30,7 +30,7 @@ const { posts, page, totalPages } = Astro.props;
 <!doctype html>
 <html lang="ko">
   <head>
-    <BaseHead title={`${SITE_TITLE} — ${page}페이지`} description={SITE_DESCRIPTION} />
+    <BaseHead title={`${SITE_TITLE} — ${page}페이지`} description={SITE_DESCRIPTION} noindex />
   </head>
   <body>
     <Header />

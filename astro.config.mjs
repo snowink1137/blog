@@ -51,6 +51,13 @@ export default defineConfig({
     }),
     mdx(),
     sitemap({
+      // 얇은 아카이브는 사이트맵에서 제외 (해당 페이지는 noindex 처리도 함).
+      //  - /tags/*  : 태그 74% 가 글 1개짜리라 색인 가치 없음 (서브카테고리가 주제 허브 역할)
+      //  - /page/*  : 페이지네이션. 글은 이미 개별 URL 로 모두 포함됨
+      filter: (page) => {
+        const p = new URL(page).pathname;
+        return !p.startsWith('/tags/') && !p.startsWith('/page/');
+      },
       // 글 URL 에만 실제 수정일 기반 <lastmod> 부여. 목록·정적 페이지는
       // 정확한 수정일이 없으므로 생략(부정확한 lastmod 는 오히려 신뢰도 저하).
       serialize(item) {
