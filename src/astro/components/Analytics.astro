@@ -1,8 +1,8 @@
 ---
-// Google Analytics(GA4) — 프로덕션 빌드 + 실제 서비스 도메인에서만 동작.
+// Google Analytics(GA4) — 프로덕션 빌드 + 실제 서비스 도메인(apex·www)에서만 동작.
 //  - import.meta.env.PROD: 로컬 dev 는 제외 (빌드 시점 가드)
-//  - location.hostname === 프로덕션 호스트(Astro.site): 프리뷰·스테이징
-//    도메인 트래픽이 실제 GA 속성에 섞이지 않도록 (런타임 가드)
+//  - hostname 이 apex(Astro.site) 또는 www.apex 일 때만 실행 (런타임 가드).
+//    프리뷰·스테이징(workers.dev)·로컬 트래픽이 실제 GA 속성에 섞이지 않도록.
 import { GA_MEASUREMENT_ID } from '../../consts';
 
 const enabled = import.meta.env.PROD;
@@ -12,7 +12,7 @@ const prodHost = Astro.site ? new URL(Astro.site).hostname : '';
 
 {enabled && gaId && (
   <script define:vars={{ gaId, prodHost }}>
-    if (!prodHost || location.hostname === prodHost) {
+    if (!prodHost || location.hostname === prodHost || location.hostname === 'www.' + prodHost) {
       var s = document.createElement('script');
       s.async = true;
       s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
