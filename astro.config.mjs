@@ -21,11 +21,14 @@ for (const file of readdirSync(blogDir)) {
   if (!fm) continue;
   const pub = fm[1].match(/^pubDate:\s*['"]?([^'"\n]+)['"]?\s*$/m);
   const upd = fm[1].match(/^updatedDate:\s*['"]?([^'"\n]+)['"]?\s*$/m);
-  // 날짜 부분(YYYY-MM-DD)만 잘라 W3C 날짜로 사용. Date 변환 시 타임존에 따라
-  // 하루씩 밀려 빌드 환경마다 값이 달라지므로, 벽시계 날짜를 그대로 보존.
-  const dateStr = (upd?.[1] || pub?.[1] || '').trim().slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) continue;
-  lastmodByPath['/' + file.replace(/\.mdx?$/, '') + '/'] = dateStr;
+  // 워프 시절 날짜는 KST(한국) 벽시계 기준. 오프셋이 없으면 +09:00 을 명시해
+  // 정확한 순간을 보존하면서 빌드 환경(로컬/UTC)에 무관하게 결정론적으로 만든다.
+  let dateStr = (upd?.[1] || pub?.[1] || '').trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) dateStr += 'T00:00:00+09:00';
+  else if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(dateStr)) dateStr += '+09:00';
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) continue;
+  lastmodByPath['/' + file.replace(/\.mdx?$/, '') + '/'] = d.toISOString();
 }
 
 export default defineConfig({
