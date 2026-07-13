@@ -87,7 +87,7 @@ htop
 > 
 > htop은 기본적으로 **스레드를 개별 행으로 표시**합니다. 여러 행이 보여도 RES(실제 메모리)와 MEM% 값이 동일하다면 같은 메모리를 공유하는 스레드들이에요. 실제 사용량은 한 번만 카운트됩니다. `H` 키를 누르면 스레드를 숨기고 프로세스 단위로만 볼 수 있습니다.
 
-![](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-01-image-25.png)
+![htop 화면 — cwagent 프로세스(amazon-cloudwatch-agent)가 메모리 11.6%를 사용 중이며 전체 메모리는 509M/914M](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-01-image-25.png)
 
 ## 사전 준비: IAM 역할 생성
 
@@ -99,7 +99,7 @@ CloudWatch Agent가 CloudWatch로 데이터를 보내려면 **권한**이 필요
 2.  좌측 메뉴에서 **역할(Roles)** 클릭
 3.  **역할 생성** 버튼 클릭
 
-![](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-02-image-17.png)
+![IAM 역할 목록 화면 — 우측 상단 ‘역할 생성’ 버튼](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-02-image-17.png)
 
 4.  **신뢰할 수 있는 엔터티 유형**: AWS 서비스 선택
 5.  **사용 사례**: EC2 선택
@@ -111,7 +111,7 @@ CloudWatch Agent가 CloudWatch로 데이터를 보내려면 **권한**이 필요
 2.  **CloudWatchAgentServerPolicy** 체크박스 선택
 3.  **다음** 클릭
 
-![](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-03-image-18.png)
+![IAM 권한 추가 화면 — ‘cloudwatchagent’로 검색해 CloudWatchAgentServerPolicy 정책을 선택](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-03-image-18.png)
 
 > **💡 CloudWatchAgentServerPolicy에 포함된 권한**
 > 
@@ -130,7 +130,7 @@ CloudWatch Agent가 CloudWatch로 데이터를 보내려면 **권한**이 필요
 4.  방금 생성한 역할 선택
 5.  **IAM 역할 업데이트** 클릭
 
-![](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-04-image-19.png)
+![EC2 인스턴스에서 작업 > 보안 > ‘IAM 역할 수정’ 메뉴 경로](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-04-image-19.png)
 
 역할이 연결되면 EC2 인스턴스 정보에서 **IAM 역할** 항목에 역할 이름이 표시됩니다.
 
@@ -147,7 +147,7 @@ wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-
 # 패키지 설치
 sudo dpkg -i -E ./amazon-cloudwatch-agent.deb
 ```
-![](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-05-image-20.png)
+![터미널 — wget으로 amazon-cloudwatch-agent.deb(64M)를 다운로드한 뒤 dpkg로 설치하는 출력](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-05-image-20.png)
 
 설치가 완료되면 `/opt/aws/amazon-cloudwatch-agent/` 디렉토리에 Agent 파일들이 생성됩니다.
 
@@ -301,7 +301,7 @@ sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a 
   "version": "1.300026.0"
 }
 ```
-![](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-06-image-21.png)
+![터미널 — amazon-cloudwatch-agent-ctl status 결과, status가 running·configured로 표시됨](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-06-image-21.png)
 
 `"status": "running"`이 표시되면 정상입니다.
 
@@ -325,7 +325,7 @@ Agent가 정상 실행되면 1-2분 후 CloudWatch에서 메트릭을 확인할 
 2.  좌측 메뉴에서 **지표(Metrics)** > **모든 지표** 클릭
 3.  하단의 **사용자 지정 네임스페이스**에서 **CWAgent** 선택
 
-![](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-07-image-22.png)
+![CloudWatch 지표 화면 — ‘사용자 지정 네임스페이스’에 새로 생긴 CWAgent 카드](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-07-image-22.png)
 
 > **⚠️ CWAgent가 안 보인다면?**
 > 
@@ -345,7 +345,7 @@ Agent가 정상 실행되면 1-2분 후 CloudWatch에서 메트릭을 확인할 
 
 각 그룹을 클릭해서 원하는 메트릭을 체크하면 상단 그래프에서 확인할 수 있습니다.
 
-![](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-08-image-23.png)
+![CloudWatch 그래프 — CWAgent가 수집한 disk_used_percent와 mem_used_percent 지표(약 49.5%)](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-08-image-23.png)
 
 이제 드디어 EC2 콘솔에서 볼 수 없던 **메모리 사용률**과 **디스크 용량**을 CloudWatch에서 확인할 수 있습니다!
 
@@ -372,7 +372,7 @@ Agent가 정상 실행되면 1-2분 후 CloudWatch에서 메트릭을 확인할 
 2.  **지표 선택** > **CWAgent** > **InstanceId**
 3.  `mem_available_percent` 선택 > **지표 선택** 클릭
 
-![](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-09-image-24.png)
+![메모리 경보 생성 화면 — CWAgent의 mem_available_percent 지표에 ‘보다 작음 20’ 조건, 데이터 포인트 2/3 설정](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-09-image-24.png)
 
 ### 조건 설정
 
