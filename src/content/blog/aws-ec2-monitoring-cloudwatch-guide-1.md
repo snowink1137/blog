@@ -20,7 +20,7 @@ tags: ['aws', 'cloud', 'cloud-watch', 'ec2', 'monitoring']
 
 EC2 인스턴스를 선택하면 하단에 **모니터링** 탭이 있습니다. 별도 설정 없이도 AWS가 자동으로 수집하는 메트릭들을 바로 확인할 수 있습니다.
 
-![](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-01-image-7.png)
+![EC2 인스턴스 요약 화면 하단의 '모니터링' 탭 — CPU 사용률·네트워크 입출력·CPU 크레딧 등 자동 수집 메트릭 그래프](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-01-image-7.png)
 
 ### 기본 제공 메트릭
 
@@ -42,7 +42,7 @@ EC2 인스턴스를 선택하면 하단에 **모니터링** 탭이 있습니다.
 
 모니터링 탭에서 **세부 모니터링 관리** 버튼을 보셨을 겁니다. 이 버튼을 클릭하면 “추가 요금이 적용됩니다”라는 경고가 나타납니다.
 
-![](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-02-image-8.png)
+![‘세부 모니터링 관리’ 클릭 시 뜨는 대화상자 — 세부 모니터링 활성화 체크박스와 ‘추가 요금 적용’ 안내](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-02-image-8.png)
 
 ### 두 모니터링의 차이
 
@@ -82,7 +82,7 @@ EC2 모니터링 탭에서 본 그래프들은 사실 **Amazon CloudWatch**라�
 
 ### EC2 모니터링 구조 이해하기
 
-![](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-03-image-6.png)
+![EC2 모니터링 구조 다이어그램 — 기본 모니터링(하이퍼바이저 레벨: CPU·네트워크·디스크 I/O·상태검사)과 CloudWatch Agent(OS 내부: 메모리·디스크 용량·프로세스·로그)가 각각 Amazon CloudWatch로 전송](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-03-image-6.png)
 
 기본 모니터링 메트릭은 AWS 인프라(하이퍼바이저) 레벨에서 수집됩니다. 그래서 **OS 내부 정보인 메모리 사용률이나 디스크 용량은 기본 제공되지 않습니다.** 이 정보를 수집하려면 인스턴스 안에 CloudWatch Agent를 설치해야 합니다.
 
@@ -125,7 +125,7 @@ t3.micro 하나로 개인 블로그를 운영하는 수준이라면, **무료 �
 1.  AWS 콘솔 상단 검색창에 **CloudWatch** 입력
 2.  CloudWatch 서비스 클릭
 
-![](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-04-image-9.png)
+![CloudWatch 콘솔 Overview 화면 — 경보 생성, 대시보드 생성, 로그 보기 등 시작 메뉴](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-04-image-9.png)
 
 ### EC2 메트릭 찾기
 
@@ -133,7 +133,7 @@ t3.micro 하나로 개인 블로그를 운영하는 수준이라면, **무료 �
 2.  하단의 **AWS 네임스페이스**에서 **EC2** 선택
 3.  **인스턴스별 지표** 클릭
 
-![](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-05-image-10.png)
+![CloudWatch 지표 화면 — 좌측 ‘모든 지표’ 메뉴와 AWS 네임스페이스 중 EC2 카드 선택](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-05-image-10.png)
 
 ### CPU 사용률 그래프 보기
 
@@ -141,7 +141,7 @@ t3.micro 하나로 개인 블로그를 운영하는 수준이라면, **무료 �
 2.  **CPUUtilization** 메트릭 체크박스 선택
 3.  상단에 그래프가 표시됩니다
 
-![](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-06-image-11.png)
+![CloudWatch 지표 목록에서 CPUUtilization 체크박스를 선택하자 상단에 CPU 사용률 그래프가 표시된 화면](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-06-image-11.png)
 
 그래프 상단의 시간 범위를 조절하면 1시간, 3시간, 12시간, 1일, 1주일 등 원하는 기간의 데이터를 볼 수 있습니다.
 
@@ -159,7 +159,7 @@ t3.micro 하나로 개인 블로그를 운영하는 수준이라면, **무료 �
 2.  **경보 생성** 버튼 클릭
 3.  **지표 선택** 클릭
 
-![](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-07-image-12.png)
+![CloudWatch 경보 화면 — 경보가 없는 상태에서 ‘경보 생성’ 버튼](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-07-image-12.png)
 
 ### 2단계: 메트릭 선택
 
@@ -169,7 +169,7 @@ t3.micro 하나로 개인 블로그를 운영하는 수준이라면, **무료 �
 
 ### 3단계: 조건 설정
 
-![](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-08-image-13.png)
+![경보 조건 설정 화면 — 임계값 유형 ‘정적’, 조건 ‘보다 큼’, 임계값 80, 데이터 포인트 1/1](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-08-image-13.png)
 
 | 설정 항목 | 권장 값 | 설명 |
 | --- | --- | --- |
@@ -186,7 +186,7 @@ t3.micro 하나로 개인 블로그를 운영하는 수준이라면, **무료 �
 
 알람이 발생했을 때 이메일을 받으려면 **SNS(Simple Notification Service)** 주제를 생성해야 합니다.
 
-![](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-09-image-14.png)
+![경보 알림(작업) 설정 화면 — 경보 상태 트리거와 SNS 새 주제 생성, 알림 수신 이메일 입력](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-09-image-14.png)
 
 1.  **알람 상태 트리거**: “경보 상태”(In alarm) 선택
 2.  **SNS 주제 선택**: “새 주제 생성” 선택
@@ -203,7 +203,7 @@ t3.micro 하나로 개인 블로그를 운영하는 수준이라면, **무료 �
 2.  **알람 설명**: “EC2 CPU 사용률 80% 초과 알람” (선택사항)
 3.  **다음** > **경보 생성** 클릭
 
-![](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-10-image-15.png)
+![경보 생성 완료 화면 — ‘wordpress-ec2-cpu-high-alert’ 경보가 생성되어 목록에 표시됨](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-10-image-15.png)
 
 생성이 완료되면 알람 목록에서 확인할 수 있습니다. 현재 CPU가 80% 이하라면 상태가 **“OK”**로 표시됩니다.
 
