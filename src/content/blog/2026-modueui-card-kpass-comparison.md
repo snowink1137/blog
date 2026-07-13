@@ -67,7 +67,7 @@ tags: ['gtx', 'k패스', '교통카드', '기후동행카드', '모두의-카드
 > 
 > A. 아닙니다. 시스템이 매월 자동으로 유리한 방식을 선택해줍니다. 교통비가 적은 달에는 K패스, 많은 달에는 모두의 카드가 적용됩니다.
 
-![](/images/2026-modueui-card-kpass-comparison/img-01-infographic-comparison.png)
+![K패스 vs 모두의카드 환급액 비교 인포그래픽 — 서울·부산·화성 통학·대전 4가지 사례별 월 환급액 막대그래프 (교통비가 적은 대전 사례만 K패스가 유리)](/images/2026-modueui-card-kpass-comparison/img-01-infographic-comparison.png)
 
 ## 모두의 카드, 핵심만 정리
 

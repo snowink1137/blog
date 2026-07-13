@@ -68,7 +68,7 @@ docker system prune -a
 
 응급 처치는 임시방편입니다. 8GB로는 WordPress + MySQL 운영이 빠듯하니, EBS 볼륨 자체를 늘리는 게 정답입니다.
 
-![](/images/aws-ec2-ebs-volume-expansion-guide/img-01-image.png)
+![EC2 EBS 볼륨 세부 정보 화면 — 20 GiB gp3 볼륨과 우측 상단 ‘수정’ 버튼, 좌측 Elastic Block Store 볼륨 메뉴](/images/aws-ec2-ebs-volume-expansion-guide/img-01-image.png)
 
 **AWS 콘솔 작업 순서:**
 

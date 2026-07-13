@@ -46,7 +46,7 @@ tags: ['세액공제', '소득공제', '연말정산', '연말정산간소화']
 
 **대표 항목**: 월세, 의료비, 교육비, 기부금, 자녀, 결혼
 
-![](/images/2025-year-end-tax-settlement-guide/img-01-image-36.png)
+![소득공제 vs 세액공제 비교 인포그래픽 — 소득공제는 과세표준을 낮추고 세액공제는 산출세액에서 직접 차감하는 방식 차이와 실제 절세 효과 비교](/images/2025-year-end-tax-settlement-guide/img-01-image-36.png)
 
 > 💡 **어떤 게 더 유리할까?**
 > 

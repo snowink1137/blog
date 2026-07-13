@@ -36,7 +36,7 @@ spring:
 
 먼저 전체 흐름을 다이어그램으로 살펴보겠습니다.
 
-![](/images/spring-one-indexed-parameters-pageable-default/img-01-image-16.png)
+![Pageable 생성 흐름도 — page 파라미터가 있으면 one-indexed-parameters=true일 때 page를 1→0으로 변환하고, 없으면 @PageableDefault를 사용해 최종 PageRequest.of(0, 10)을 생성](/images/spring-one-indexed-parameters-pageable-default/img-01-image-16.png)
 
 다이어그램에서 볼 수 있듯이, **`-1` 변환은 오직 요청 파라미터가 존재할 때만 적용**됩니다. `@PageableDefault`를 통한 기본값은 변환 없이 그대로 사용됩니다.
 

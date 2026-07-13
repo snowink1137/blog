@@ -28,7 +28,7 @@ tags: ['b3', 'micrometer', 'msa', 'observability', 'opentelemetry', 'spring-boot
 
 사용자가 주문 버튼을 클릭하면 다음과 같은 흐름이 발생할 수 있습니다:
 
-![](/images/tracing-1-observability-spring-otel/img-01-image-37.png)
+![마이크로서비스 요청 경로 예시 — API Gateway에서 Order Service를 거쳐 Inventory·Payment·Notification·User Service로 흩어지는 분산 호출](/images/tracing-1-observability-spring-otel/img-01-image-37.png)
 
 이 중 어딘가에서 지연이 발생했다면, 어떻게 찾을까요? 각 서비스의 로그를 시간대별로 맞춰가며 추적하는 건 비현실적입니다. 요청마다 고유한 ID를 부여하고, 이 ID가 모든 서비스를 따라다니게 하면 어떨까요? 이것이 Distributed Tracing의 핵심 아이디어입니다.
 
@@ -56,7 +56,7 @@ tags: ['b3', 'micrometer', 'msa', 'observability', 'opentelemetry', 'spring-boot
 
 대시보드에서 갑자기 에러율이 치솟는 걸 발견했다고 가정해봅시다. Metrics가 알려주는 건 “에러가 많이 발생하고 있다”는 사실뿐입니다. 어떤 요청에서 에러가 났는지, 그 요청이 어떤 경로를 거쳤는지는 알 수 없습니다. 로그를 뒤져야 하는데, 에러가 발생한 시간대의 로그가 수만 건이라면? 그중에서 문제의 요청을 찾는 건 사막에서 바늘 찾기입니다.
 
-![](/images/tracing-1-observability-spring-otel/img-02-image-40.png)
+![관측성의 분리된 세계 — Metrics·Logging·Tracing이 서로 연결되지 않아 ‘어떤 요청에서 에러가 났는지’ 추적하기 어려운 상황](/images/tracing-1-observability-spring-otel/img-02-image-40.png)
 
 세 가지 데이터가 서로 연결되지 않으니, 문제 해결에 필요한 정보를 모으는 것 자체가 일입니다.
 
@@ -64,7 +64,7 @@ tags: ['b3', 'micrometer', 'msa', 'observability', 'opentelemetry', 'spring-boot
 
 해결책은 의외로 단순합니다. 모든 데이터에 동일한 식별자를 붙이면 됩니다.
 
-![](/images/tracing-1-observability-spring-otel/img-03-image-41.png)
+![Trace ID로 통합된 관측성 — 하나의 trace_id로 Metrics(Exemplar)·Tracing·Logging이 연결되어 요청을 끝까지 추적](/images/tracing-1-observability-spring-otel/img-03-image-41.png)
 
 **Tracing에서는 당연히 Trace ID가 있습니다.** 이건 원래부터 그랬습니다.
 
@@ -115,7 +115,7 @@ Grafana에서 응답 시간 그래프를 보다가 특이점을 클릭하면, Ex
 
 Distributed Tracing이 필요하다는 건 모두가 알았지만, 어떻게 구현할지는 제각각이었습니다.
 
-![](/images/tracing-1-observability-spring-otel/img-04-image-42.png)
+![Distributed Tracing 표준 진화 타임라인 — 2012 Zipkin·B3, 2015~16 OpenTracing vs OpenCensus 분열, 2019 W3C Trace Context·OpenTelemetry, 현재 업계 표준 정착](/images/tracing-1-observability-spring-otel/img-04-image-42.png)
 
 ### Zipkin과 B3 포맷
 
@@ -240,7 +240,7 @@ Micrometer는 원래 메트릭 수집을 위한 Facade 라이브러리였습니�
 
 Micrometer Tracing은 같은 철학을 Tracing에 적용합니다.
 
-![](/images/tracing-1-observability-spring-otel/img-05-image-39.png)
+![Micrometer Tracing 계층 구조 — 애플리케이션의 Tracer/Observation API가 Micrometer Tracing 추상화를 거쳐 Bridge(bridge-otel·bridge-brave)로, 다시 OpenTelemetry SDK/Brave·Zipkin 구현체로 연결](/images/tracing-1-observability-spring-otel/img-05-image-39.png)
 
 **Bridge**가 핵심입니다. `micrometer-tracing-bridge-otel`을 사용하면 내부적으로 OpenTelemetry SDK가 동작하고, `micrometer-tracing-bridge-brave`를 사용하면 Brave가 동작합니다. 애플리케이션 코드는 Micrometer Tracing API만 사용하면 됩니다.
 

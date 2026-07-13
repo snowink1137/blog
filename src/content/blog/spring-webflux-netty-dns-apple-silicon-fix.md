@@ -40,7 +40,7 @@ Spring WebFlux는 기본적으로 `reactor-netty`를 사용합니다. WebClient�
 
 ## 원인: Netty는 왜 시스템 DNS를 사용하지 않을까?
 
-![](/images/spring-webflux-netty-dns-apple-silicon-fix/img-01-netty-dns-flowchart.png)
+![Netty DNS 해석 흐름도 — netty-resolver-dns-native-macos(osx-aarch_64) 라이브러리가 있으면 macOS 네이티브 DNS로 VPN 내부 도메인 해석에 성공하고, 없으면 fallback DNS로 공용 서버(8.8.8.8)를 써 내부 도메인 해석에 실패(SearchDomainUnknownHostException)](/images/spring-webflux-netty-dns-apple-silicon-fix/img-01-netty-dns-flowchart.png)
 
 Netty는 자체 DNS resolver를 사용합니다. 그 이유는 **성능** 때문입니다.
 
@@ -80,7 +80,7 @@ dependencies {
 | `compileOnly` | ✅ | ❌ | 컴파일에만 필요, 런타임엔 외부 제공 (Lombok 등) |
 | `runtimeOnly` | ❌ | ✅ | 코드에서 직접 참조 안 함, 런타임에 프레임워크가 감지 |
 
-![](/images/spring-webflux-netty-dns-apple-silicon-fix/img-02-gradle-dependency-config.png)
+![Gradle 의존성 Configuration 비교 — implementation(컴파일+패키징), compileOnly(컴파일만, Lombok·Servlet API), runtimeOnly(패키징만, JDBC 드라이버·Netty Native)가 컴파일·패키징·런타임 단계에 어떻게 포함되는지](/images/spring-webflux-netty-dns-apple-silicon-fix/img-02-gradle-dependency-config.png)
 
 `netty-resolver-dns-native-macos`는 코드에서 직접 import하지 않습니다. Netty가 런타임에 classpath를 스캔해서 자동으로 감지하고 사용합니다. 따라서 `runtimeOnly`가 적합합니다.
 

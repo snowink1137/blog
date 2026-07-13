@@ -130,7 +130,7 @@ CloudWatch Agent가 CloudWatch로 데이터를 보내려면 **권한**이 필요
 4.  방금 생성한 역할 선택
 5.  **IAM 역할 업데이트** 클릭
 
-![EC2 인스턴스에서 작업 > 보안 > ‘IAM 역할 수정’ 메뉴 경로](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-04-image-19.png)
+![EC2 인스턴스에서 작업 → 보안 → ‘IAM 역할 수정’ 메뉴 경로](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-04-image-19.png)
 
 역할이 연결되면 EC2 인스턴스 정보에서 **IAM 역할** 항목에 역할 이름이 표시됩니다.
 
