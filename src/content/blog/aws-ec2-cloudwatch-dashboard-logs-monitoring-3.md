@@ -26,7 +26,7 @@ tags: ['aws', 'cloud-watch', 'cloud-watch-agent', 'cloud-watch-logs', 'ec2', 'mo
 4.  대시보드 이름 입력: `EC2-Monitoring` (알아보기 쉬운 이름)
 5.  **대시보드 생성** 클릭
 
-![](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-01-image-26.png)
+![CloudWatch 대시보드 목록 화면 — 대시보드가 없는 상태에서 ‘대시보드 생성’ 버튼](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-01-image-26.png)
 
 ### 위젯 종류
 
@@ -52,7 +52,7 @@ tags: ['aws', 'cloud-watch', 'cloud-watch-agent', 'cloud-watch-logs', 'ec2', 'mo
 5.  대상 인스턴스의 `CPUUtilization` 체크
 6.  **위젯 생성** 클릭
 
-![](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-02-image-27.png)
+![CPUUtilization 위젯 하나가 추가된 wordpress-ec2-monitoring 대시보드](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-02-image-27.png)
 
 ### 메모리 가용률 위젯 추가
 
@@ -83,11 +83,11 @@ tags: ['aws', 'cloud-watch', 'cloud-watch-agent', 'cloud-watch-logs', 'ec2', 'mo
 
 위젯들을 드래그해서 원하는 위치로 배치할 수 있습니다. 레이아웃 예시:
 
-![](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-03-image-28.png)
+![대시보드 위젯 구성 다이어그램 — 디스크 사용률·네트워크 I/O·CPU 사용률·메모리 가용률 4개 위젯 (EC2·CWAgent 지표)](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-03-image-28.png)
 
 레이아웃 정리가 끝나면 우측 상단의 **저장** 버튼을 꼭 클릭하세요.
 
-![](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-04-image-29.png)
+![완성된 대시보드 — disk_used_percent·CPUUtilization·NetworkIn/Out·mem_available_percent 4개 그래프 위젯](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-04-image-29.png)
 
 ### 시간 범위 설정
 
@@ -404,7 +404,7 @@ sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl \
 ```bash
 sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 ```
-![](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-05-image-30.png)
+![터미널 — amazon-cloudwatch-agent-ctl fetch-config로 설정을 적용하고 검증에 성공한 뒤 status가 running으로 표시됨](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-05-image-30.png)
 
 ## CloudWatch Logs에서 확인
 
@@ -416,14 +416,14 @@ Agent가 정상 실행되면 1-2분 후 CloudWatch Logs에서 로그를 확인�
 2.  좌측 메뉴에서 **로그** > **Log Management** 클릭
 3.  `/ec2/syslog` 로그 그룹 클릭
 
-![](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-06-image-31.png)
+![CloudWatch 로그 그룹 목록 — /ec2/auth, /ec2/docker, /ec2/syslog 세 그룹(보존 기간 2주)](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-06-image-31.png)
 
 ### 로그 스트림에서 로그 보기
 
 1.  로그 그룹 내에서 인스턴스 ID로 된 **로그 스트림** 클릭
 2.  로그 이벤트 목록 확인
 
-![](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-07-image-32.png)
+![/ec2/syslog 로그 그룹 세부 정보와 인스턴스 ID로 된 로그 스트림 하나](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-07-image-32.png)
 
 ### 보존 기간 설정
 
@@ -456,7 +456,7 @@ fields @timestamp, @message
 
 **쿼리 실행** 버튼을 클릭하면 결과가 표시됩니다.
 
-![](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-08-image-33.png)
+![CloudWatch Logs Insights — @timestamp·@message를 최신순 20건 조회하는 쿼리와 그 결과 로그](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-08-image-33.png)
 
 ### 쿼리 문법
 
@@ -534,7 +534,7 @@ Logs Insights 쿼리 결과를 대시보드에 추가할 수 있습니다.
 4.  위젯 이름 입력 (예: “최근 에러 로그”)
 5.  **대시보드에 추가** 클릭
 
-![](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-09-image-35.png)
+![대시보드 하단에 추가한 ‘최근 에러 로그’ 위젯 — 4개 지표 그래프와 함께 에러 로그가 표시됨](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-09-image-35.png)
 
 이제 대시보드에서 메트릭과 함께 로그도 한눈에 확인할 수 있습니다.
 
