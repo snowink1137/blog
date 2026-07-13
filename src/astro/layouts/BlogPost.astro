@@ -1,5 +1,6 @@
 ---
 import type { ImageMetadata } from 'astro';
+import { SITE_TITLE } from '../../consts';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
@@ -16,14 +17,44 @@ interface Props {
   tags?: string[];
 }
 
-const { title, description, pubDate, updatedDate, category, subcategory, tags = [] } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, category, subcategory, tags = [] } =
+  Astro.props;
 const categoryLabel = category === 'tech' ? 'Tech' : category === 'life' ? 'Life' : null;
 const categoryHref = category === 'tech' ? '/tech' : category === 'life' ? '/life' : null;
+
+// 구조화 데이터(schema.org BlogPosting) — frontmatter 로 자동 생성. 글마다 수동 추가 불필요.
+// 새 글은 title·description·pubDate 만 있으면 자동으로 붙고, updatedDate/heroImage/tags 는 있으면 반영.
+const canonicalURL = new URL(Astro.url.pathname, Astro.site).href;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: title,
+  description,
+  datePublished: pubDate.toISOString(),
+  dateModified: (updatedDate ?? pubDate).toISOString(),
+  author: { '@type': 'Organization', name: SITE_TITLE, url: new URL('/', Astro.site).href },
+  publisher: {
+    '@type': 'Organization',
+    name: SITE_TITLE,
+    logo: { '@type': 'ImageObject', url: new URL('/favicon-192.png', Astro.site).href },
+  },
+  url: canonicalURL,
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalURL },
+  inLanguage: 'ko-KR',
+  // image 는 실제 대표 이미지(heroImage)가 있을 때만. 없으면 생략(권장 항목이라 무방)
+  // — 작은 favicon 을 넣으면 리치결과에서 "이미지 너무 작음" 경고가 나므로 넣지 않음.
+  ...(heroImage ? { image: new URL(heroImage.src, Astro.site).href } : {}),
+  ...(categoryLabel ? { articleSection: categoryLabel } : {}),
+  ...(tags.length ? { keywords: tags.join(', ') } : {}),
+};
+// set:html 로 주입하므로 </script> 조기 종료 방지를 위해 < 를 유니코드 이스케이프.
+const jsonLdText = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
 ---
 
 <html lang="ko">
   <head>
     <BaseHead title={title} description={description} />
+    <script type="application/ld+json" is:inline set:html={jsonLdText} />
   </head>
   <body>
     <Header />
