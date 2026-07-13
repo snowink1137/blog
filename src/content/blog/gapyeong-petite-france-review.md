@@ -10,7 +10,7 @@ tags: ['가평', '쁘띠프랑스']
 
 ## 서울 근교 1시간, 유럽 마을 산책
 
-![](/images/gapyeong-petite-france-review/img-01-image-19.png)
+![청평호반 언덕에 자리한 쁘띠프랑스 마을 전경 — 파스텔톤 건물과 오렌지빛 기와지붕, 뒤로 산과 호수](/images/gapyeong-petite-france-review/img-01-image-19.png)
 
 서울에서 차로 1시간이면 도착하는 작은 프랑스 마을이 있습니다. 경기도 가평 청평호반에 자리 잡은 쁘띠프랑스는 파스텔톤 건물들과 오렌지빛 기와지붕이 어우러진 테마파크입니다. 솔직히 방문 전에는 “그냥 사진 찍기 좋은 곳” 정도로 예상했는데, 막상 가보니 생각보다 볼거리가 알찼습니다. 유럽 골동품 컬렉션부터 어린왕자 전시, K-드라마 촬영지까지 가족들과 산책 겸 구경하며 반나절을 보내기에 충분했습니다.
 
@@ -18,10 +18,10 @@ tags: ['가평', '쁘띠프랑스']
 
 쁘띠프랑스의 메인 테마는 생텍쥐페리의 소설 **어린왕자**입니다. 마을 곳곳에서 어린왕자, 여우, 장미, 보아뱀 조형물을 만날 수 있고, 생텍쥐페리 기념관에서는 작가의 생애와 작품 세계를 살펴볼 수 있습니다.
 
-![](/images/gapyeong-petite-france-review/img-02-image-24.png)
-![](/images/gapyeong-petite-france-review/img-03-image-25.png)
+![생텍쥐페리 기념관 내부 — 'Le Petit Prince' 글자와 작가 흑백 사진, 어린왕자 전시물](/images/gapyeong-petite-france-review/img-02-image-24.png)
+![생텍쥐페리 기념관의 빨간 비행기 모형과 우주·별을 그린 벽화, 작가 연보 패널](/images/gapyeong-petite-france-review/img-03-image-25.png)
 
-![](/images/gapyeong-petite-france-review/img-04-image-26.png)
+![건물 외벽 포토존 — 철새 떼에 매달려 날아가는 어린왕자를 표현한 벽화와 붉은 의자·양 조형물](/images/gapyeong-petite-france-review/img-04-image-26.png)
 
 기념관 내부에는 작가의 흑백 사진들과 함께 어린왕자 캐릭터가 전시되어 있습니다. 생텍쥐페리가 비행사였던 만큼 빨간 비행기 모형도 있어서 아이들이 올라가 사진을 찍을 수 있습니다. 벽면에는 우주와 별을 배경으로 한 일러스트가 그려져 있어 동화 속에 들어온 느낌을 줍니다.
 
@@ -34,7 +34,7 @@ tags: ['가평', '쁘띠프랑스']
 
 쁘띠프랑스가 더 유명해진 건 K-드라마 촬영지로 알려지면서부터입니다. 마을 내 전시관에는 이곳에서 촬영된 드라마들의 포스터와 촬영 장면들이 정리되어 있습니다.
 
-![](/images/gapyeong-petite-france-review/img-05-image-27.png)
+![K-드라마 촬영지 전시관 — '별에서 온 그대' 등 드라마 포스터와 촬영 장면 사진, 안내판](/images/gapyeong-petite-france-review/img-05-image-27.png)
 
 **촬영된 주요 드라마:**
 
@@ -52,14 +52,14 @@ tags: ['가평', '쁘띠프랑스']
 
 사실 쁘띠프랑스의 진짜 가치는 대표가 수십 년간 모아온 유럽 골동품 컬렉션에 있습니다. 건물마다 테마별로 빼곡하게 전시된 도자기, 인형, 오르골, 고가구들은 단순한 장식이 아니라 실제 유럽에서 수집해 온 것들입니다.
 
-![](/images/gapyeong-petite-france-review/img-06-image-28.png)
+![유럽인형전시관 내부 — 노란 진열장 가득한 인형들과 중앙의 어린왕자·여우 조형물](/images/gapyeong-petite-france-review/img-06-image-28.png)
 
-![](/images/gapyeong-petite-france-review/img-07-image-29.png)
+![레이스 드레스를 입은 도자기 인형과 마리오네트 등 유럽 인형 컬렉션 클로즈업](/images/gapyeong-petite-france-review/img-07-image-29.png)
 
-![](/images/gapyeong-petite-france-review/img-08-Screenshot-2025-12-28-at-15.17.08.jpg)
+![프랑스 전통가옥 재현관 — 노출 목재 천장과 앤티크 소파, 유리 장식구가 매달린 실내](/images/gapyeong-petite-france-review/img-08-Screenshot-2025-12-28-at-15.17.08.jpg)
 
-![](/images/gapyeong-petite-france-review/img-09-Screenshot-2025-12-28-at-15.18.36.jpg)
-![](/images/gapyeong-petite-france-review/img-10-image-30.png)
+![벽 가득 걸린 100여 점의 유럽 장식 접시와 앤티크 수납장, 빈티지 재봉틀](/images/gapyeong-petite-france-review/img-09-Screenshot-2025-12-28-at-15.18.36.jpg)
+![오르골하우스 — 선반 가득한 앤티크 오르골과 자동인형, 기계식 오르간](/images/gapyeong-petite-france-review/img-10-image-30.png)
 
 **유럽인형전시관**에는 19세기부터 현대까지의 유럽 인형 300여 점이 전시되어 있습니다. 레이스 드레스를 입은 도자기 인형들, 나무로 만든 피노키오 인형들, 마리오네트 인형들까지 종류도 다양합니다. 전시관 중앙에는 어린왕자와 여우 조형물이 있어 포토존 역할도 합니다.
 
@@ -74,13 +74,13 @@ tags: ['가평', '쁘띠프랑스']
 
 쁘띠프랑스의 매력은 골목골목 돌아다니며 사진 찍기 좋다는 점입니다. 노란색, 분홍색, 연두색 파스텔톤 건물들이 언덕을 따라 올라가며 자리 잡고 있어서, 어디서 찍어도 그림 같은 사진이 나옵니다.
 
-![](/images/gapyeong-petite-france-review/img-11-image9.jpg)
+![해질녘 쁘띠프랑스 골목 — 파스텔톤 건물과 전구 장식, 서리 내린 나무들](/images/gapyeong-petite-france-review/img-11-image9.jpg)
 
-![](/images/gapyeong-petite-france-review/img-12-image14.jpg)
+![마을 광장의 노란색 에펠탑 모형과 알록달록한 파스텔톤 건물들](/images/gapyeong-petite-france-review/img-12-image14.jpg)
 
-![](/images/gapyeong-petite-france-review/img-13-image19.jpg)
+![마을 광장의 대형 광대 마리오네트 인형과 뒤편 파스텔톤 건물](/images/gapyeong-petite-france-review/img-13-image19.jpg)
 
-![](/images/gapyeong-petite-france-review/img-14-image20.jpg)
+![마을 언덕 위 테라스에서 해질녘에 바라본 청평호와 산 능선](/images/gapyeong-petite-france-review/img-14-image20.jpg)
 
 마을 중앙에는 노란색 **에펠탑 모형**이 있습니다. 실제 에펠탑에 비하면 작지만, 뒤로 알록달록한 건물들과 산이 보여서 사진 명소로 인기입니다. 에펠탑 근처에는 프랑스 영화 포스터(아멜리에, 네 멋대로 해라 등)가 걸린 벽도 있어서 분위기를 더합니다.
 
@@ -90,7 +90,7 @@ tags: ['가평', '쁘띠프랑스']
 
 ## 이탈리아마을 피노키오와다빈치
 
-![](/images/gapyeong-petite-france-review/img-15-image1.jpg)
+![이탈리아마을 피노키오와다빈치 전경 — 언덕 위 대형 피노키오 조형물과 토스카나풍 성곽 건물](/images/gapyeong-petite-france-review/img-15-image1.jpg)
 
 쁘띠프랑스 바로 위쪽에는 2021년에 개장한 **이탈리아마을 피노키오와다빈치**가 있습니다. 같은 대표가 운영하며, 이번엔 이탈리아 토스카나 지방의 마을을 오마주했습니다. 피노키오와 레오나르도 다빈치가 메인 테마입니다.
 
