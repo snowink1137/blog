@@ -53,7 +53,18 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
 
 <html lang="ko">
   <head>
-    <BaseHead title={title} description={description} />
+    <BaseHead
+      title={title}
+      description={description}
+      image={heroImage}
+      ogType="article"
+      article={{
+        publishedTime: pubDate.toISOString(),
+        modifiedTime: (updatedDate ?? pubDate).toISOString(),
+        section: categoryLabel ?? undefined,
+        tags,
+      }}
+    />
     <script type="application/ld+json" is:inline set:html={jsonLdText} />
   </head>
   <body>
