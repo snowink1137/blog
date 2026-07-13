@@ -77,7 +77,7 @@ Pod가 생성될 때 네트워크는 어떻게 설정될까요? [Kubernetes 공�
 6. 컨테이너 런타임 → kubelet: "네트워크 준비 완료"
 7. kubelet: 컨테이너 시작
 ```
-![](/images/kubernetes-network-guide-2-pod-to-pod/img-01-image-31.png)
+![Pod 생성 시 네트워크 설정 흐름도 — kubelet이 컨테이너 런타임과 CNI 플러그인을 호출해 IPAM으로 IP를 할당받고 veth pair를 만들어 Pod에 네트워크를 구성](/images/kubernetes-network-guide-2-pod-to-pod/img-01-image-31.png)
 
 CNI 플러그인은 `/opt/cni/bin/` 디렉토리에 실행 파일로 존재하고, 설정은 `/etc/cni/net.d/`에 JSON 형태로 저장됩니다.
 
@@ -102,7 +102,7 @@ Pod IP는 보통 노드별로 다른 대역을 사용합니다. 여기서 **CIDR
 
 이제 실제 통신 과정을 살펴보겠습니다. 먼저 **같은 노드에 있는 Pod끼리** 통신하는 경우입니다.
 
-![](/images/kubernetes-network-guide-2-pod-to-pod/img-02-image-32.png)
+![같은 노드 내 Pod 간 통신 흐름 — Pod A의 eth0에서 veth pair와 Linux Bridge(cni0)를 거쳐 Pod B로 패킷 전달](/images/kubernetes-network-guide-2-pod-to-pod/img-02-image-32.png)
 
 ### veth pair: 가상 네트워크 케이블
 
@@ -152,7 +152,7 @@ Pod A(10.244.1.15)가 같은 노드의 Pod B(10.244.1.20)에게 패킷을 보내
 
 이제 **다른 노드에 있는 Pod끼리** 통신하는 경우를 살펴보겠습니다. 이 부분이 CNI 플러그인마다 구현이 다른 핵심 영역입니다.
 
-![](/images/kubernetes-network-guide-2-pod-to-pod/img-03-image-33.png)
+![다른 노드 간 Pod 통신 흐름 — Worker-1의 Pod A 패킷이 CNI(Overlay/Direct Routing)로 캡슐화돼 물리 네트워크를 지나 Worker-2에서 역캡슐화되어 Pod B로 도착](/images/kubernetes-network-guide-2-pod-to-pod/img-03-image-33.png)
 
 ### 문제: Pod IP는 클러스터 내부에서만 의미가 있다
 
@@ -353,7 +353,7 @@ curl http://user-service.svc:8080/api/users
 
 [CoreDNS](https://coredns.io/)는 Kubernetes의 기본 DNS 서버입니다. 모든 Service와 Pod에 대한 DNS 레코드를 관리합니다.
 
-![](/images/kubernetes-network-guide-2-pod-to-pod/img-04-image-34.png)
+![CoreDNS 서비스 디스커버리 흐름 — Pod가 Service 도메인을 DNS 조회해 ClusterIP를 받고, kube-proxy/eBPF가 DNAT로 실제 Pod IP를 선택](/images/kubernetes-network-guide-2-pod-to-pod/img-04-image-34.png)
 
 CoreDNS는 다음과 같이 동작합니다:
 

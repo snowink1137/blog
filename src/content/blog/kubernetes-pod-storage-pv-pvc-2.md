@@ -154,7 +154,7 @@ PVC를 삭제하려면 명시적으로 `kubectl delete pvc my-pvc` 해야 합니
 
 ### PV 상태 (Phase)
 
-![](/images/kubernetes-pod-storage-pv-pvc-2/img-01-image-5.png)
+![PersistentVolume 상태 전이도 — PV 생성 후 Available → PVC 바인딩 시 Bound → PVC 삭제 시 정책에 따라 Delete(삭제) 또는 Retain(Released), Released에서 claimRef 제거로 Available 재사용](/images/kubernetes-pod-storage-pv-pvc-2/img-01-image-5.png)
 
 | 상태 | 의미 |
 | --- | --- |

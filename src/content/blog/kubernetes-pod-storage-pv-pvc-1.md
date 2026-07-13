@@ -91,7 +91,7 @@ spec:
 
 ### Volume 타입들
 
-![](/images/kubernetes-pod-storage-pv-pvc-1/img-01-image.png)
+![Pod 볼륨 구조도 — Pod의 volumeMounts가 spec.volumes[]의 emptyDir·persistentVolumeClaim·configMap에 연결되고, PVC는 PV를 거쳐 실제 스토리지(AWS EBS·NFS)로 이어짐](/images/kubernetes-pod-storage-pv-pvc-1/img-01-image.png)
 
 | Volume 타입 | 설명 | 데이터 지속성 |
 | --- | --- | --- |
@@ -103,7 +103,7 @@ spec:
 
 **`persistentVolumeClaim` 타입을 사용할 때만 PVC/PV라는 별도 리소스가 관여합니다.**
 
-![](/images/kubernetes-pod-storage-pv-pvc-1/img-02-image-1.png)
+![Volume 타입 개요 — spec.volumes[]의 emptyDir·hostPath·configMap·secret·persistentVolumeClaim, 그리고 PVC→PV→실제 스토리지로 이어지는 바인딩](/images/kubernetes-pod-storage-pv-pvc-1/img-02-image-1.png)
 
 ### emptyDir: 빈 디렉토리로 시작하는 공유 볼륨
 
@@ -311,7 +311,7 @@ Block Storage는 네트워크로 연결된 가상 블록 디바이스입니다.
 
 **예시:** AWS EBS, GCP Persistent Disk (Zonal), Azure Managed Disk
 
-![](/images/kubernetes-pod-storage-pv-pvc-1/img-03-image-2.png)
+![블록 스토리지 마운트 3단계 — CSI Controller가 EBS 볼륨을 노드에 attach(/dev/xvdf), CSI Node Plugin이 마운트, bind mount로 Pod의 /data에 연결](/images/kubernetes-pod-storage-pv-pvc-1/img-03-image-2.png)
 
 **흐름:**
 
@@ -390,7 +390,7 @@ Block Storage의 경우 (단일 Pod 기준):
 
 ### CSI 드라이버 구조
 
-![](/images/kubernetes-pod-storage-pv-pvc-1/img-04-image-3.png)
+![CSI 드라이버 구조 — 각 노드의 Node Plugin(DaemonSet)이 Pod 경로에 마운트하고, Controller Plugin이 스토리지 백엔드(EBS·GCP PD·NFS 등)에 볼륨을 생성·attach](/images/kubernetes-pod-storage-pv-pvc-1/img-04-image-3.png)
 
 CSI 드라이버는 두 가지 컴포넌트로 구성됩니다:
 
@@ -438,7 +438,7 @@ Pod 스케줄링 → Controller: attach → Node: mount → Pod 사용 가능!
 
 ### 동적 프로비저닝 흐름
 
-![](/images/kubernetes-pod-storage-pv-pvc-1/img-05-image-4.png)
+![동적 프로비저닝 시퀀스 — PVC 생성 → CSI Controller가 CreateVolume으로 클라우드 볼륨 생성 → PV 자동 생성·바인딩 → ControllerPublishVolume attach → NodePublishVolume 마운트 → Pod 볼륨 사용](/images/kubernetes-pod-storage-pv-pvc-1/img-05-image-4.png)
 
 1.  개발자가 PVC 생성 (StorageClass 지정)
 2.  CSI Controller가 PVC 감지

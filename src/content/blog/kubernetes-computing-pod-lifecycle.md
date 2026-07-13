@@ -28,7 +28,7 @@ tags: ['kubelet', 'kubernetes', 'pod', 'scheduler']
 
 Kubernetes 클러스터는 크게 **컨트롤 플레인** (Control Plane) 과 **워커 노드** (Worker Node) 로 나뉩니다.
 
-![](/images/kubernetes-computing-pod-lifecycle/img-01-image-35.png)
+![쿠버네티스 클러스터 구조도 — Control Plane(API Server·etcd·Scheduler·Controller Manager)과 워커 노드(kubelet·kube-proxy·컨테이너 런타임·Pod)](/images/kubernetes-computing-pod-lifecycle/img-01-image-35.png)
 
 ### 왜 이렇게 나눠져 있을까?
 
@@ -103,7 +103,7 @@ spec:
 | `template` | 생성할 Pod의 템플릿 (라벨, 컨테이너 정의) |
 | `resources` | CPU/Memory 요청량과 제한 |
 
-![](/images/kubernetes-computing-pod-lifecycle/img-02-image-36.png)
+![Pod 생성 전체 흐름도 — kubectl apply → API Server → etcd 저장 → Controller Manager(Deployment→ReplicaSet→Pod) → Scheduler 노드 선택 → kubelet → 컨테이너 런타임 → CNI → Pod Running](/images/kubernetes-computing-pod-lifecycle/img-02-image-36.png)
 
 ### 1단계: kubectl → API Server
 
@@ -242,7 +242,7 @@ status:
 
 Scheduler는 Pod를 “가장 적합한” 노드에 배치합니다. 이 과정은 **Filtering**과 **Scoring** 두 단계로 나뉩니다.
 
-![](/images/kubernetes-computing-pod-lifecycle/img-03-image-37.png)
+![Scheduler 노드 선택 과정 — Filtering 단계에서 조건 미달 노드를 제외하고, Scoring 단계에서 최고 점수 노드를 골라 nodeName에 기록](/images/kubernetes-computing-pod-lifecycle/img-03-image-37.png)
 
 ### Filtering: 부적합한 노드 제외
 
@@ -360,7 +360,7 @@ kubelet은 워커 노드의 **에이전트**입니다. 다음과 같은 일을 �
 
 kubelet은 컨테이너를 직접 실행하지 않습니다. 대신 **CRI** (Container Runtime Interface) 라는 표준 인터페이스를 통해 컨테이너 런타임과 통신합니다.
 
-![](/images/kubernetes-computing-pod-lifecycle/img-04-image-38.png)
+![컨테이너 런타임 계층 구조 — kubelet이 CRI(gRPC)로 고수준 런타임(containerd·CRI-O)을 호출하고, OCI 표준을 거쳐 저수준 런타임 runc가 namespace·cgroup으로 컨테이너를 격리 실행](/images/kubernetes-computing-pod-lifecycle/img-04-image-38.png)
 ```text
 kubelet
    ↓ (CRI - gRPC 프로토콜)

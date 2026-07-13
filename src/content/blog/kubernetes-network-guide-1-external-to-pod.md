@@ -18,7 +18,7 @@ Kubernetes를 사용하다 보면 “내 요청이 정확히 어떤 경로로 Po
 
 외부 요청이 Pod에 도달하는 전체 흐름은 다음과 같습니다.
 
-![](/images/kubernetes-network-guide-1-external-to-pod/img-01-k8s-traffic-flow-overview-2.png)
+![쿠버네티스 외부 트래픽 흐름도 — 사용자 요청이 DNS 조회 → 외부 로드밸런서 → NodePort → Ingress Controller → Service → 애플리케이션 Pod 순으로 전달](/images/kubernetes-network-guide-1-external-to-pod/img-01-k8s-traffic-flow-overview-2.png)
 ```text
 사용자 → DNS → 외부 LB → Ingress Node Service → Ingress Controller Pod → Worker Node Service → Worker Node Pod
 ```
@@ -211,7 +211,7 @@ DaemonSet을 사용하면 Ingress 역할 노드마다 하나의 nginx Pod가 실
 
 Ingress Controller는 어떻게 클러스터 전체의 Ingress 리소스를 알 수 있을까요? 답은 **Kubernetes API Server의 watch 기능**입니다.
 
-![](/images/kubernetes-network-guide-1-external-to-pod/img-02-ingress-sync-flow.png)
+![Ingress 동기화 흐름도 — kubectl apply → API Server 수신 → etcd 저장 → Ingress Controller가 watch로 감지 → nginx.conf 재생성 → nginx reload](/images/kubernetes-network-guide-1-external-to-pod/img-02-ingress-sync-flow.png)
 
 동기화 흐름을 단계별로 정리하면 다음과 같습니다:
 
@@ -293,7 +293,7 @@ server {
 
 이 마법을 담당하는 것이 바로 **kube-proxy**입니다.
 
-![](/images/kubernetes-network-guide-1-external-to-pod/img-03-kube-proxy-flow.png)
+![kube-proxy 동작 3단계 다이어그램 — API Server watch로 Service/Endpoints 변경 감지, iptables NAT 규칙 업데이트, 패킷의 ClusterIP를 Pod IP로 DNAT](/images/kubernetes-network-guide-1-external-to-pod/img-03-kube-proxy-flow.png)
 
 kube-proxy의 동작을 3단계로 나눠보면:
 
@@ -330,7 +330,7 @@ sudo iptables -t nat -L KUBE-SERVICES -n | head -20
 
 예를 들어 `user-service`라는 ClusterIP Service가 있다면, 다음과 같은 규칙 체인이 생성됩니다.
 
-![](/images/kubernetes-network-guide-1-external-to-pod/img-04-iptables-chain-flow-1.png)
+![iptables 체인 흐름도 — ClusterIP로 들어온 패킷이 KUBE-SERVICES → KUBE-SVC 체인 → 50% 확률로 KUBE-SEP 엔드포인트를 거쳐 Pod A/B로 DNAT](/images/kubernetes-network-guide-1-external-to-pod/img-04-iptables-chain-flow-1.png)
 
 | 체인 이름 | 역할 | 설명 |
 | --- | --- | --- |
