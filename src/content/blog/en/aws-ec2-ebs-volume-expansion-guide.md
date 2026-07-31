@@ -70,6 +70,8 @@ First aid is only a stopgap. 8GB is too tight for running WordPress + MySQL, so 
 
 ![EC2 EBS volume details screen — a 20 GiB gp3 volume with the Modify button at the top right and the Elastic Block Store volume menu on the left](/images/aws-ec2-ebs-volume-expansion-guide/img-01-image.png)
 
+*Console shown in Korean — the layout and menu positions are identical in the English console.*
+
 **Steps in the AWS Console:**
 
 1.  AWS Console → EC2 → left menu **Elastic Block Store** → **Volumes**
