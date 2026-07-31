@@ -15,7 +15,7 @@ const totalPages = Math.ceil(allPosts.length / POSTS_PER_PAGE);
 <!doctype html>
 <html lang="ko">
   <head>
-    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} alternates={{ ko: '/', en: '/en/' }} />
   </head>
   <body>
     <Header />

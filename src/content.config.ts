@@ -14,6 +14,8 @@ const blog = defineCollection({
       category: z.enum(['tech', 'life']),
       subcategory: z.string().optional(),
       tags: z.array(z.string()).default([]),
+      // 한국 특화 글(연말정산·K패스 등) — 영어 목록(/en/)에 노출하지 않음. 폴백 URL 은 생성됨
+      koOnly: z.boolean().default(false),
     }),
 });
 

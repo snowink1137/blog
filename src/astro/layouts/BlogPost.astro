@@ -18,6 +18,8 @@ interface Props {
   locale?: 'ko' | 'en';
   // 한/영 번역 짝이 있을 때만 채움 → hreflang + 본문 상단 언어 전환 링크
   alternates?: { ko: string; en: string };
+  // 미번역 글의 /en/ 페이지 — 한국어 원문을 렌더하되 안내 박스 + canonical→원문
+  fallback?: boolean;
 }
 
 const {
@@ -31,13 +33,19 @@ const {
   tags = [],
   locale = 'ko',
   alternates,
+  fallback = false,
 } = Astro.props;
+
+// 폴백 페이지는 URL 만 /en/ 이고 내용은 한국어 — 문서 언어·canonical·JSON-LD 는 원문 기준
+const contentLang = fallback ? 'ko' : locale;
+const koPath = Astro.url.pathname.replace(/^\/en\//, '/');
+const langAltHref = locale === 'en' ? koPath : `/en${Astro.url.pathname}`;
 const categoryLabel = category === 'tech' ? 'Tech' : category === 'life' ? 'Life' : null;
 const categoryHref = category === 'tech' ? '/tech' : category === 'life' ? '/life' : null;
 
 // 구조화 데이터(schema.org BlogPosting) — frontmatter 로 자동 생성. 글마다 수동 추가 불필요.
 // 새 글은 title·description·pubDate 만 있으면 자동으로 붙고, updatedDate/heroImage/tags 는 있으면 반영.
-const canonicalURL = new URL(Astro.url.pathname, Astro.site).href;
+const canonicalURL = new URL(fallback ? koPath : Astro.url.pathname, Astro.site).href;
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
@@ -53,7 +61,7 @@ const jsonLd = {
   },
   url: canonicalURL,
   mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalURL },
-  inLanguage: locale === 'en' ? 'en' : 'ko-KR',
+  inLanguage: contentLang === 'en' ? 'en' : 'ko-KR',
   // image 는 실제 대표 이미지(heroImage)가 있을 때만. 없으면 생략(권장 항목이라 무방)
   // — 작은 favicon 을 넣으면 리치결과에서 "이미지 너무 작음" 경고가 나므로 넣지 않음.
   ...(heroImage ? { image: new URL(heroImage.src, Astro.site).href } : {}),
@@ -64,13 +72,14 @@ const jsonLd = {
 const jsonLdText = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
 ---
 
-<html lang={locale}>
+<html lang={contentLang}>
   <head>
     <BaseHead
       title={title}
       description={description}
       image={heroImage}
       alternates={alternates}
+      canonicalPath={fallback ? koPath : undefined}
       ogType="article"
       article={{
         publishedTime: pubDate.toISOString(),
@@ -82,9 +91,13 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
     <script type="application/ld+json" is:inline set:html={jsonLdText} />
   </head>
   <body>
-    <Header />
+    <Header locale={locale} altHref={langAltHref} />
     <main class="max-w-3xl mx-auto px-4 sm:px-6 py-12">
-      <article data-pagefind-body data-pagefind-meta={`category:${category ?? ''}`}>
+      {/* 폴백 페이지는 검색 인덱스 제외 — 원문과 같은 한국어 내용이라 중복 노출 방지 */}
+      <article
+        {...(fallback ? {} : { 'data-pagefind-body': true })}
+        data-pagefind-meta={`category:${category ?? ''}`}
+      >
         <header class="mb-10 pb-8 border-b border-slate-200 dark:border-slate-800">
           {categoryLabel && categoryHref && (
             <div class="mb-4 flex items-center gap-1.5">
@@ -125,6 +138,19 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
             )}
           </div>
         </header>
+
+        {fallback && (
+          <div class="mb-8 rounded-lg border border-amber-300 dark:border-amber-700/60 bg-amber-50 dark:bg-amber-950/40 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">
+            🌐 This post hasn't been translated into English yet — you're reading the Korean
+            original.
+            <a
+              href="/en/"
+              class="underline underline-offset-2 hover:text-amber-700 dark:hover:text-amber-100"
+            >
+              Back to the English index
+            </a>
+          </div>
+        )}
 
         {/* heroImage 는 목록 썸네일 용도로만 사용 — 본문 상단에는 렌더하지 않음 */}
         <div class="prose prose-slate dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-a:text-(--color-accent) prose-a:no-underline hover:prose-a:underline prose-code:before:hidden prose-code:after:hidden prose-code:bg-slate-100 dark:prose-code:bg-slate-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-normal prose-img:rounded-lg">

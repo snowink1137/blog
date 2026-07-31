@@ -13,6 +13,8 @@ interface Props {
   noindex?: boolean;
   // 한/영 번역 짝이 있는 페이지만 채움 → hreflang alternate 링크 출력 (양쪽이 같은 세트를 가져야 유효)
   alternates?: { ko: string; en: string };
+  // 자기 자신이 대표 URL 이 아닐 때(미번역 글의 /en/ 폴백 등) canonical 을 이 경로로 지정
+  canonicalPath?: string;
   ogType?: 'website' | 'article';
   // 글일 때만 채워짐 → og:type=article + article:* 하위 태그 출력
   article?: {
@@ -23,16 +25,17 @@ interface Props {
   };
 }
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const {
   title,
   description,
   image = FallbackImage,
   noindex = false,
   alternates,
+  canonicalPath,
   ogType = 'website',
   article,
 } = Astro.props;
+const canonicalURL = new URL(canonicalPath ?? Astro.url.pathname, Astro.site);
 ---
 
 <!-- Global Metadata -->

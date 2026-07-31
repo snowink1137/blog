@@ -14,6 +14,24 @@ export async function getSortedPosts(): Promise<CollectionEntry<'blog'>[]> {
     .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 }
 
+/**
+ * 영어 홈(/en/) 목록. koOnly(한국 특화) 글은 제외.
+ * 번역이 있으면 영어 항목을, 없으면 한국어 항목을 KO 표시와 함께 — 링크는 항상 /en/ 프리픽스.
+ */
+export async function getEnListing(): Promise<
+  { post: CollectionEntry<'blog'>; href: string; translated: boolean }[]
+> {
+  const posts = await getCollection('blog');
+  const enById = new Map(posts.filter(isEnPost).map((p) => [p.id.slice(3), p]));
+  return posts
+    .filter((post) => !isEnPost(post) && !post.data.koOnly)
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+    .map((ko) => {
+      const en = enById.get(ko.id);
+      return { post: en ?? ko, href: `/en/${ko.id}/`, translated: Boolean(en) };
+    });
+}
+
 /** tech 글의 서브카테고리 목록을 글 수 내림차순으로 반환 */
 export async function getTechSubcategories(): Promise<{ name: string; count: number }[]> {
   const posts = await getSortedPosts();

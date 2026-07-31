@@ -5,6 +5,7 @@ pubDate: '2025-12-22T00:57:37+09:00'
 updatedDate: '2025-12-22T00:57:37+09:00'
 heroImage: '../../assets/heroes/modueui-card.png'
 category: life
+koOnly: true
 tags: ['gtx', 'k패스', '교통카드', '기후동행카드', '모두의-카드', '신분당선']
 ---
 

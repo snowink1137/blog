@@ -1,0 +1,48 @@
+---
+import BaseHead from '../../astro/components/BaseHead.astro';
+import Footer from '../../astro/components/Footer.astro';
+import Header from '../../astro/components/Header.astro';
+import PostCard from '../../astro/components/PostCard.astro';
+import { SITE_TITLE } from '../../consts';
+import { getEnListing } from '../../lib/posts';
+
+const entries = await getEnListing();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title={`${SITE_TITLE} — English`}
+      description="Dev notes on AWS, JVM, Kubernetes, Spring and more. Posts marked KO haven't been translated yet and open the Korean original."
+      alternates={{ ko: '/', en: '/en/' }}
+    />
+  </head>
+  <body>
+    <Header locale="en" />
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-16">
+      <section class="mb-16">
+        <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-4">
+          Hello, World
+        </h1>
+        <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          Notes on tech I'm into, translated from Korean. Posts marked
+          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300">KO</span>
+          haven't been translated yet and open the Korean original.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-6">All posts</h2>
+        <ul class="divide-y divide-slate-100 dark:divide-slate-800/70">
+          {entries.map(({ post, href, translated }) => (
+            <li class="py-6 first:pt-0 last:pb-0">
+              <PostCard post={post} href={href} badge={translated ? undefined : 'KO'} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    </main>
+    <Footer />
+  </body>
+</html>

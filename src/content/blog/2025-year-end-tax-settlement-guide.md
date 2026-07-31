@@ -5,6 +5,7 @@ pubDate: '2026-01-08T01:44:08+09:00'
 updatedDate: '2026-01-08T01:44:08+09:00'
 heroImage: '../../assets/heroes/tax-settlement.png'
 category: life
+koOnly: true
 tags: ['세액공제', '소득공제', '연말정산', '연말정산간소화']
 ---
 

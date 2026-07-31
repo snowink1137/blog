@@ -24,7 +24,22 @@ function toLastmod(raw) {
   return Number.isNaN(d.getTime()) ? null : d.toISOString();
 }
 
+const SITE_URL = 'https://hello-world-log.com';
+
 const lastmodByPath = {};
+
+// 번역된 슬러그 목록 — /en/ 폴백(미번역 원문 복제) URL 을 sitemap 에서 거르고,
+// 번역 짝에 hreflang alternate 를 넣는 기준.
+let translatedSlugs = new Set();
+try {
+  translatedSlugs = new Set(
+    readdirSync(new URL('./src/content/blog/en/', import.meta.url))
+      .filter((f) => /\.mdx?$/.test(f))
+      .map((f) => f.replace(/\.mdx?$/, '')),
+  );
+} catch {
+  // en/ 디렉토리가 없으면 번역 0개로 취급
+}
 
 // 글: frontmatter updatedDate(없으면 pubDate) 기준. en/ 하위(영어 번역본)도 포함 — /en/<slug>/ 로 매핑됨.
 const blogDir = new URL('./src/content/blog/', import.meta.url);
@@ -53,7 +68,7 @@ for (const [urlPath, rel] of Object.entries(staticPages)) {
 }
 
 export default defineConfig({
-  site: 'https://hello-world-log.com',
+  site: SITE_URL,
 
   integrations: [
     expressiveCode({
@@ -77,13 +92,32 @@ export default defineConfig({
       //  - /page/*  : 페이지네이션. 글은 이미 개별 URL 로 모두 포함됨
       filter: (page) => {
         const p = new URL(page).pathname;
-        return !p.startsWith('/tags/') && !p.startsWith('/page/');
+        if (p.startsWith('/tags/') || p.startsWith('/page/')) return false;
+        // /en/ 하위 글: 번역된 것만 포함. 폴백 페이지는 canonical 이 원문이라 제외
+        const en = p.match(/^\/en\/([^/]+)\/$/);
+        if (en) return translatedSlugs.has(en[1]);
+        return true;
       },
       // 글 URL 에만 실제 수정일 기반 <lastmod> 부여. 목록·정적 페이지는
       // 정확한 수정일이 없으므로 생략(부정확한 lastmod 는 오히려 신뢰도 저하).
+      // 번역 짝(홈 포함)에는 head 와 동일한 hreflang alternate 세트를 함께 기재.
       serialize(item) {
-        const lastmod = lastmodByPath[new URL(item.url).pathname];
+        const p = new URL(item.url).pathname;
+        const lastmod = lastmodByPath[p];
         if (lastmod) item.lastmod = lastmod;
+        let pair = null;
+        if (p === '/' || p === '/en/') pair = { ko: '/', en: '/en/' };
+        else {
+          const m = p.match(/^\/(?:en\/)?([^/]+)\/$/);
+          if (m && translatedSlugs.has(m[1])) pair = { ko: `/${m[1]}/`, en: `/en/${m[1]}/` };
+        }
+        if (pair) {
+          item.links = [
+            { lang: 'ko', url: SITE_URL + pair.ko },
+            { lang: 'en', url: SITE_URL + pair.en },
+            { lang: 'x-default', url: SITE_URL + pair.ko },
+          ];
+        }
         return item;
       },
     }),
