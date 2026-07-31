@@ -28,36 +28,42 @@ const SITE_URL = 'https://hello-world-log.com';
 
 const lastmodByPath = {};
 
-// 번역된 슬러그 목록 — /en/ 폴백(미번역 원문 복제) URL 을 sitemap 에서 거르고,
-// 번역 짝에 hreflang alternate 를 넣는 기준.
-let translatedSlugs = new Set();
-try {
-  translatedSlugs = new Set(
-    readdirSync(new URL('./src/content/blog/en/', import.meta.url))
-      .filter((f) => /\.mdx?$/.test(f))
-      .map((f) => f.replace(/\.mdx?$/, '')),
-  );
-} catch {
-  // en/ 디렉토리가 없으면 번역 0개로 취급
-}
-
 // 글: frontmatter updatedDate(없으면 pubDate) 기준. en/ 하위(영어 번역본)도 포함 — /en/<slug>/ 로 매핑됨.
+// 같은 순회에서 sitemap 처리용 목록도 수집:
+//  - koSlugs / translatedSlugs → 미번역 폴백(/en/<slug>/) URL 판별과 hreflang 짝 기준
+//  - enLifeCount → 번역된 life 글이 생기기 전까지 /en/life/ 는 빈 페이지(noindex)라 제외
+const koSlugs = new Set();
+const translatedSlugs = new Set();
+let enLifeCount = 0;
 const blogDir = new URL('./src/content/blog/', import.meta.url);
 for (const file of readdirSync(blogDir, { recursive: true })) {
   if (!/\.mdx?$/.test(file)) continue;
   const fm = readFileSync(new URL(file, blogDir), 'utf-8').match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!fm) continue;
+  const slugPath = file.replace(/\.mdx?$/, '');
+  if (slugPath.startsWith('en/')) {
+    translatedSlugs.add(slugPath.slice(3));
+    if (/^category:\s*['"]?life['"]?\s*$/m.test(fm[1])) enLifeCount += 1;
+  } else {
+    koSlugs.add(slugPath);
+  }
   const pub = fm[1].match(/^pubDate:\s*['"]?([^'"\n]+)['"]?\s*$/m);
   const upd = fm[1].match(/^updatedDate:\s*['"]?([^'"\n]+)['"]?\s*$/m);
   const lastmod = toLastmod(upd?.[1] || pub?.[1]);
-  if (lastmod) lastmodByPath['/' + file.replace(/\.mdx?$/, '') + '/'] = lastmod;
+  if (lastmod) lastmodByPath['/' + slugPath + '/'] = lastmod;
 }
+
+// 한/영 짝이 있는 정적 페이지 — sitemap hreflang 대상 (head 의 alternates 와 동일하게 유지할 것)
+const pairedStatics = new Set(['/about/', '/privacy-policy/', '/tech/']);
+if (enLifeCount > 0) pairedStatics.add('/life/');
 
 // 정적 콘텐츠 페이지(about·privacy): 페이지 파일 안 `const updatedDate = '...'` 에서 읽음.
 // 목록·홈은 자연스러운 수정일이 없어 제외.
 const staticPages = {
   '/about/': './src/pages/about.astro',
   '/privacy-policy/': './src/pages/privacy-policy.astro',
+  '/en/about/': './src/pages/en/about.astro',
+  '/en/privacy-policy/': './src/pages/en/privacy-policy.astro',
 };
 for (const [urlPath, rel] of Object.entries(staticPages)) {
   const m = readFileSync(new URL(rel, import.meta.url), 'utf-8').match(
@@ -92,15 +98,19 @@ export default defineConfig({
       //  - /page/*  : 페이지네이션. 글은 이미 개별 URL 로 모두 포함됨
       filter: (page) => {
         const p = new URL(page).pathname;
-        if (p.startsWith('/tags/') || p.startsWith('/page/')) return false;
-        // /en/ 하위 글: 번역된 것만 포함. 폴백 페이지는 canonical 이 원문이라 제외
-        const en = p.match(/^\/en\/([^/]+)\/$/);
-        if (en) return translatedSlugs.has(en[1]);
+        const base = p.startsWith('/en/') ? p.slice(3) : p;
+        // 얇은 아카이브(태그·페이지네이션)는 한/영 모두 제외
+        if (base.startsWith('/tags/') || base.startsWith('/page/')) return false;
+        // 미번역 글의 /en/ 폴백(원문 복제)은 canonical 이 원문이라 제외
+        const m = p.match(/^\/en\/([^/]+)\/$/);
+        if (m && koSlugs.has(m[1]) && !translatedSlugs.has(m[1])) return false;
+        // 번역된 life 글이 없는 동안 /en/life/ 는 빈 페이지(noindex)라 제외
+        if (p === '/en/life/' && enLifeCount === 0) return false;
         return true;
       },
       // 글 URL 에만 실제 수정일 기반 <lastmod> 부여. 목록·정적 페이지는
       // 정확한 수정일이 없으므로 생략(부정확한 lastmod 는 오히려 신뢰도 저하).
-      // 번역 짝(홈 포함)에는 head 와 동일한 hreflang alternate 세트를 함께 기재.
+      // 번역 짝(홈·정적 페이지·번역 글)에는 head 와 동일한 hreflang 세트를 함께 기재.
       serialize(item) {
         const p = new URL(item.url).pathname;
         const lastmod = lastmodByPath[p];
@@ -108,8 +118,10 @@ export default defineConfig({
         let pair = null;
         if (p === '/' || p === '/en/') pair = { ko: '/', en: '/en/' };
         else {
-          const m = p.match(/^\/(?:en\/)?([^/]+)\/$/);
-          if (m && translatedSlugs.has(m[1])) pair = { ko: `/${m[1]}/`, en: `/en/${m[1]}/` };
+          const base = p.startsWith('/en/') ? p.slice(3) : p;
+          const m = base.match(/^\/([^/]+)\/$/);
+          if (pairedStatics.has(base)) pair = { ko: base, en: `/en${base}` };
+          else if (m && translatedSlugs.has(m[1])) pair = { ko: base, en: `/en${base}` };
         }
         if (pair) {
           item.links = [

@@ -1,0 +1,65 @@
+---
+import BaseHead from '../../astro/components/BaseHead.astro';
+import Footer from '../../astro/components/Footer.astro';
+import Header from '../../astro/components/Header.astro';
+import { SITE_TITLE } from '../../consts';
+
+// 이 페이지 최종 수정일 (KST). 내용 고치면 이 값을 갱신 → sitemap <lastmod> 동기화.
+const updatedDate = '2026-07-31T20:15:00+09:00';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title={`Privacy Policy | ${SITE_TITLE}`}
+      description="Privacy policy"
+      alternates={{ ko: '/privacy-policy/', en: '/en/privacy-policy/' }}
+    />
+  </head>
+  <body>
+    <Header locale="en" altHref="/privacy-policy/" />
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-12">
+      <article class="prose prose-slate dark:prose-invert max-w-none prose-a:text-(--color-accent) prose-a:no-underline hover:prose-a:underline">
+        <h1>Privacy policy</h1>
+
+        <p><strong>hello world log</strong> ("this site") takes visitors' privacy seriously and handles personal information as described below.</p>
+
+        <h3>1. Information we collect</h3>
+        <p>This site has no user registration and does not directly collect personal information from visitors. However, if you leave a comment, your name, email address, and website URL may be collected.</p>
+
+        <h3>2. Cookies</h3>
+        <p>This site uses cookies to improve the visitor experience and analyze traffic. You can refuse cookies in your browser settings, though some features may be limited as a result.</p>
+
+        <h3>3. Advertising and analytics services</h3>
+        <p>This site uses the following third-party services.</p>
+
+        <p><strong>Google AdSense</strong></p>
+        <ul>
+          <li>Google and its advertising partners may use cookies to serve ads based on your interests.</li>
+          <li>You can opt out of personalized advertising in Google's Ads Settings.</li>
+        </ul>
+
+        <p><strong>Google Analytics</strong></p>
+        <ul>
+          <li>Used to analyze visitor statistics; the collected data is processed anonymously.</li>
+        </ul>
+
+        <h3>4. Retention and deletion</h3>
+        <p>Information collected when leaving a comment is deleted together with the comment.</p>
+
+        <h3>5. Contact</h3>
+        <p>For privacy-related inquiries, please reach out below.</p>
+        <ul>
+          <li>Email: <a href="mailto:snowink1137@gmail.com">snowink1137@gmail.com</a></li>
+        </ul>
+
+        <h3>6. Revision history</h3>
+        <ul>
+          <li>Effective date: January 8, 2026</li>
+        </ul>
+      </article>
+    </main>
+    <Footer />
+  </body>
+</html>

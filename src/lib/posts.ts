@@ -2,39 +2,26 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 
 export const POSTS_PER_PAGE = 10;
 
+export type Locale = 'ko' | 'en';
+
 /** 영어 번역본(en/ 하위)인지 — 한국어 목록·태그·RSS 에서 제외할 때 사용 */
 export function isEnPost(post: CollectionEntry<'blog'>): boolean {
   return post.id.startsWith('en/');
 }
 
-export async function getSortedPosts(): Promise<CollectionEntry<'blog'>[]> {
+/** locale 별 글 목록 (최신순). ko = 한국어 원문만, en = 번역본만 */
+export async function getSortedPosts(locale: Locale = 'ko'): Promise<CollectionEntry<'blog'>[]> {
   const posts = await getCollection('blog');
   return posts
-    .filter((post) => !isEnPost(post))
+    .filter((post) => (locale === 'en' ? isEnPost(post) : !isEnPost(post)))
     .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 }
 
-/**
- * 영어 홈(/en/) 목록. koOnly(한국 특화) 글은 제외.
- * 번역이 있으면 영어 항목을, 없으면 한국어 항목을 KO 표시와 함께 — 링크는 항상 /en/ 프리픽스.
- */
-export async function getEnListing(): Promise<
-  { post: CollectionEntry<'blog'>; href: string; translated: boolean }[]
-> {
-  const posts = await getCollection('blog');
-  const enById = new Map(posts.filter(isEnPost).map((p) => [p.id.slice(3), p]));
-  return posts
-    .filter((post) => !isEnPost(post) && !post.data.koOnly)
-    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-    .map((ko) => {
-      const en = enById.get(ko.id);
-      return { post: en ?? ko, href: `/en/${ko.id}/`, translated: Boolean(en) };
-    });
-}
-
 /** tech 글의 서브카테고리 목록을 글 수 내림차순으로 반환 */
-export async function getTechSubcategories(): Promise<{ name: string; count: number }[]> {
-  const posts = await getSortedPosts();
+export async function getTechSubcategories(
+  locale: Locale = 'ko',
+): Promise<{ name: string; count: number }[]> {
+  const posts = await getSortedPosts(locale);
   const counts = new Map<string, number>();
   for (const post of posts) {
     if (post.data.category !== 'tech' || !post.data.subcategory) continue;

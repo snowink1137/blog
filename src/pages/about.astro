@@ -11,7 +11,11 @@ const updatedDate = '2026-07-11T02:51:19+09:00';
 <!doctype html>
 <html lang="ko">
   <head>
-    <BaseHead title={`About | ${SITE_TITLE}`} description="hello world log 소개" />
+    <BaseHead
+      title={`About | ${SITE_TITLE}`}
+      description="hello world log 소개"
+      alternates={{ ko: '/about/', en: '/en/about/' }}
+    />
   </head>
   <body>
     <Header />

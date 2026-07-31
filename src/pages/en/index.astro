@@ -4,9 +4,9 @@ import Footer from '../../astro/components/Footer.astro';
 import Header from '../../astro/components/Header.astro';
 import PostCard from '../../astro/components/PostCard.astro';
 import { SITE_TITLE } from '../../consts';
-import { getEnListing } from '../../lib/posts';
+import { getSortedPosts } from '../../lib/posts';
 
-const entries = await getEnListing();
+const posts = await getSortedPosts('en');
 ---
 
 <!doctype html>
@@ -14,7 +14,7 @@ const entries = await getEnListing();
   <head>
     <BaseHead
       title={`${SITE_TITLE} — English`}
-      description="Dev notes on AWS, JVM, Kubernetes, Spring and more. Posts marked KO haven't been translated yet and open the Korean original."
+      description="Dev notes on AWS, JVM, Kubernetes, Spring and more — translated from the Korean blog hello world log."
       alternates={{ ko: '/', en: '/en/' }}
     />
   </head>
@@ -26,18 +26,16 @@ const entries = await getEnListing();
           Hello, World
         </h1>
         <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
-          Notes on tech I'm into, translated from Korean. Posts marked
-          <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300">KO</span>
-          haven't been translated yet and open the Korean original.
+          Notes on tech I'm into, translated from Korean. More translations are on the way.
         </p>
       </section>
 
       <section>
-        <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-6">All posts</h2>
+        <h2 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-6">Recent posts</h2>
         <ul class="divide-y divide-slate-100 dark:divide-slate-800/70">
-          {entries.map(({ post, href, translated }) => (
+          {posts.map((post) => (
             <li class="py-6 first:pt-0 last:pb-0">
-              <PostCard post={post} href={href} badge={translated ? undefined : 'KO'} />
+              <PostCard post={post} />
             </li>
           ))}
         </ul>

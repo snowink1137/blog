@@ -1,0 +1,38 @@
+---
+import BaseHead from '../../astro/components/BaseHead.astro';
+import Footer from '../../astro/components/Footer.astro';
+import Header from '../../astro/components/Header.astro';
+import { SITE_TITLE } from '../../consts';
+
+// 이 페이지 최종 수정일 (KST). 내용 고치면 이 값을 갱신 → sitemap <lastmod> 동기화.
+const updatedDate = '2026-07-31T20:15:00+09:00';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title={`About | ${SITE_TITLE}`}
+      description="About hello world log"
+      alternates={{ ko: '/about/', en: '/en/about/' }}
+    />
+  </head>
+  <body>
+    <Header locale="en" altHref="/about/" />
+    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-12">
+      <article class="prose prose-slate dark:prose-invert max-w-none prose-a:text-(--color-accent) prose-a:no-underline hover:prose-a:underline">
+        <h1>About</h1>
+
+        <p>Hi, welcome to hello world log.</p>
+
+        <p>
+          I write about the tech I'm interested in and keep a record of everyday life. English
+          posts here are translations of the Korean originals.
+        </p>
+
+        <p>Contact: <a href="mailto:snowink1137@gmail.com">snowink1137@gmail.com</a></p>
+      </article>
+    </main>
+    <Footer />
+  </body>
+</html>

@@ -1,6 +1,7 @@
 ---
 import type { ImageMetadata } from 'astro';
 import { SITE_TITLE } from '../../consts';
+import { getSortedPosts } from '../../lib/posts';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
@@ -41,7 +42,26 @@ const contentLang = fallback ? 'ko' : locale;
 const koPath = Astro.url.pathname.replace(/^\/en\//, '/');
 const langAltHref = locale === 'en' ? koPath : `/en${Astro.url.pathname}`;
 const categoryLabel = category === 'tech' ? 'Tech' : category === 'life' ? 'Life' : null;
-const categoryHref = category === 'tech' ? '/tech' : category === 'life' ? '/life' : null;
+const prefix = locale === 'en' ? '/en' : '';
+const categoryHref =
+  category === 'tech' ? `${prefix}/tech` : category === 'life' ? `${prefix}/life` : null;
+
+// en 모드에선 실제로 존재하는 영어 서브카테고리·태그 페이지만 링크 — 폴백 글에서의 404 방지
+let enSubcats: Set<string | undefined> | null = null;
+let enTags: Set<string> | null = null;
+if (locale === 'en') {
+  const enPosts = await getSortedPosts('en');
+  enSubcats = new Set(enPosts.map((p) => p.data.subcategory).filter(Boolean));
+  enTags = new Set(enPosts.flatMap((p) => p.data.tags));
+}
+const subcategoryHref = !subcategory
+  ? null
+  : locale === 'en'
+    ? enSubcats?.has(subcategory)
+      ? `/en/tech/${subcategory}/`
+      : null
+    : `/tech/${subcategory}/`;
+const visibleTags = locale === 'en' ? tags.filter((t) => enTags?.has(t)) : tags;
 
 // 구조화 데이터(schema.org BlogPosting) — frontmatter 로 자동 생성. 글마다 수동 추가 불필요.
 // 새 글은 title·description·pubDate 만 있으면 자동으로 붙고, updatedDate/heroImage/tags 는 있으면 반영.
@@ -110,12 +130,18 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
               {subcategory && (
                 <>
                   <span class="text-xs text-slate-400 dark:text-slate-600">›</span>
-                  <a
-                    href={`/tech/${subcategory}/`}
-                    class="inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                  >
-                    {subcategory}
-                  </a>
+                  {subcategoryHref ? (
+                    <a
+                      href={subcategoryHref}
+                      class="inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                    >
+                      {subcategory}
+                    </a>
+                  ) : (
+                    <span class="inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                      {subcategory}
+                    </span>
+                  )}
                 </>
               )}
             </div>
@@ -147,7 +173,7 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
               href="/en/"
               class="underline underline-offset-2 hover:text-amber-700 dark:hover:text-amber-100"
             >
-              Back to the English index
+              Browse posts in English →
             </a>
           </div>
         )}
@@ -157,12 +183,12 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
           <slot />
         </div>
 
-        {tags.length > 0 && (
+        {visibleTags.length > 0 && (
           <footer class="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800">
             <div class="flex flex-wrap gap-2">
-              {tags.map((tag) => (
+              {visibleTags.map((tag) => (
                 <a
-                  href={`/tags/${tag}/`}
+                  href={`${prefix}/tags/${tag}/`}
                   class="inline-block text-sm px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                 >
                   #{tag}
