@@ -307,7 +307,7 @@ sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a 
 
 > **💡 Agent 재시작/중지 명령어**
 > 
-> ```php
+> ```bash
 > # 재시작
 > sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a restart
 > 
