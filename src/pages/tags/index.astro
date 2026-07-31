@@ -4,8 +4,9 @@ import BaseHead from '../../astro/components/BaseHead.astro';
 import Footer from '../../astro/components/Footer.astro';
 import Header from '../../astro/components/Header.astro';
 import { SITE_TITLE } from '../../consts';
+import { isEnPost } from '../../lib/posts';
 
-const posts = await getCollection('blog');
+const posts = (await getCollection('blog')).filter((post) => !isEnPost(post));
 const tagCounts = new Map<string, number>();
 for (const post of posts) {
   for (const tag of post.data.tags) {

@@ -4,17 +4,33 @@ import BlogPost from '../astro/layouts/BlogPost.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
-  return posts.map((post) => ({
-    params: { slug: post.id },
-    props: post,
-  }));
+  // en/ 하위는 영어 번역본 — id 가 'en/<slug>' 라 URL 도 자동으로 /en/<slug>/ 가 된다.
+  // 번역 짝이 있는 글만 alternates(hreflang 쌍)를 넘긴다.
+  const enIds = new Set(posts.filter((p) => p.id.startsWith('en/')).map((p) => p.id.slice(3)));
+  return posts.map((post) => {
+    const isEn = post.id.startsWith('en/');
+    const baseId = isEn ? post.id.slice(3) : post.id;
+    const paired = isEn || enIds.has(post.id);
+    return {
+      params: { slug: post.id },
+      props: {
+        post,
+        locale: isEn ? ('en' as const) : ('ko' as const),
+        alternates: paired ? { ko: `/${baseId}/`, en: `/en/${baseId}/` } : undefined,
+      },
+    };
+  });
 }
-type Props = CollectionEntry<'blog'>;
+type Props = {
+  post: CollectionEntry<'blog'>;
+  locale: 'ko' | 'en';
+  alternates?: { ko: string; en: string };
+};
 
-const post = Astro.props;
+const { post, locale, alternates } = Astro.props;
 const { Content } = await render(post);
 ---
 
-<BlogPost {...post.data}>
+<BlogPost {...post.data} locale={locale} alternates={alternates}>
   <Content />
 </BlogPost>

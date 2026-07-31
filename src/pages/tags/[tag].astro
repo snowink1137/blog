@@ -5,9 +5,10 @@ import Footer from '../../astro/components/Footer.astro';
 import Header from '../../astro/components/Header.astro';
 import PostCard from '../../astro/components/PostCard.astro';
 import { SITE_TITLE } from '../../consts';
+import { isEnPost } from '../../lib/posts';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog');
+  const posts = (await getCollection('blog')).filter((post) => !isEnPost(post));
   const tagSet = new Set<string>();
   for (const post of posts) {
     for (const tag of post.data.tags) tagSet.add(tag);

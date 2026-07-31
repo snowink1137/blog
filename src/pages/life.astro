@@ -5,9 +5,10 @@ import Footer from '../astro/components/Footer.astro';
 import Header from '../astro/components/Header.astro';
 import PostCard from '../astro/components/PostCard.astro';
 import { SITE_TITLE } from '../consts';
+import { isEnPost } from '../lib/posts';
 
 const posts = (await getCollection('blog'))
-  .filter((post) => post.data.category === 'life')
+  .filter((post) => !isEnPost(post) && post.data.category === 'life')
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 

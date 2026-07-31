@@ -2,9 +2,16 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 
 export const POSTS_PER_PAGE = 10;
 
+/** 영어 번역본(en/ 하위)인지 — 한국어 목록·태그·RSS 에서 제외할 때 사용 */
+export function isEnPost(post: CollectionEntry<'blog'>): boolean {
+  return post.id.startsWith('en/');
+}
+
 export async function getSortedPosts(): Promise<CollectionEntry<'blog'>[]> {
   const posts = await getCollection('blog');
-  return posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+  return posts
+    .filter((post) => !isEnPost(post))
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 }
 
 /** tech 글의 서브카테고리 목록을 글 수 내림차순으로 반환 */

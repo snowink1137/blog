@@ -11,6 +11,8 @@ interface Props {
   description: string;
   image?: ImageMetadata;
   noindex?: boolean;
+  // 한/영 번역 짝이 있는 페이지만 채움 → hreflang alternate 링크 출력 (양쪽이 같은 세트를 가져야 유효)
+  alternates?: { ko: string; en: string };
   ogType?: 'website' | 'article';
   // 글일 때만 채워짐 → og:type=article + article:* 하위 태그 출력
   article?: {
@@ -27,6 +29,7 @@ const {
   description,
   image = FallbackImage,
   noindex = false,
+  alternates,
   ogType = 'website',
   article,
 } = Astro.props;
@@ -60,6 +63,15 @@ const {
 
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
+
+{/* 한/영 번역 짝 — 검색엔진이 검색자 언어에 맞는 URL 을 노출하도록. x-default 는 그 외 언어권용 */}
+{alternates && (
+  <>
+    <link rel="alternate" hreflang="ko" href={new URL(alternates.ko, Astro.site)} />
+    <link rel="alternate" hreflang="en" href={new URL(alternates.en, Astro.site)} />
+    <link rel="alternate" hreflang="x-default" href={new URL(alternates.ko, Astro.site)} />
+  </>
+)}
 
 <!-- Primary Meta Tags -->
 <title>{title}</title>

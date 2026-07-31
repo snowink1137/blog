@@ -15,10 +15,23 @@ interface Props {
   category?: 'tech' | 'life';
   subcategory?: string;
   tags?: string[];
+  locale?: 'ko' | 'en';
+  // 한/영 번역 짝이 있을 때만 채움 → hreflang + 본문 상단 언어 전환 링크
+  alternates?: { ko: string; en: string };
 }
 
-const { title, description, pubDate, updatedDate, heroImage, category, subcategory, tags = [] } =
-  Astro.props;
+const {
+  title,
+  description,
+  pubDate,
+  updatedDate,
+  heroImage,
+  category,
+  subcategory,
+  tags = [],
+  locale = 'ko',
+  alternates,
+} = Astro.props;
 const categoryLabel = category === 'tech' ? 'Tech' : category === 'life' ? 'Life' : null;
 const categoryHref = category === 'tech' ? '/tech' : category === 'life' ? '/life' : null;
 
@@ -40,7 +53,7 @@ const jsonLd = {
   },
   url: canonicalURL,
   mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalURL },
-  inLanguage: 'ko-KR',
+  inLanguage: locale === 'en' ? 'en' : 'ko-KR',
   // image 는 실제 대표 이미지(heroImage)가 있을 때만. 없으면 생략(권장 항목이라 무방)
   // — 작은 favicon 을 넣으면 리치결과에서 "이미지 너무 작음" 경고가 나므로 넣지 않음.
   ...(heroImage ? { image: new URL(heroImage.src, Astro.site).href } : {}),
@@ -51,12 +64,13 @@ const jsonLd = {
 const jsonLdText = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
 ---
 
-<html lang="ko">
+<html lang={locale}>
   <head>
     <BaseHead
       title={title}
       description={description}
       image={heroImage}
+      alternates={alternates}
       ogType="article"
       article={{
         publishedTime: pubDate.toISOString(),
@@ -100,6 +114,14 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
             <FormattedDate date={pubDate} />
             {updatedDate && updatedDate.valueOf() > pubDate.valueOf() && (
               <span class="italic">· updated <FormattedDate date={updatedDate} /></span>
+            )}
+            {alternates && (
+              <a
+                href={locale === 'en' ? alternates.ko : alternates.en}
+                class="text-(--color-accent) hover:underline underline-offset-2"
+              >
+                {locale === 'en' ? '🌐 한국어로 보기' : '🌐 Read in English'}
+              </a>
             )}
           </div>
         </header>

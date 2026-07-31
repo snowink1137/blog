@@ -26,9 +26,9 @@ function toLastmod(raw) {
 
 const lastmodByPath = {};
 
-// 글: frontmatter updatedDate(없으면 pubDate) 기준
+// 글: frontmatter updatedDate(없으면 pubDate) 기준. en/ 하위(영어 번역본)도 포함 — /en/<slug>/ 로 매핑됨.
 const blogDir = new URL('./src/content/blog/', import.meta.url);
-for (const file of readdirSync(blogDir)) {
+for (const file of readdirSync(blogDir, { recursive: true })) {
   if (!/\.mdx?$/.test(file)) continue;
   const fm = readFileSync(new URL(file, blogDir), 'utf-8').match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!fm) continue;
