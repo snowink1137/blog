@@ -68,9 +68,7 @@ docker system prune -a
 
 First aid is only a stopgap. 8GB is too tight for running WordPress + MySQL, so the proper fix is to grow the EBS volume itself.
 
-![EC2 EBS volume details screen — a 20 GiB gp3 volume with the Modify button at the top right and the Elastic Block Store volume menu on the left](/images/aws-ec2-ebs-volume-expansion-guide/img-01-image.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![EC2 Volumes list screen showing an 8 GiB gp3 volume, with the Volumes menu under Elastic Block Store and the Actions button highlighted](/images/aws-ec2-ebs-volume-expansion-guide/img-01-image-en.jpg)
 
 **Steps in the AWS Console:**
 

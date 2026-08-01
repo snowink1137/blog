@@ -26,9 +26,7 @@ A dashboard is a screen where multiple metrics are laid out as widgets so you ca
 4.  Enter a dashboard name: `EC2-Monitoring` (something easy to recognize)
 5.  Click **Create dashboard**
 
-![CloudWatch dashboards list — empty state with the Create dashboard button highlighted](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-01-image-26.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![CloudWatch dashboards list with the Create dashboard button highlighted](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-01-image-26-en.jpg)
 
 ### Widget types
 
@@ -103,9 +101,7 @@ flowchart LR
 
 Once you're done arranging, make sure to click the **Save** button at the top right.
 
-![Finished dashboard — four graph widgets: disk_used_percent, CPUUtilization, NetworkIn/Out, and mem_available_percent](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-04-image-29.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![Finished dashboard — four graph widgets: disk_used_percent, CPUUtilization, NetworkIn/Out, and mem_available_percent](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-04-image-29-en.jpg)
 
 ### Set the time range
 
@@ -434,18 +430,14 @@ Once the Agent is running properly, the logs show up in CloudWatch Logs after 1-
 2.  Click **Logs** > **Log Management** in the left menu
 3.  Click the `/ec2/syslog` log group
 
-![CloudWatch log groups list — /ec2/auth, /ec2/docker, and /ec2/syslog, each with 2-week retention](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-06-image-31.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![CloudWatch log groups list — /ec2/auth, /ec2/docker, and /ec2/syslog, each with 2-week retention](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-06-image-31-en.jpg)
 
 ### View logs in the log stream
 
 1.  Inside the log group, click the **log stream** named after the instance ID
 2.  Check the list of log events
 
-![/ec2/syslog log group details with a single log stream named after the instance ID](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-07-image-32.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![/ec2/syslog log group details with a single log stream named after the instance ID (masked)](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-07-image-32-en.jpg)
 
 ### Set the retention period
 
@@ -478,9 +470,7 @@ This query means "show me the 20 most recent logs in reverse chronological order
 
 Click the **Run query** button and the results appear.
 
-![CloudWatch Logs Insights — a query fetching the 20 most recent @timestamp and @message entries, with the resulting logs](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-08-image-33.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![CloudWatch Logs Insights — a query fetching the 20 most recent @timestamp and @message entries, with the resulting logs](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-08-image-33-en.jpg)
 
 ### Query syntax
 
@@ -558,9 +548,7 @@ You can add Logs Insights query results to your dashboard.
 4.  Enter a widget name (e.g. "Recent error logs")
 5.  Click **Add to dashboard**
 
-![The 'Recent error logs' widget added at the bottom of the dashboard, shown alongside the four metric graphs](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-09-image-35.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![A log widget showing recent error and warning entries at the bottom of the dashboard, below the four metric graphs](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-09-image-35-en.jpg)
 
 Now the dashboard shows your logs right next to your metrics, all in one view.
 

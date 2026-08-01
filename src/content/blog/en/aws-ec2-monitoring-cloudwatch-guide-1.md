@@ -20,9 +20,7 @@ On an on-premises server you would have to install monitoring tools yourself, bu
 
 Select an EC2 instance and you'll find a **Monitoring** tab at the bottom. Without any setup, you can immediately see the metrics AWS collects automatically.
 
-![The Monitoring tab at the bottom of the EC2 instance summary page — graphs of automatically collected metrics like CPU utilization, network in/out, and CPU credits](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-01-image-7.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![The Monitoring tab at the bottom of the EC2 instance summary page for the 'wordpress' instance — cards for automatically collected metrics like CPU utilization, network in/out, and CPU credits](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-01-image-7-en.jpg)
 
 ### Metrics Provided by Default
 
@@ -44,9 +42,7 @@ Basic monitoring collects data at **5-minute intervals** and comes at no extra c
 
 You've probably noticed the **Manage detailed monitoring** button in the monitoring tab. Click it and you're greeted with a warning that "additional charges apply".
 
-![The dialog shown after clicking 'Manage detailed monitoring' — an Enable checkbox for detailed monitoring and a notice that additional charges apply](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-02-image-8.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![The dialog shown after clicking 'Manage detailed monitoring' — an Enable checkbox for detailed monitoring and a notice that additional charges apply](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-02-image-8-en.jpg)
 
 ### What's Actually Different
 
@@ -153,9 +149,7 @@ Now let's look at EC2 metrics directly in the CloudWatch console.
 1.  Type **CloudWatch** into the search bar at the top of the AWS console
 2.  Click the CloudWatch service
 
-![CloudWatch console Overview page — getting-started menu with create alarm, create dashboard, and view logs](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-04-image-9.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![CloudWatch console Overview page — alarms by AWS service, recent alarms, and application monitoring widgets](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-04-image-9-en.jpg)
 
 ### Finding EC2 Metrics
 
@@ -163,9 +157,7 @@ Now let's look at EC2 metrics directly in the CloudWatch console.
 2.  Under **AWS namespaces** at the bottom, select **EC2**
 3.  Click **Per-Instance Metrics**
 
-![CloudWatch Metrics page — the 'All metrics' menu on the left and the EC2 card selected among the AWS namespaces](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-05-image-10.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![CloudWatch Metrics page — the Metrics menu (Classic metrics) on the left and the EC2 card highlighted among the AWS namespaces](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-05-image-10-en.jpg)
 
 ### Viewing the CPU Utilization Graph
 
@@ -173,9 +165,7 @@ Now let's look at EC2 metrics directly in the CloudWatch console.
 2.  Check the **CPUUtilization** metric checkbox
 3.  The graph appears at the top
 
-![Selecting the CPUUtilization checkbox in the CloudWatch metric list displays the CPU utilization graph at the top](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-06-image-11.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![Selecting the CPUUtilization checkbox for the wordpress instance in the CloudWatch metric list displays the CPU utilization graph at the top](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-06-image-11-en.jpg)
 
 Adjust the time range at the top of the graph to see data for 1 hour, 3 hours, 12 hours, 1 day, 1 week, or whatever period you need.
 
@@ -193,9 +183,7 @@ The whole point of monitoring is **knowing immediately when something goes wrong
 2.  Click the **Create alarm** button
 3.  Click **Select metric**
 
-![CloudWatch Alarms page — the 'Create alarm' button with no alarms created yet](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-07-image-12.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![CloudWatch Alarms page — the 'Create alarm' button at the top right of the alarm list](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-07-image-12-en.jpg)
 
 ### Step 2: Select the Metric
 
@@ -205,9 +193,7 @@ The whole point of monitoring is **knowing immediately when something goes wrong
 
 ### Step 3: Configure the Conditions
 
-![Alarm condition settings — threshold type 'Static', condition 'Greater', threshold 80, datapoints 1 out of 1](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-08-image-13.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![Alarm condition settings — threshold type 'Static' and condition 'Greater' selected, with the threshold value field below](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-08-image-13-en.jpg)
 
 | Setting | Recommended value | Description |
 | --- | --- | --- |
@@ -224,9 +210,7 @@ The whole point of monitoring is **knowing immediately when something goes wrong
 
 To receive an email when the alarm fires, you need to create an **SNS (Simple Notification Service)** topic.
 
-![Alarm notification (actions) settings — alarm state trigger, creating a new SNS topic, and entering the email address for notifications](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-09-image-14.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![Alarm notification (actions) settings — alarm state trigger, creating a new SNS topic, and entering the email address for notifications](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-09-image-14-en.jpg)
 
 1.  **Alarm state trigger**: select "In alarm"
 2.  **SNS topic**: choose "Create new topic"
@@ -243,9 +227,7 @@ To receive an email when the alarm fires, you need to create an **SNS (Simple No
 2.  **Alarm description**: "Alarm when EC2 CPU utilization exceeds 80%" (optional)
 3.  Click **Next** > **Create alarm**
 
-![Alarm created — the 'wordpress-ec2-cpu-high-alert' alarm now appears in the list](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-10-image-15.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![Alarm created — the 'wordpress-ec2-cpu-high-alert' alarm now appears in the alarm list, in the 'Insufficient data' state right after creation](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-10-image-15-en.jpg)
 
 Once created, the alarm shows up in the alarm list. If your CPU is currently below 80%, the state reads **"OK"**.
 

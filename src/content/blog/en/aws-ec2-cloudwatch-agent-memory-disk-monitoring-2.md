@@ -99,9 +99,7 @@ For the CloudWatch Agent to send data to CloudWatch, it needs **permissions**. Y
 2.  Click **Roles** in the left menu
 3.  Click **Create role**
 
-![IAM role list screen — the 'Create role' button at the top right](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-02-image-17.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![IAM role list screen — the 'Create role' button at the top right](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-02-image-17-en.jpg)
 
 4.  **Trusted entity type**: select AWS service
 5.  **Use case**: select EC2
@@ -113,9 +111,7 @@ For the CloudWatch Agent to send data to CloudWatch, it needs **permissions**. Y
 2.  Check **CloudWatchAgentServerPolicy**
 3.  Click **Next**
 
-![IAM add permissions screen — searching for 'cloudwatchagent' and selecting the CloudWatchAgentServerPolicy policy](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-03-image-18.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![IAM add permissions screen — searching for 'cloudwatchagent' and selecting the CloudWatchAgentServerPolicy policy](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-03-image-18-en.jpg)
 
 > **💡 What CloudWatchAgentServerPolicy includes**
 > 
@@ -134,9 +130,7 @@ For the CloudWatch Agent to send data to CloudWatch, it needs **permissions**. Y
 4.  Select the role you just created
 5.  Click **Update IAM role**
 
-![Menu path on an EC2 instance: Actions → Security → 'Modify IAM role'](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-04-image-19.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![Menu path on an EC2 instance: Actions → Security → 'Modify IAM role'](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-04-image-19-en.jpg)
 
 Once attached, the role name appears under the **IAM Role** field in the EC2 instance details.
 
@@ -331,9 +325,7 @@ Once the agent is running, the metrics show up in CloudWatch after a minute or t
 2.  Click **Metrics** > **All metrics** in the left menu
 3.  Under **Custom namespaces** at the bottom, select **CWAgent**
 
-![CloudWatch metrics screen — the newly created CWAgent card under 'Custom namespaces'](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-07-image-22.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![CloudWatch metrics screen — the newly created CWAgent card under 'Custom namespaces'](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-07-image-22-en.jpg)
 
 > **⚠️ Don't see CWAgent?**
 > 
@@ -353,9 +345,7 @@ Click into the **CWAgent** namespace and you'll see several groups. That's becau
 
 Click into each group and check the metrics you want to see them on the graph at the top.
 
-![CloudWatch graph — disk_used_percent and mem_used_percent metrics collected by CWAgent (around 49.5%)](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-08-image-23.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![CloudWatch graph — mem_used_percent and cpu_usage_active metrics collected by CWAgent](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-08-image-23-en.jpg)
 
 At last — **memory usage** and **disk capacity**, the metrics you can't see anywhere in the EC2 console, are now visible in CloudWatch!
 
@@ -382,9 +372,7 @@ Linux puts spare memory to work as buff/cache. That region is **automatically re
 2.  **Select metric** > **CWAgent** > **InstanceId**
 3.  Select `mem_available_percent` > click **Select metric**
 
-![Memory alarm creation screen — the CWAgent mem_available_percent metric with a 'Lower than 20' condition and datapoints set to 2 out of 3](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-09-image-24.png)
-
-*Console shown in Korean — the layout and menu positions are identical in the English console.*
+![Memory alarm screen — the CWAgent mem_available_percent metric with the 'Lower' threshold condition selected](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-09-image-24-en.jpg)
 
 ### Configure the Conditions
 
