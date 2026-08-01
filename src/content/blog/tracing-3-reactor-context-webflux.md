@@ -785,7 +785,7 @@ logging:
 > 
 > Spring Boot 3.2에서 추가된 이 설정은 내부적으로 `Hooks.enableAutomaticContextPropagation()`을 호출합니다. 이전 버전에서는 직접 호출해야 했습니다:
 > 
-> ```php
+> ```java
 > // Spring Boot 3.1 이하
 > @SpringBootApplication
 > public class MyApplication {
@@ -954,7 +954,7 @@ public Flux<Order> getOrders() {
 > 
 > **sink** (handle에서 사용):
 > 
-> ```php
+> ```java
 > sink.next(value);         // 값을 다음 연산자로 전달
 > sink.error(exception);    // 에러 발생
 > // sink.next()를 안 부르면 → 해당 항목 필터링

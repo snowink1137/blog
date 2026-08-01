@@ -87,17 +87,6 @@ const viewAllLabel = locale === 'en' ? 'View all' : '전체 보기';
           <path d="m21 21-4.3-4.3"></path>
         </svg>
       </a>
-      <a
-        href="/rss.xml"
-        class="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors"
-        aria-label="RSS feed"
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 11a9 9 0 0 1 9 9"></path>
-          <path d="M4 4a16 16 0 0 1 16 16"></path>
-          <circle cx="5" cy="19" r="1"></circle>
-        </svg>
-      </a>
       <a href={altHref} class={langToggleClass} aria-label={locale === 'ko' ? 'Read in English' : '한국어로 보기'}>
         {locale === 'ko' ? 'EN' : 'KO'}
       </a>
@@ -171,7 +160,6 @@ const viewAllLabel = locale === 'en' ? 'View all' : '전체 보기';
       )}
       <a href={`${prefix}/tags`} class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">Tags</a>
       <a href={`${prefix}/about`} class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">About</a>
-      <a href="/rss.xml" class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">RSS</a>
     </div>
   </div>
 </header>

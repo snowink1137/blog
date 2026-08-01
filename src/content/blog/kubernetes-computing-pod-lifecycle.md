@@ -147,7 +147,7 @@ status:
 > 
 > **DaemonSet**과 **StatefulSet**은 Deployment를 거치지 않고 **직접 Pod를 생성**합니다.
 > 
-> ```php
+> ```yaml
 > # DaemonSet 예시: 모든 노드에 로그 수집기 배포
 > 
 > apiVersion: apps/v1
@@ -167,7 +167,7 @@ status:
 >         - name: fluentd
 >           image: fluentd:latest
 > ```
-> ```php
+> ```yaml
 > # StatefulSet 예시: Redis 클러스터
 > 
 > apiVersion: apps/v1
@@ -581,7 +581,7 @@ exec:
 > | `/actuator/health/liveness` | 앱이 살아있는지만 확인 (단순 응답) |
 > | `/actuator/health/readiness` | DB, Redis, Kafka 등 외부 의존성 연결 상태 확인 |
 > 
-> ```php
+> ```yaml
 > # Spring Boot 앱의 Probe 설정 예시
 > livenessProbe:
 >   httpGet:

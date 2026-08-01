@@ -506,7 +506,7 @@ Hooks.onOperatorDebug();
 > 
 > 둘 다 연산자가 생성될 때 “어디서 호출했는지”를 런타임에 기록하는 건 같습니다. 차이는 기록 코드가 **어디서 실행되느냐**입니다. `Hooks`는 Reactor 외부의 콜백에서 실행되므로, 호출 스택에서 사용자 코드가 몇 번째 프레임에 있는지 알 수 없어 `new Exception().getStackTrace()`로 **전체 스택을 캡처**해야 합니다. `ReactorDebugAgent`는 **Java Agent** 메커니즘(JVM이 클래스를 메모리에 로딩하는 시점에 바이트코드를 수정하는 기능)을 사용해서 `Flux.map()` 같은 연산자 메서드 **내부에** 캡처 코드를 삽입합니다. 연산자 메서드 바로 위 프레임이 사용자 코드라는 것이 보장되므로, `StackWalker`(Java 9+)로 **1~2 프레임만 확인**하고 멈출 수 있습니다.
 > 
-> ```php
+> ```java
 > // Hooks 방식 — 전체 스택을 배열로 만든 뒤 필요한 것을 고름 (무거움)
 > StackTraceElement[] all = new Exception().getStackTrace();
 > 

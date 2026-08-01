@@ -131,7 +131,7 @@ MetalLB는 온프레미스에서도 클라우드처럼 EXTERNAL-IP를 자동 할
 > 
 > `kubectl get svc` 출력에서 보이는 EXTERNAL-IP는 노드 IP가 아닙니다. LoadBalancer Service에 할당되는 **외부 접근용 IP**입니다.
 > 
-> ```php
+> ```text
 > # 클라우드: Cloud Controller가 LB를 만들고 IP 할당
 > NAME        TYPE           EXTERNAL-IP    PORT(S)
 > my-service  LoadBalancer   52.12.34.56    80:31492/TCP

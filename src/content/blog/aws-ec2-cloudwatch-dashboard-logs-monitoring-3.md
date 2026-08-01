@@ -83,7 +83,21 @@ tags: ['aws', 'cloud-watch', 'cloud-watch-agent', 'cloud-watch-logs', 'ec2', 'mo
 
 위젯들을 드래그해서 원하는 위치로 배치할 수 있습니다. 레이아웃 예시:
 
-![대시보드 위젯 구성 다이어그램 — 디스크 사용률·네트워크 I/O·CPU 사용률·메모리 가용률 4개 위젯 (EC2·CWAgent 지표)](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-03-image-28.png)
+```mermaid
+flowchart LR
+    subgraph DASH["📊 EC2-Monitoring 대시보드"]
+        subgraph L[" "]
+            direction TB
+            W1["디스크 사용률<br/>(CWAgent)"]
+            W2["네트워크 I/O<br/>(EC2)"]
+        end
+        subgraph R[" "]
+            direction TB
+            W3["CPU 사용률<br/>(EC2)"]
+            W4["메모리 가용률<br/>(CWAgent)"]
+        end
+    end
+```
 
 레이아웃 정리가 끝나면 우측 상단의 **저장** 버튼을 꼭 클릭하세요.
 
@@ -479,7 +493,7 @@ fields @timestamp, @message
 | limit 50
 ```
 
-`/error/i`는 대소문자 구분 없이 “error”를 포함하는 로그를 찾습니다.
+`(?i)error`는 대소문자 구분 없이 “error”를 포함하는 로그를 찾습니다.
 
 **2\. SSH 로그인 시도 확인** (auth.log 수집 시)
 

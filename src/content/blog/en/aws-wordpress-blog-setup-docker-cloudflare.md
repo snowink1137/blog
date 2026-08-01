@@ -2,7 +2,7 @@
 title: 'Setting Up a WordPress Blog on AWS (feat. Docker, Cloudflare)'
 description: 'The full walkthrough of running WordPress on AWS EC2 with Docker Compose and wiring up a domain and HTTPS through Cloudflare — SSH config, Security Groups, and Elastic IP, written for first-time server builders.'
 pubDate: '2025-12-06T15:48:02+09:00'
-updatedDate: '2025-12-06T15:48:02+09:00'
+updatedDate: '2026-08-01T19:30:00+09:00'
 category: tech
 subcategory: 'AWS'
 tags: ['aws', 'cloudflare', 'docker', 'wordpress']
@@ -83,7 +83,7 @@ mkdir ~/wordpress && cd ~/wordpress
 vim docker-compose.yml
 ```
 
-I went with the standard WordPress PHP-Apache image, and set up the DB to run on the same instance. If usage grows later, I plan to migrate the data to something like AWS RDS. That said, running on a t3.small instance (2 vCPUs, 1GB of memory) I actually hit OOM kills during operation, so I added a number of tuning options to the DB command.
+I went with the standard WordPress PHP-Apache image, and set up the DB to run on the same instance. If usage grows later, I plan to migrate the data to something like AWS RDS. That said, running on a t3.micro instance (2 vCPUs, 1GB of memory) I actually hit OOM kills during operation, so I added a number of tuning options to the DB command.
 
 ```yaml
 services:
@@ -127,7 +127,7 @@ volumes:
 Start the containers.
 
 ```bash
-docker compose -f wordpress-docker-compose.yaml -p wordpress up -d
+docker compose -p wordpress up -d
 ```
 
 ### Configuring the Security Group
@@ -176,7 +176,7 @@ The purchased domain needs to point at an IP — but before doing that, it's a g
 3.  Select the new IP → **Actions** → **Associate Elastic IP address**
 4.  Choose your instance and associate it
 
-An Elastic IP is free while it's associated with an EC2 instance.
+An Elastic IP used to be free while associated with a running EC2 instance, but **since February 2024 AWS charges $0.005/hour (~$3.6/month) for every public IPv4 address, attached or not**. The free tier does include 750 hours of public IPv4 usage per month for your first 12 months, so a single instance is effectively free during that period.
 
 ### DNS Setup
 

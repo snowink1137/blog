@@ -2,7 +2,7 @@
 title: 'AWS에 WordPress 블로그 구축하기(feat. docker, cloudflare)'
 description: 'AWS EC2에 Docker Compose로 WordPress를 올리고 Cloudflare로 도메인·HTTPS까지 연결하는 전 과정. SSH 설정, Security Group, Elastic IP 등 처음 서버를 만드는 사람 기준으로 정리했다.'
 pubDate: '2025-12-06T15:48:02+09:00'
-updatedDate: '2025-12-06T15:48:02+09:00'
+updatedDate: '2026-08-01T19:30:00+09:00'
 category: tech
 subcategory: 'AWS'
 tags: ['aws', 'cloudflare', 'docker', 'wordpress']
@@ -83,7 +83,7 @@ mkdir ~/wordpress && cd ~/wordpress
 vim docker-compose.yml
 ```
 
-기본적인 wordpress php apache 이미지를 사용했고, DB도 같은 인스턴스에서 띄우는 것으로 설정했습니다. 나중에 사용량이 많아지면 데이터를 AWS RDS 같은 곳으로 마이그레이션할 생각입니다. 그런데 t3.small 인스턴스(vCPU 2, 1GB memory)를 사용하다보니 실행 중 OOM이 나기도 했습니다. 그래서 DB command로 여러 최적화 옵션을 추가했습니다.
+기본적인 wordpress php apache 이미지를 사용했고, DB도 같은 인스턴스에서 띄우는 것으로 설정했습니다. 나중에 사용량이 많아지면 데이터를 AWS RDS 같은 곳으로 마이그레이션할 생각입니다. 그런데 t3.micro 인스턴스(vCPU 2, 1GB memory)를 사용하다보니 실행 중 OOM이 나기도 했습니다. 그래서 DB command로 여러 최적화 옵션을 추가했습니다.
 
 ```yaml
 services:
@@ -127,7 +127,7 @@ volumes:
 컨테이너를 실행합니다.
 
 ```bash
-docker compose -f wordpress-docker-compose.yaml -p wordpress up -d
+docker compose -p wordpress up -d
 ```
 
 ### Security Group 설정
@@ -176,7 +176,7 @@ WHOIS 개인정보 보호는 자동으로 적용되어 별도 설정이 필요 �
 3.  생성된 IP 선택 → **작업** → **탄력적 IP 주소 연결**
 4.  인스턴스 선택 후 연결
 
-Elastic IP는 EC2에 연결된 상태에서는 무료입니다.
+과거에는 실행 중인 EC2 인스턴스에 연결된 Elastic IP 1개가 무료였지만, **2024년 2월부터는 연결 여부와 관계없이 모든 퍼블릭 IPv4 주소에 시간당 $0.005(월 약 $3.6)가 과금**됩니다. 다만 프리티어(가입 후 12개월)에는 월 750시간의 퍼블릭 IPv4 무료 사용량이 포함되어 있어, 인스턴스 1대 운영이라면 그동안은 사실상 무료입니다.
 
 ### DNS 설정
 

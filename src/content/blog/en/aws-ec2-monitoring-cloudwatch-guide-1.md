@@ -86,9 +86,31 @@ The graphs you saw in the EC2 monitoring tab actually come from a service called
 
 ### Understanding the EC2 Monitoring Architecture
 
-![EC2 monitoring architecture diagram — basic monitoring (hypervisor level: CPU, network, disk I/O, status checks) and the CloudWatch Agent (inside the OS: memory, disk capacity, processes, logs) each sending data to Amazon CloudWatch](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-03-image-6.png)
-
-*Diagram labels are in Korean — green box (left): basic monitoring at the hypervisor level; orange box (right): CloudWatch Agent metrics collected inside the OS. Both flow into Amazon CloudWatch.*
+```mermaid
+flowchart TB
+    subgraph EC2["🖥️ EC2 instance"]
+        direction LR
+        subgraph BASIC["Basic monitoring"]
+            B0("Hypervisor level · automatic · free")
+            B1["✅ CPU utilization"]
+            B2["✅ Network I/O"]
+            B3["✅ Disk I/O"]
+            B4["✅ Status checks"]
+        end
+        subgraph AGENT["CloudWatch Agent"]
+            A0("Inside the OS · separate install required")
+            A1["✨ Memory usage"]
+            A2["✨ Disk capacity"]
+            A3["✨ Process monitoring"]
+            A4["✨ Custom log collection"]
+        end
+    end
+    subgraph CW["☁️ Amazon CloudWatch — AWS unified monitoring platform"]
+        C1["Metric storage · visualization · dashboards · alarms"]
+    end
+    BASIC -->|sent automatically every 5 minutes| CW
+    AGENT -->|metrics sent per your config| CW
+```
 
 Basic monitoring metrics are collected at the AWS infrastructure (hypervisor) level. That's why **OS-internal information like memory usage and disk capacity isn't provided by default.** To collect it, you have to install the CloudWatch Agent inside the instance.
 
@@ -208,7 +230,7 @@ To receive an email when the alarm fires, you need to create an **SNS (Simple No
 
 1.  **Alarm state trigger**: select "In alarm"
 2.  **SNS topic**: choose "Create new topic"
-3.  **Topic name**: enter `ec2-cpu-alert`
+3.  **Topic name**: enter `wordpress-ec2-cpu-alert`
 4.  **Email endpoint**: enter your email address
 
 > **⚠️ Don't skip the email subscription confirmation!**
@@ -217,7 +239,7 @@ To receive an email when the alarm fires, you need to create an **SNS (Simple No
 
 ### Step 5: Name and Create the Alarm
 
-1.  **Alarm name**: `EC2-CPU-High-Alert` (something easy to recognize)
+1.  **Alarm name**: `wordpress-ec2-cpu-high-alert` (something easy to recognize)
 2.  **Alarm description**: "Alarm when EC2 CPU utilization exceeds 80%" (optional)
 3.  Click **Next** > **Create alarm**
 

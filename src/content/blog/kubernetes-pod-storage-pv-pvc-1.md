@@ -125,7 +125,7 @@ volumes:
 > 
 > `emptyDir: {}`에서 `{}`는 기본 설정을 사용한다는 의미입니다.
 > 
-> ```php
+> ```yaml
 > volumes:
 >   - name: cache
 >     emptyDir: {}  # 기본: 노드의 디스크에 저장

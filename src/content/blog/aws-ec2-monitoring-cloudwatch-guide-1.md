@@ -82,7 +82,31 @@ EC2 모니터링 탭에서 본 그래프들은 사실 **Amazon CloudWatch**라�
 
 ### EC2 모니터링 구조 이해하기
 
-![EC2 모니터링 구조 다이어그램 — 기본 모니터링(하이퍼바이저 레벨: CPU·네트워크·디스크 I/O·상태검사)과 CloudWatch Agent(OS 내부: 메모리·디스크 용량·프로세스·로그)가 각각 Amazon CloudWatch로 전송](/images/aws-ec2-monitoring-cloudwatch-guide-1/img-03-image-6.png)
+```mermaid
+flowchart TB
+    subgraph EC2["🖥️ EC2 인스턴스"]
+        direction LR
+        subgraph BASIC["기본 모니터링"]
+            B0("하이퍼바이저 레벨 · 자동 · 무료")
+            B1["✅ CPU 사용률"]
+            B2["✅ 네트워크 I/O"]
+            B3["✅ 디스크 I/O"]
+            B4["✅ 상태 검사"]
+        end
+        subgraph AGENT["CloudWatch Agent"]
+            A0("OS 내부 · 별도 설치 필요")
+            A1["✨ 메모리 사용률"]
+            A2["✨ 디스크 용량"]
+            A3["✨ 프로세스 모니터링"]
+            A4["✨ 커스텀 로그 수집"]
+        end
+    end
+    subgraph CW["☁️ Amazon CloudWatch — AWS 통합 모니터링 플랫폼"]
+        C1["메트릭 저장 · 시각화 · 대시보드 · 알람"]
+    end
+    BASIC -->|5분 간격 자동 전송| CW
+    AGENT -->|설정에 따라 메트릭 전송| CW
+```
 
 기본 모니터링 메트릭은 AWS 인프라(하이퍼바이저) 레벨에서 수집됩니다. 그래서 **OS 내부 정보인 메모리 사용률이나 디스크 용량은 기본 제공되지 않습니다.** 이 정보를 수집하려면 인스턴스 안에 CloudWatch Agent를 설치해야 합니다.
 
@@ -190,7 +214,7 @@ t3.micro 하나로 개인 블로그를 운영하는 수준이라면, **무료 �
 
 1.  **알람 상태 트리거**: “경보 상태”(In alarm) 선택
 2.  **SNS 주제 선택**: “새 주제 생성” 선택
-3.  **주제 이름**: `ec2-cpu-alert` 입력
+3.  **주제 이름**: `wordpress-ec2-cpu-alert` 입력
 4.  **알림을 받을 이메일**: 본인 이메일 입력
 
 > **⚠️ 이메일 구독 확인 필수!**
@@ -199,7 +223,7 @@ t3.micro 하나로 개인 블로그를 운영하는 수준이라면, **무료 �
 
 ### 5단계: 알람 이름 지정 및 생성
 
-1.  **알람 이름**: `EC2-CPU-High-Alert` (알아보기 쉬운 이름)
+1.  **알람 이름**: `wordpress-ec2-cpu-high-alert` (알아보기 쉬운 이름)
 2.  **알람 설명**: “EC2 CPU 사용률 80% 초과 알람” (선택사항)
 3.  **다음** > **경보 생성** 클릭
 

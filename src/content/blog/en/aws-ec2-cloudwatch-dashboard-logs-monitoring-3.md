@@ -85,9 +85,21 @@ In this post I mainly use the **Line** widget. It's great for seeing trends over
 
 You can drag the widgets into whatever positions you like. Here's an example layout:
 
-![Dashboard widget layout diagram — four widgets: disk usage, network I/O, CPU usage, and memory availability (EC2 and CWAgent metrics)](/images/aws-ec2-cloudwatch-dashboard-logs-monitoring-3/img-03-image-28.png)
-
-*Diagram labels shown in Korean — top left: disk usage (CWAgent), bottom left: network I/O (EC2), top right: CPU usage (EC2), bottom right: memory availability (CWAgent).*
+```mermaid
+flowchart LR
+    subgraph DASH["📊 EC2-Monitoring dashboard"]
+        subgraph L[" "]
+            direction TB
+            W1["Disk usage<br/>(CWAgent)"]
+            W2["Network I/O<br/>(EC2)"]
+        end
+        subgraph R[" "]
+            direction TB
+            W3["CPU usage<br/>(EC2)"]
+            W4["Memory available<br/>(CWAgent)"]
+        end
+    end
+```
 
 Once you're done arranging, make sure to click the **Save** button at the top right.
 
