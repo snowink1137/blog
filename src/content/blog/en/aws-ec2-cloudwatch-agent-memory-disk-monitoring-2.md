@@ -322,7 +322,7 @@ Once the agent is running, the metrics show up in CloudWatch after a minute or t
 ### Find the CWAgent Namespace
 
 1.  Go to the **CloudWatch** service in the AWS console
-2.  Click **Metrics** > **All metrics** in the left menu
+2.  Click **Metrics** > **Classic metrics** (formerly **All metrics**) in the left menu
 3.  Under **Custom namespaces** at the bottom, select **CWAgent**
 
 ![CloudWatch metrics screen — the newly created CWAgent card under 'Custom namespaces'](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-07-image-22-en.jpg)

@@ -153,7 +153,7 @@ Now let's look at EC2 metrics directly in the CloudWatch console.
 
 ### Finding EC2 Metrics
 
-1.  In the left menu, click **Metrics** > **All metrics**
+1.  In the left menu, click **Metrics** > **Classic metrics** (formerly **All metrics**)
 2.  Under **AWS namespaces** at the bottom, select **EC2**
 3.  Click **Per-Instance Metrics**
 

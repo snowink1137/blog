@@ -322,7 +322,7 @@ Agent가 정상 실행되면 1-2분 후 CloudWatch에서 메트릭을 확인할 
 ### CWAgent 네임스페이스 찾기
 
 1.  AWS 콘솔에서 **CloudWatch** 서비스로 이동
-2.  좌측 메뉴에서 **지표(Metrics)** > **모든 지표** 클릭
+2.  좌측 메뉴에서 **지표(Metrics)** > **모든 지표** 클릭 (최신 콘솔에서는 메뉴명이 **Classic metrics** 로 바뀜)
 3.  하단의 **사용자 지정 네임스페이스**에서 **CWAgent** 선택
 
 ![CloudWatch 지표 화면 — ‘사용자 지정 네임스페이스’에 새로 생긴 CWAgent 카드](/images/aws-ec2-cloudwatch-agent-memory-disk-monitoring-2/img-07-image-22.png)
