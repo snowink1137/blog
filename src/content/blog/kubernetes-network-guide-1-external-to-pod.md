@@ -2,7 +2,7 @@
 title: 'Kubernetes 네트워크 이해하기 (1): 외부 요청이 Pod에 도달하기까지'
 description: '외부 HTTP 요청이 LB → Ingress Controller → Service → Pod까지 도달하는 전체 경로를 추적. kube-proxy와 iptables, conntrack, 그리고 구간별 트러블슈팅 명령어까지.'
 pubDate: '2026-01-08T20:00:00+09:00'
-updatedDate: '2026-01-08T20:00:00+09:00'
+updatedDate: '2026-08-03T02:05:00+09:00'
 category: tech
 subcategory: 'Kubernetes'
 tags: ['ingress', 'kubernetes', 'network', 'service']
@@ -18,7 +18,50 @@ Kubernetes를 사용하다 보면 “내 요청이 정확히 어떤 경로로 Po
 
 외부 요청이 Pod에 도달하는 전체 흐름은 다음과 같습니다.
 
-![쿠버네티스 외부 트래픽 흐름도 — 사용자 요청이 DNS 조회 → 외부 로드밸런서 → NodePort → Ingress Controller → Service → 애플리케이션 Pod 순으로 전달](/images/kubernetes-network-guide-1-external-to-pod/img-01-k8s-traffic-flow-overview-2.png)
+```mermaid
+flowchart TB
+    subgraph EXT["외부 네트워크"]
+        USER["사용자<br/>example.com 요청"]
+        DNS["DNS 서버"]
+        LB["외부 Load Balancer<br/>(공인 IP)"]
+        USER -->|"1. DNS 조회"| DNS
+        DNS -->|"2. 공인 IP 반환"| USER
+        USER -->|"3. HTTP 요청"| LB
+    end
+
+    subgraph K8S["Kubernetes 클러스터"]
+        IR["Ingress Resource<br/>(라우팅 규칙 정의)"]
+        subgraph CP["Control Plane"]
+            API["API Server"]
+            ETCD[("etcd")]
+            API <--> ETCD
+        end
+        subgraph IN["Ingress Node"]
+            subgraph ICS["Ingress Controller 스택"]
+                ISVC["Service<br/>(NodePort로 외부 노출)"]
+                NG1["Pod: nginx-ingress-xxx<br/>(Ingress Controller)"]
+                NG2["Pod: nginx-ingress-yyy<br/>(Ingress Controller)"]
+                ISVC -->|"5. 트래픽 분배"| NG1
+                ISVC -.->|"또는"| NG2
+            end
+        end
+        subgraph WN["Worker Node"]
+            subgraph APP["애플리케이션 스택"]
+                ASVC["Service<br/>(ClusterIP)"]
+                POD1["Pod: my-app-xxx"]
+                POD2["Pod: my-app-yyy"]
+                ASVC -->|"7. Pod 선택"| POD1
+                ASVC -.->|"또는"| POD2
+            end
+        end
+    end
+
+    IR -.->|"저장"| ETCD
+    NG1 <-->|"watch"| API
+    LB -->|"4. NodePort로 전달<br/>(예: 31492)"| ISVC
+    NG1 -->|"6. Host/Path 매칭 후<br/>Service로 전달"| ASVC
+```
+
 ```text
 사용자 → DNS → 외부 LB → Ingress Node Service → Ingress Controller Pod → Worker Node Service → Worker Node Pod
 ```
@@ -211,7 +254,16 @@ DaemonSet을 사용하면 Ingress 역할 노드마다 하나의 nginx Pod가 실
 
 Ingress Controller는 어떻게 클러스터 전체의 Ingress 리소스를 알 수 있을까요? 답은 **Kubernetes API Server의 watch 기능**입니다.
 
-![Ingress 동기화 흐름도 — kubectl apply → API Server 수신 → etcd 저장 → Ingress Controller가 watch로 감지 → nginx.conf 재생성 → nginx reload](/images/kubernetes-network-guide-1-external-to-pod/img-02-ingress-sync-flow.png)
+```mermaid
+flowchart TB
+    A["1. 개발자<br/>kubectl apply -f my-ingress.yaml"]
+    B["2. API Server<br/>요청 수신"]
+    C[("3. etcd<br/>Ingress 저장")]
+    D["4. Ingress Controller<br/>watch로 변경 감지"]
+    E["5. nginx.conf<br/>설정 파일 재생성"]
+    F["6. nginx reload<br/>설정 적용 완료"]
+    A --> B --> C --> D --> E --> F
+```
 
 동기화 흐름을 단계별로 정리하면 다음과 같습니다:
 
@@ -293,7 +345,23 @@ server {
 
 이 마법을 담당하는 것이 바로 **kube-proxy**입니다.
 
-![kube-proxy 동작 3단계 다이어그램 — API Server watch로 Service/Endpoints 변경 감지, iptables NAT 규칙 업데이트, 패킷의 ClusterIP를 Pod IP로 DNAT](/images/kubernetes-network-guide-1-external-to-pod/img-03-kube-proxy-flow.png)
+```mermaid
+flowchart TB
+    subgraph S1["1단계: API Server Watch"]
+        direction LR
+        API["API Server"] -->|"Service/Endpoints<br/>변경 감지"| KP1["kube-proxy"]
+    end
+    subgraph S2["2단계: iptables 규칙 업데이트"]
+        direction LR
+        KP2["kube-proxy"] -->|"ClusterIP:Port →<br/>Pod IP:Port 매핑"| NAT["iptables<br/>NAT 테이블"]
+    end
+    subgraph S3["3단계: 패킷 처리"]
+        direction LR
+        PKT["패킷 도착<br/>dst: ClusterIP"] -->|"ClusterIP로 향하면"| RULE["iptables<br/>규칙 매칭"]
+        RULE -->|"DNAT 수행"| POD["Pod<br/>실제 목적지"]
+    end
+    S1 --> S2 --> S3
+```
 
 kube-proxy의 동작을 3단계로 나눠보면:
 
@@ -330,7 +398,22 @@ sudo iptables -t nat -L KUBE-SERVICES -n | head -20
 
 예를 들어 `user-service`라는 ClusterIP Service가 있다면, 다음과 같은 규칙 체인이 생성됩니다.
 
-![iptables 체인 흐름도 — ClusterIP로 들어온 패킷이 KUBE-SERVICES → KUBE-SVC 체인 → 50% 확률로 KUBE-SEP 엔드포인트를 거쳐 Pod A/B로 DNAT](/images/kubernetes-network-guide-1-external-to-pod/img-04-iptables-chain-flow-1.png)
+```mermaid
+flowchart TB
+    PKT["들어온 패킷<br/>dst: 10.96.100.50:80<br/>(ClusterIP)"]
+    SVCS["KUBE-SERVICES<br/>목적지가 ClusterIP인지 확인"]
+    SVC["KUBE-SVC-XXXX<br/>(user-service 체인)"]
+    SEPA["KUBE-SEP-AAAA<br/>Endpoint A (50% 확률)"]
+    SEPB["KUBE-SEP-BBBB<br/>Endpoint B (50% 확률)"]
+    PODA["Pod A로 전달<br/>DNAT → 10.244.1.15:8080"]
+    PODB["Pod B로 전달<br/>DNAT → 10.244.2.23:8080"]
+    PKT --> SVCS
+    SVCS -->|"ClusterIP 매칭"| SVC
+    SVC -->|"random 50%"| SEPA
+    SVC -->|"random 50%"| SEPB
+    SEPA --> PODA
+    SEPB --> PODB
+```
 
 | 체인 이름 | 역할 | 설명 |
 | --- | --- | --- |

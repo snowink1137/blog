@@ -2,7 +2,7 @@
 title: 'Kubernetes 컴퓨팅 이해하기 (1): Pod는 어떻게 배치되고 실행되는가'
 description: 'kubectl apply부터 컨테이너 실행까지 — API Server, Controller Manager, Scheduler, kubelet이 각자 어떤 역할로 Pod를 배치하고 실행하는지 단계별로 추적한다.'
 pubDate: '2026-01-10T19:54:00+09:00'
-updatedDate: '2026-01-10T19:54:00+09:00'
+updatedDate: '2026-08-03T02:05:00+09:00'
 category: tech
 subcategory: 'Kubernetes'
 tags: ['kubelet', 'kubernetes', 'pod', 'scheduler']
@@ -28,7 +28,47 @@ tags: ['kubelet', 'kubernetes', 'pod', 'scheduler']
 
 Kubernetes 클러스터는 크게 **컨트롤 플레인** (Control Plane) 과 **워커 노드** (Worker Node) 로 나뉩니다.
 
-![쿠버네티스 클러스터 구조도 — Control Plane(API Server·etcd·Scheduler·Controller Manager)과 워커 노드(kubelet·kube-proxy·컨테이너 런타임·Pod)](/images/kubernetes-computing-pod-lifecycle/img-01-image-35.png)
+```mermaid
+flowchart TB
+    subgraph CP["Control Plane (Master Node)"]
+        API["API Server<br/>모든 요청의 진입점"]
+        ETCD["etcd<br/>클러스터 상태 저장소"]
+        SCHED["Scheduler<br/>Pod 배치 결정"]
+        CM["Controller Manager<br/>Desired State 유지"]
+        API <--> ETCD
+        API <--> SCHED
+        API <--> CM
+    end
+    subgraph W1["Worker Node 1"]
+        KL1["kubelet<br/>Pod 라이프사이클 관리"]
+        KP1["kube-proxy<br/>네트워크 규칙"]
+        CR1["Container Runtime<br/>containerd / CRI-O"]
+        POD1["Pod"]
+        KL1 --> CR1
+        CR1 --> POD1
+    end
+    subgraph W2["Worker Node 2"]
+        KL2["kubelet<br/>Pod 라이프사이클 관리"]
+        KP2["kube-proxy<br/>네트워크 규칙"]
+        CR2["Container Runtime<br/>containerd / CRI-O"]
+        POD2["Pod"]
+        POD3["Pod"]
+        KL2 --> CR2
+        CR2 --> POD2
+        CR2 --> POD3
+    end
+    API <--> KL1
+    API <--> KP1
+    API <--> KL2
+    API <--> KP2
+    style API fill:#ffe0b2,color:#0f172a
+    style ETCD fill:#ffcdd2,color:#0f172a
+    style KL1 fill:#b2ebf2,color:#0f172a
+    style KL2 fill:#b2ebf2,color:#0f172a
+    style POD1 fill:#c8e6c9,color:#0f172a
+    style POD2 fill:#c8e6c9,color:#0f172a
+    style POD3 fill:#c8e6c9,color:#0f172a
+```
 
 ### 왜 이렇게 나눠져 있을까?
 
@@ -103,7 +143,37 @@ spec:
 | `template` | 생성할 Pod의 템플릿 (라벨, 컨테이너 정의) |
 | `resources` | CPU/Memory 요청량과 제한 |
 
-![Pod 생성 전체 흐름도 — kubectl apply → API Server → etcd 저장 → Controller Manager(Deployment→ReplicaSet→Pod) → Scheduler 노드 선택 → kubelet → 컨테이너 런타임 → CNI → Pod Running](/images/kubernetes-computing-pod-lifecycle/img-02-image-36.png)
+```mermaid
+flowchart TB
+    USER["사용자<br/>kubectl apply -f deployment.yaml"]
+    subgraph CP["Control Plane"]
+        API["API Server<br/>인증 / 인가 / Admission"]
+        ETCD["etcd<br/>Deployment, ReplicaSet, Pod 저장"]
+        CM["Controller Manager<br/>Deployment → ReplicaSet → Pod"]
+        SCHED["Scheduler<br/>Filtering → Scoring"]
+    end
+    subgraph WN["Worker Node (선택된 노드)"]
+        KL["kubelet<br/>Pod 생성 요청 수신"]
+        CR["Container Runtime<br/>이미지 Pull & 컨테이너 생성"]
+        CNI["CNI Plugin<br/>네트워크 설정"]
+        RUN["Pod Running!"]
+    end
+    USER -->|"1. Deployment 전송"| API
+    API -->|"2. 저장"| ETCD
+    ETCD -->|"3. 감시"| CM
+    CM -->|"4. Pod 생성 (status: Pending)"| API
+    API -->|"5. 감시"| SCHED
+    SCHED -->|"6. 노드 선택 · nodeName 기록"| API
+    API -->|"7. 감시"| KL
+    KL -->|"8. CRI 호출"| CR
+    CR -->|"9. 네트워크 설정"| CNI
+    CNI -->|"10. 완료"| RUN
+    style API fill:#ffe0b2,color:#0f172a
+    style ETCD fill:#ffcdd2,color:#0f172a
+    style KL fill:#b2ebf2,color:#0f172a
+    style CNI fill:#e1bee7,color:#0f172a
+    style RUN fill:#c8e6c9,color:#0f172a
+```
 
 ### 1단계: kubectl → API Server
 
@@ -242,7 +312,32 @@ status:
 
 Scheduler는 Pod를 “가장 적합한” 노드에 배치합니다. 이 과정은 **Filtering**과 **Scoring** 두 단계로 나뉩니다.
 
-![Scheduler 노드 선택 과정 — Filtering 단계에서 조건 미달 노드를 제외하고, Scoring 단계에서 최고 점수 노드를 골라 nodeName에 기록](/images/kubernetes-computing-pod-lifecycle/img-03-image-37.png)
+```mermaid
+flowchart TB
+    subgraph DETECT["새 Pod 감지"]
+        POD["Pod<br/>nodeName: (없음)<br/>status: Pending"]
+    end
+    subgraph SP["스케줄링 프로세스"]
+        subgraph F["1단계: Filtering"]
+            FC["필터 조건<br/>· CPU/Memory 충분?<br/>· NodeSelector 일치?<br/>· Taint 허용?"]
+            FR["결과<br/>✅ Node 1<br/>✅ Node 2<br/>❌ Node 3 (메모리 부족)<br/>❌ Node 4 (Taint 불일치)<br/>✅ Node 5"]
+            FC --> FR
+        end
+        subgraph SG["2단계: Scoring"]
+            SC["점수 기준<br/>· 리소스 균형<br/>· 이미지 존재 여부<br/>· Pod 친화성"]
+            SR["결과<br/>Node 1: 75점<br/>Node 2: 82점 ⭐<br/>Node 5: 68점"]
+            SC --> SR
+        end
+        FR --> SC
+    end
+    subgraph DONE["노드 선택 완료"]
+        UP["Pod 업데이트<br/>nodeName: node-2"]
+    end
+    POD --> FC
+    SR --> UP
+    style POD fill:#bbdefb,color:#0f172a
+    style UP fill:#c8e6c9,color:#0f172a
+```
 
 ### Filtering: 부적합한 노드 제외
 
@@ -360,7 +455,40 @@ kubelet은 워커 노드의 **에이전트**입니다. 다음과 같은 일을 �
 
 kubelet은 컨테이너를 직접 실행하지 않습니다. 대신 **CRI** (Container Runtime Interface) 라는 표준 인터페이스를 통해 컨테이너 런타임과 통신합니다.
 
-![컨테이너 런타임 계층 구조 — kubelet이 CRI(gRPC)로 고수준 런타임(containerd·CRI-O)을 호출하고, OCI 표준을 거쳐 저수준 런타임 runc가 namespace·cgroup으로 컨테이너를 격리 실행](/images/kubernetes-computing-pod-lifecycle/img-04-image-38.png)
+```mermaid
+flowchart TB
+    subgraph K8S["Kubernetes"]
+        KL["kubelet<br/>Pod 라이프사이클 관리<br/>Probe 실행, 상태 보고"]
+    end
+    subgraph CRI["CRI 계층"]
+        GRPC["gRPC 통신<br/>표준 인터페이스"]
+    end
+    subgraph HIGH["고수준 런타임"]
+        CD["containerd<br/>Docker에서 분리<br/>가장 널리 사용"]
+        CRIO["CRI-O<br/>Kubernetes 전용<br/>경량 런타임"]
+    end
+    subgraph OCIL["OCI 계층"]
+        SPEC["OCI 표준<br/>컨테이너 이미지 & 런타임 규격"]
+    end
+    subgraph LOW["저수준 런타임"]
+        RUNC["runc<br/>linux namespace, cgroup 설정<br/>프로세스 격리 실행"]
+    end
+    subgraph RES["실행 결과"]
+        PROC["컨테이너 프로세스<br/>격리된 환경에서 실행"]
+    end
+    KL -->|"Pod 생성/삭제 요청"| GRPC
+    GRPC -->|"이미지 Pull<br/>컨테이너 생성"| CD
+    GRPC -->|"이미지 Pull<br/>컨테이너 생성"| CRIO
+    CD --> SPEC
+    CRIO --> SPEC
+    SPEC -->|"컨테이너 실행"| RUNC
+    RUNC -->|"프로세스 시작"| PROC
+    style KL fill:#bbdefb,color:#0f172a
+    style GRPC fill:#ffe0b2,color:#0f172a
+    style SPEC fill:#e1bee7,color:#0f172a
+    style RUNC fill:#ffcdd2,color:#0f172a
+    style PROC fill:#b2ebf2,color:#0f172a
+```
 ```text
 kubelet
    ↓ (CRI - gRPC 프로토콜)

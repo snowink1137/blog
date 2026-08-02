@@ -2,7 +2,7 @@
 title: 'AWS EC2 모니터링 가이드 (1) – CloudWatch로 서버 상태 확인하기'
 description: 'EC2 모니터링 탭과 CloudWatch의 관계, 기본 vs 세부 모니터링의 차이와 비용, 무료 범위까지 — EC2 서버 상태 모니터링의 기초를 잡는 시리즈 첫 편.'
 pubDate: '2026-01-06T22:22:22+09:00'
-updatedDate: '2026-01-06T22:22:22+09:00'
+updatedDate: '2026-08-01T19:26:17+09:00'
 category: tech
 subcategory: 'AWS'
 tags: ['aws', 'cloud', 'cloud-watch', 'ec2', 'monitoring']

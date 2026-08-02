@@ -2,7 +2,7 @@
 title: 'Understanding Kubernetes Storage (1): How Pods Store and Persist Data'
 description: 'From the Kubernetes volume concept and Volume types like emptyDir and hostPath, to the PV/PVC architecture that decouples storage from the Pod lifecycle — the first post in the storage series.'
 pubDate: '2026-01-11T19:56:00+09:00'
-updatedDate: '2026-01-11T19:56:00+09:00'
+updatedDate: '2026-08-03T02:05:00+09:00'
 category: tech
 subcategory: 'Kubernetes'
 tags: ['csi', 'kubernetes', 'pv', 'pvc', 'storage']
@@ -91,9 +91,30 @@ spec:
 
 ### The Volume types
 
-![Pod volume structure diagram — the Pod's volumeMounts connect to emptyDir, persistentVolumeClaim, and configMap entries in spec.volumes[], and the PVC leads through a PV to the actual storage (AWS EBS, NFS)](/images/kubernetes-pod-storage-pv-pvc-1/img-01-image.png)
-
-*Diagram labels are in Korean — the emptyDir arrow points to "node temporary space (deleted when the Pod is deleted)", and the PVC "binds" to a PV that "connects" to the "actual storage (AWS EBS, NFS, etc.)".*
+```mermaid
+flowchart TB
+    subgraph POD["Pod"]
+        VM1["volumeMounts:<br/>- mountPath: /cache"]
+        VM2["volumeMounts:<br/>- mountPath: /data"]
+        VM3["volumeMounts:<br/>- mountPath: /config"]
+    end
+    subgraph VOLS["spec.volumes[]"]
+        V1["emptyDir: {}"]
+        V2["persistentVolumeClaim:<br/>claimName: my-pvc"]
+        V3["configMap:<br/>name: my-config"]
+    end
+    VM1 --> V1
+    VM2 --> V2
+    VM3 --> V3
+    V1 --> TMP["Node temporary space<br/>(deleted when the Pod is deleted)"]
+    V2 --> PVC["PersistentVolumeClaim"]
+    V3 --> CM["ConfigMap"]
+    PVC -->|"binds"| PV["PersistentVolume"]
+    PV -->|"connects to"| REAL["Actual storage<br/>(AWS EBS, NFS, etc.)"]
+    style PVC fill:#c8e6c9,color:#0f172a
+    style PV fill:#c8e6c9,color:#0f172a
+    style REAL fill:#ffcdd2,color:#0f172a
+```
 
 | Volume type | Description | Data persistence |
 | --- | --- | --- |
@@ -105,9 +126,23 @@ spec:
 
 **The separate PVC/PV resources come into play only when you use the `persistentVolumeClaim` type.**
 
-![Volume type overview — emptyDir, hostPath, configMap, secret, and persistentVolumeClaim in spec.volumes[], plus the binding chain from PVC through PV to the actual storage](/images/kubernetes-pod-storage-pv-pvc-1/img-02-image-1.png)
-
-*Diagram labels are in Korean — each type box summarizes its behavior (emptyDir is created/deleted with the Pod, hostPath uses a node path directly, configMap/secret reference those resources), and persistentVolumeClaim "references" a PVC ("storage request"), which "binds" to a PV ("cluster-level storage") "connected" to the actual storage.*
+```mermaid
+flowchart TB
+    subgraph VOLS["The Pod's spec.volumes[]"]
+        E["emptyDir<br/>→ created and deleted with the Pod"]
+        H["hostPath<br/>→ uses a node path directly"]
+        C["configMap<br/>→ references a ConfigMap"]
+        S["secret<br/>→ references a Secret"]
+        P["persistentVolumeClaim<br/>→ references a PVC"]
+    end
+    P -->|"references"| PVC["PersistentVolumeClaim (PVC)<br/>storage request"]
+    PVC -->|"binds"| PV["PersistentVolume (PV)<br/>cluster-level storage"]
+    PV -->|"connects to"| REAL["Actual storage<br/>(AWS EBS, NFS, etc.)"]
+    style P fill:#c8e6c9,color:#0f172a
+    style PVC fill:#c8e6c9,color:#0f172a
+    style PV fill:#c8e6c9,color:#0f172a
+    style REAL fill:#ffcdd2,color:#0f172a
+```
 
 ### emptyDir: a shared volume that starts as an empty directory
 
@@ -315,9 +350,22 @@ Block Storage is a virtual block device attached over the network.
 
 **Examples:** AWS EBS, GCP Persistent Disk (Zonal), Azure Managed Disk
 
-![Three steps of mounting block storage — the CSI Controller attaches the EBS volume to the node (/dev/xvdf), the CSI Node Plugin mounts it, and a bind mount connects it to /data in the Pod](/images/kubernetes-pod-storage-pv-pvc-1/img-03-image-2.png)
-
-*Diagram labels are in Korean — the cloud provider (AZ-a) holds the EBS volume; step 1 is "network attach (CSI Controller)" to the worker node's /dev/xvdf ("attached device"), step 2 is "mount (CSI Node Plugin)" to the kubelet path, and step 3 bind-mounts it to /data ("path inside the container").*
+```mermaid
+flowchart TB
+    subgraph CLOUD["Cloud provider (AZ-a)"]
+        BS["Block Storage<br/>(e.g. AWS EBS vol-123)"]
+    end
+    subgraph NODE["Worker node (AZ-a)"]
+        DEV["/dev/xvdf<br/>(attached device)"]
+        KPATH["/var/lib/kubelet/pods/.../volumes/..."]
+    end
+    subgraph POD["Pod"]
+        DATA["/data<br/>(path inside the container)"]
+    end
+    BS -->|"① network attach<br/>(CSI Controller)"| DEV
+    DEV -->|"② mount<br/>(CSI Node Plugin)"| KPATH
+    KPATH -->|"③ bind mount"| DATA
+```
 
 **The flow:**
 
@@ -396,9 +444,32 @@ We covered CNI (Container Network Interface) in [Understanding Networking (2)](/
 
 ### CSI driver architecture
 
-![CSI driver architecture — each node's Node Plugin (DaemonSet) mounts at Pod paths, while the Controller Plugin creates and attaches volumes against the storage backend (EBS, GCP PD, NFS, etc.)](/images/kubernetes-pod-storage-pv-pvc-1/img-04-image-3.png)
-
-*Diagram labels are in Korean — the worker nodes' Node Plugins "mount/unmount at the Pod path", the API Server exchanges "PVC/PV events" with the CSI Controller Plugin, which handles "volume create/delete and attach/detach to nodes" against the storage backend.*
+```mermaid
+flowchart TB
+    subgraph WORKERS["Worker nodes"]
+        subgraph N1["Node 1"]
+            NP1["Node Plugin<br/>(DaemonSet)"]
+            POD1["Pod"]
+            NP1 <-->|"mount/unmount<br/>at the Pod path"| POD1
+        end
+        subgraph N2["Node 2"]
+            NP2["Node Plugin<br/>(DaemonSet)"]
+            POD2["Pod"]
+            NP2 <-->|"mount/unmount<br/>at the Pod path"| POD2
+        end
+    end
+    subgraph CP["Control Plane"]
+        API["API Server"]
+    end
+    subgraph CSI["CSI Driver"]
+        CTRL["Controller Plugin (Deployment)<br/>CreateVolume / DeleteVolume<br/>ControllerPublishVolume / ControllerUnpublishVolume"]
+    end
+    subgraph BACKEND["Storage backend"]
+        SB["AWS EBS / GCP PD /<br/>Azure Disk / NFS"]
+    end
+    API <-->|"PVC/PV events"| CTRL
+    CTRL <-->|"create/delete volumes<br/>attach/detach to nodes"| SB
+```
 
 A CSI driver consists of two components:
 
@@ -446,9 +517,26 @@ Creating PVs by hand every time is tedious. With a **StorageClass**, a PV is **c
 
 ### The dynamic provisioning flow
 
-![Dynamic provisioning sequence — PVC created → the CSI Controller creates a cloud volume via CreateVolume → a PV is auto-created and bound → ControllerPublishVolume attaches → NodePublishVolume mounts → the Pod uses the volume](/images/kubernetes-pod-storage-pv-pvc-1/img-05-image-4.png)
-
-*Diagram labels are in Korean — the sequence runs from the developer creating a PVC, through the CSI Controller calling CreateVolume on the cloud API and binding the auto-created PV, then Pod creation and scheduling, ControllerPublishVolume (attach to node), NodePublishVolume (mount at the Pod path), and finally the Pod running with the volume available.*
+```mermaid
+sequenceDiagram
+    participant DEV as Developer
+    participant API as API Server
+    participant CTRL as CSI Controller Plugin
+    participant CLOUD as Cloud API
+    participant NODE as CSI Node Plugin
+    participant POD as Pod
+    DEV->>API: ① Create PVC (storageClassName: fast-ssd)
+    API->>CTRL: ② PVC detected
+    CTRL->>CLOUD: ③ CreateVolume (e.g. create an EBS volume)
+    CLOUD-->>CTRL: Return volume ID
+    CTRL->>API: ④ PV auto-created & bound to the PVC
+    DEV->>API: ⑤ Create Pod (references the PVC)
+    API->>CTRL: ⑥ Pod scheduled
+    CTRL->>CLOUD: ⑦ ControllerPublishVolume (attach to the node)
+    CLOUD-->>NODE: Device attached
+    NODE->>POD: ⑧ NodePublishVolume (mount at the Pod path)
+    POD-->>DEV: ⑨ Pod running, volume available
+```
 
 1.  A developer creates a PVC (specifying a StorageClass)
 2.  The CSI Controller detects the PVC

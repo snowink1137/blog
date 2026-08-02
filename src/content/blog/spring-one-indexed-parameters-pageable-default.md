@@ -2,7 +2,7 @@
 title: 'Spring Boot one-indexed-parameters 옵션의 함정: @PageableDefault는 왜 0으로 설정해야 할까?'
 description: 'one-indexed-parameters를 켜면 @PageableDefault(page = 1)이 오히려 두 번째 페이지를 가리키는 함정 — Spring Data 소스 코드와 테스트로 원인을 검증하고 올바른 사용법을 정리한다.'
 pubDate: '2026-01-03T17:06:46+09:00'
-updatedDate: '2026-01-03T17:06:46+09:00'
+updatedDate: '2026-08-03T02:05:00+09:00'
 category: tech
 subcategory: 'Spring'
 tags: ['one-indexed-parameters', 'pageable', 'pageable-default', 'pagination', 'spring-boot', 'spring-data']
@@ -36,7 +36,34 @@ spring:
 
 먼저 전체 흐름을 다이어그램으로 살펴보겠습니다.
 
-![Pageable 생성 흐름도 — page 파라미터가 있으면 one-indexed-parameters=true일 때 page를 1→0으로 변환하고, 없으면 @PageableDefault를 사용해 최종 PageRequest.of(0, 10)을 생성](/images/spring-one-indexed-parameters-pageable-default/img-01-image-16.png)
+```mermaid
+flowchart TB
+    START["🌐 HTTP 요청<br/>GET /items?page=1&size=10"]
+    Q1{"page 파라미터<br/>존재?"}
+    PARSE["parseAndApplyBoundaries()"]
+    Q2{"one-indexed-parameters<br/>= true?"}
+    SHIFT["page = page - 1<br/>(1 → 0으로 변환)"]
+    KEEP["page = page<br/>(변환 없음)"]
+    DEFAULT["@PageableDefault 또는<br/>fallbackPageable 사용"]
+    NOSHIFT["❌ 변환 없이 그대로 사용<br/>@PageableDefault(page=0)"]
+    RESULT["✅ Pageable 객체 생성<br/>PageRequest.of(0, 10)"]
+
+    START --> Q1
+    Q1 -- Yes --> PARSE
+    Q1 -- No --> DEFAULT
+    PARSE --> Q2
+    Q2 -- Yes --> SHIFT
+    Q2 -- No --> KEEP
+    DEFAULT --> NOSHIFT
+    SHIFT --> RESULT
+    KEEP --> RESULT
+    NOSHIFT --> RESULT
+
+    style PARSE fill:#cfe8fb,color:#0f172a
+    style SHIFT fill:#c8e6c9,color:#0f172a
+    style NOSHIFT fill:#f8cdd5,color:#0f172a
+    style RESULT fill:#fbf3ab,color:#0f172a
+```
 
 다이어그램에서 볼 수 있듯이, **`-1` 변환은 오직 요청 파라미터가 존재할 때만 적용**됩니다. `@PageableDefault`를 통한 기본값은 변환 없이 그대로 사용됩니다.
 

@@ -2,7 +2,7 @@
 title: 'Kubernetes 스토리지 이해하기 (2): PV/PVC 실전 활용과 관리'
 description: 'AccessModes 세 가지의 실제 의미, Deployment + RWO PVC 조합의 함정, PV 라이프사이클과 Reclaim Policy까지 — PV/PVC 실전 운영에서 마주치는 문제들.'
 pubDate: '2026-01-12T19:01:00+09:00'
-updatedDate: '2026-01-12T19:01:00+09:00'
+updatedDate: '2026-08-03T02:05:00+09:00'
 category: tech
 subcategory: 'Kubernetes'
 tags: ['kubernetes', 'pv', 'pvc', 'storage']
@@ -154,7 +154,21 @@ PVC를 삭제하려면 명시적으로 `kubectl delete pvc my-pvc` 해야 합니
 
 ### PV 상태 (Phase)
 
-![PersistentVolume 상태 전이도 — PV 생성 후 Available → PVC 바인딩 시 Bound → PVC 삭제 시 정책에 따라 Delete(삭제) 또는 Retain(Released), Released에서 claimRef 제거로 Available 재사용](/images/kubernetes-pod-storage-pv-pvc-2/img-01-image-5.png)
+```mermaid
+flowchart TB
+    START(("시작")) -->|"PV 생성"| AVAILABLE["Available"]
+    AVAILABLE -->|"PVC와 바인딩"| BOUND["Bound"]
+    BOUND -->|"PVC 삭제 (Retain 정책)"| RELEASED["Released"]
+    BOUND -->|"PVC 삭제 (Delete 정책)<br/>PV와 스토리지 삭제"| GONE((("PV 삭제됨")))
+    RELEASED -->|"claimRef 제거<br/>(수동 작업)"| AVAILABLE
+    RELEASED -->|"PV 수동 삭제"| GONE
+    AVAILABLE -.- NOTE_A["사용 가능한 상태<br/>PVC가 바인딩 대기"]
+    BOUND -.- NOTE_B["PVC에 연결됨<br/>Pod에서 사용 중"]
+    RELEASED -.- NOTE_C["이전 데이터 존재<br/>자동 재사용 불가"]
+    style NOTE_A fill:#fff9c4,color:#0f172a,stroke:#c9b458
+    style NOTE_B fill:#fff9c4,color:#0f172a,stroke:#c9b458
+    style NOTE_C fill:#fff9c4,color:#0f172a,stroke:#c9b458
+```
 
 | 상태 | 의미 |
 | --- | --- |

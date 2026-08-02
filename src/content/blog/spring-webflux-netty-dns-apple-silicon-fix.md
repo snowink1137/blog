@@ -2,7 +2,7 @@
 title: 'Apple Silicon Mac에서 Netty DNS 해석 실패 해결하기(feat. Gradle 의존성 Configuration 이해하기)'
 description: 'Apple Silicon Mac에서 Spring Cloud Gateway만 DNS 해석에 실패하는 문제의 원인(Netty의 자체 DNS resolver)과 해결책. 네이티브 라이브러리 의존성과 Gradle Configuration 개념까지 함께 정리.'
 pubDate: '2026-01-04T16:43:48+09:00'
-updatedDate: '2026-01-04T16:43:48+09:00'
+updatedDate: '2026-08-03T02:05:00+09:00'
 category: tech
 subcategory: 'Spring'
 tags: ['apple-silicon', 'dns', 'gradle', 'netty', 'spring-cloud-gateway', 'spring-webflux']
@@ -40,7 +40,39 @@ Spring WebFlux는 기본적으로 `reactor-netty`를 사용합니다. WebClient�
 
 ## 원인: Netty는 왜 시스템 DNS를 사용하지 않을까?
 
-![Netty DNS 해석 흐름도 — netty-resolver-dns-native-macos(osx-aarch_64) 라이브러리가 있으면 macOS 네이티브 DNS로 VPN 내부 도메인 해석에 성공하고, 없으면 fallback DNS로 공용 서버(8.8.8.8)를 써 내부 도메인 해석에 실패(SearchDomainUnknownHostException)](/images/spring-webflux-netty-dns-apple-silicon-fix/img-01-netty-dns-flowchart.png)
+```mermaid
+flowchart TB
+    subgraph SPRING["🖥️ Spring WebFlux"]
+        A["WebClient / Gateway<br/>외부 API 호출"]
+    end
+    subgraph NETTY["⚡ Netty DNS Resolver"]
+        B{"네이티브 라이브러리<br/>존재?"}
+        C["✅ macOS Native DNS"]
+        D["❌ Fallback DNS<br/>/etc/resolv.conf 참조"]
+    end
+    subgraph MACOS["🍎 macOS 시스템 DNS"]
+        E["VPN DNS 서버<br/>10.x.x.x"]
+        F["공용 DNS 서버<br/>8.8.8.8 등"]
+    end
+    subgraph RESULT["결과"]
+        G["✅ 내부 도메인 해석 성공<br/>api.internal.example.com"]
+        H["❌ DNS 해석 실패<br/>SearchDomainUnknownHostException"]
+    end
+    A --> B
+    B -->|"netty-resolver-dns-native-macos<br/>osx-aarch_64 있음"| C
+    B -->|"라이브러리 없음"| D
+    C --> E
+    D --> F
+    E --> G
+    F --> H
+    style A fill:#dbeafe,color:#0f172a
+    style C fill:#c8e6c9,color:#0f172a
+    style G fill:#c8e6c9,color:#0f172a
+    style D fill:#ffcdd2,color:#0f172a
+    style H fill:#ffcdd2,color:#0f172a
+    style E fill:#fff9c4,color:#0f172a
+    style F fill:#fff9c4,color:#0f172a
+```
 
 Netty는 자체 DNS resolver를 사용합니다. 그 이유는 **성능** 때문입니다.
 
@@ -80,7 +112,38 @@ dependencies {
 | `compileOnly` | ✅ | ❌ | 컴파일에만 필요, 런타임엔 외부 제공 (Lombok 등) |
 | `runtimeOnly` | ❌ | ✅ | 코드에서 직접 참조 안 함, 런타임에 프레임워크가 감지 |
 
-![Gradle 의존성 Configuration 비교 — implementation(컴파일+패키징), compileOnly(컴파일만, Lombok·Servlet API), runtimeOnly(패키징만, JDBC 드라이버·Netty Native)가 컴파일·패키징·런타임 단계에 어떻게 포함되는지](/images/spring-webflux-netty-dns-apple-silicon-fix/img-02-gradle-dependency-config.png)
+```mermaid
+flowchart LR
+    subgraph SRC["📝 소스 코드"]
+        S[".kt / .java 파일"]
+    end
+    subgraph CONF["의존성 Configuration"]
+        IMPL["implementation<br/>컴파일 ✅ · JAR ✅<br/>코드에서 직접 사용"]
+        CO["compileOnly<br/>컴파일 ✅ · JAR ❌<br/>Lombok, Servlet API"]
+        RO["runtimeOnly<br/>컴파일 ❌ · JAR ✅<br/>JDBC 드라이버, Netty Native"]
+    end
+    subgraph COMPILE["🔨 컴파일 단계"]
+        BC["바이트코드 생성<br/>.class 파일"]
+    end
+    subgraph PKG["📦 패키징 단계"]
+        CLS["BOOT-INF/classes/<br/>컴파일된 클래스"]
+        LIB["BOOT-INF/lib/<br/>의존성 JAR"]
+    end
+    subgraph RUN["🚀 런타임"]
+        JAR["java -jar app.jar"]
+    end
+    S --> BC
+    BC --> CLS
+    CLS --> JAR
+    LIB --> JAR
+    IMPL -.->|"컴파일 + 패키징"| BC
+    IMPL -.->|"컴파일 + 패키징"| LIB
+    CO -.->|"컴파일만"| BC
+    RO -.->|"패키징만"| LIB
+    style IMPL fill:#c8e6c9,color:#0f172a
+    style CO fill:#fff9c4,color:#0f172a
+    style RO fill:#bbdefb,color:#0f172a
+```
 
 `netty-resolver-dns-native-macos`는 코드에서 직접 import하지 않습니다. Netty가 런타임에 classpath를 스캔해서 자동으로 감지하고 사용합니다. 따라서 `runtimeOnly`가 적합합니다.
 

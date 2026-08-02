@@ -2,7 +2,7 @@
 title: 'The one-indexed-parameters Trap in Spring Boot: Why @PageableDefault Should Still Be Set to 0'
 description: 'Enable one-indexed-parameters and @PageableDefault(page = 1) suddenly points at the second page — tracing the cause through the Spring Data source code and tests, and pinning down the correct usage.'
 pubDate: '2026-01-03T17:06:46+09:00'
-updatedDate: '2026-01-03T17:06:46+09:00'
+updatedDate: '2026-08-03T02:05:00+09:00'
 category: tech
 subcategory: 'Spring'
 tags: ['one-indexed-parameters', 'pageable', 'pageable-default', 'pagination', 'spring-boot', 'spring-data']
@@ -36,9 +36,34 @@ That reasoning is wrong. Let's see why by looking at the [Spring Data Commons so
 
 First, let's look at the overall flow as a diagram.
 
-![Pageable creation flow — when a page parameter is present and one-indexed-parameters=true, page is converted from 1 to 0; when absent, @PageableDefault is used as-is, producing the final PageRequest.of(0, 10)](/images/spring-one-indexed-parameters-pageable-default/img-01-image-16.png)
+```mermaid
+flowchart TB
+    START["🌐 HTTP request<br/>GET /items?page=1&size=10"]
+    Q1{"page parameter<br/>present?"}
+    PARSE["parseAndApplyBoundaries()"]
+    Q2{"one-indexed-parameters<br/>= true?"}
+    SHIFT["page = page - 1<br/>(converts 1 → 0)"]
+    KEEP["page = page<br/>(no conversion)"]
+    DEFAULT["Use @PageableDefault or<br/>fallbackPageable"]
+    NOSHIFT["❌ Used as-is, no conversion<br/>@PageableDefault(page=0)"]
+    RESULT["✅ Pageable object created<br/>PageRequest.of(0, 10)"]
 
-*Diagram labels are in Korean — the flow reads: HTTP request → "page parameter present?" — if yes, parseAndApplyBoundaries() checks one-indexed-parameters and converts page 1 → 0; if no, @PageableDefault or fallbackPageable is used without conversion; both paths end at creating the Pageable via PageRequest.of(0, 10).*
+    START --> Q1
+    Q1 -- Yes --> PARSE
+    Q1 -- No --> DEFAULT
+    PARSE --> Q2
+    Q2 -- Yes --> SHIFT
+    Q2 -- No --> KEEP
+    DEFAULT --> NOSHIFT
+    SHIFT --> RESULT
+    KEEP --> RESULT
+    NOSHIFT --> RESULT
+
+    style PARSE fill:#cfe8fb,color:#0f172a
+    style SHIFT fill:#c8e6c9,color:#0f172a
+    style NOSHIFT fill:#f8cdd5,color:#0f172a
+    style RESULT fill:#fbf3ab,color:#0f172a
+```
 
 As the diagram shows, **the `-1` conversion is applied only when the request parameter is present**. Defaults supplied via `@PageableDefault` are used as-is, with no conversion.
 

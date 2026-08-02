@@ -2,7 +2,7 @@
 title: 'Understanding Kubernetes Networking (2): Pod-to-Pod Communication and Service Discovery'
 description: 'Who assigns Pod IPs, and how do Pods talk to each other? Following the packet flow through CNI, veth pairs, the Linux bridge, cross-node routing, and CoreDNS service discovery.'
 pubDate: '2026-01-09T20:01:00+09:00'
-updatedDate: '2026-01-09T20:01:00+09:00'
+updatedDate: '2026-08-03T02:05:00+09:00'
 category: tech
 subcategory: 'Kubernetes'
 tags: ['calico', 'cilium', 'cni', 'container-network-interface', 'core-dns', 'kubernetes', 'network']
@@ -77,9 +77,29 @@ How does the network get configured when a Pod is created? According to the [off
 6. Container runtime → kubelet: "Network ready"
 7. kubelet: starts the container
 ```
-![Network setup flow when a Pod is created — kubelet calls the container runtime and the CNI plugin, which gets an IP from IPAM and creates a veth pair to wire up the Pod's network](/images/kubernetes-network-guide-2-pod-to-pod/img-01-image-31.png)
 
-*Diagram labels are in Korean — the steps are: 1. Pod creation request, 2. create network namespace, 3. run ADD command, 4. IP allocation request, 5. IP returned (10.244.1.15), 6. create veth pair and set routing rules, 7. setup complete, 8. network ready, 9. start container.*
+```mermaid
+flowchart TB
+    subgraph CP["Control Plane (Master Node)"]
+        API["API Server"]
+    end
+    subgraph WN["Worker Node"]
+        KUBELET["kubelet"]
+        CRI["Container runtime<br/>(containerd, CRI-O)"]
+        CNI["CNI plugin<br/>(Cilium, Calico, etc.)"]
+        IPAM["IPAM<br/>IP address management"]
+        POD["Pod<br/>10.244.1.15"]
+    end
+    API -->|"1. Pod creation request"| KUBELET
+    KUBELET -->|"2. Create network namespace"| CRI
+    CRI -->|"3. Run ADD command"| CNI
+    CNI -->|"4. IP allocation request"| IPAM
+    IPAM -->|"5. IP returned (10.244.1.15)"| CNI
+    CNI -->|"6. Create veth pair<br/>set routing rules"| POD
+    CNI -->|"7. Setup complete"| CRI
+    CRI -->|"8. Network ready"| KUBELET
+    KUBELET -->|"9. Start container"| POD
+```
 
 The CNI plugin lives as an executable in the `/opt/cni/bin/` directory, and its configuration is stored as JSON in `/etc/cni/net.d/`.
 
@@ -104,9 +124,28 @@ Splitting subnets per node like this means **"a 10.244.2.x IP lives on worker-2"
 
 Now let's walk through the actual communication process — starting with **Pods on the same node**.
 
-![Pod-to-Pod communication flow on the same node — a packet leaves Pod A's eth0, crosses the veth pair and the Linux bridge (cni0), and arrives at Pod B](/images/kubernetes-network-guide-2-pod-to-pod/img-02-image-32.png)
-
-*Diagram labels are in Korean — the steps are: 1. packet sent (dst: 10.244.1.20), 2. forwarded to the bridge, 3. bridge finds the destination by MAC address, 4. packet arrives; "veth-a/veth-b" are marked as dedicated to Pod A/Pod B, and the Linux bridge (cbr0/cni0) is labeled a virtual switch.*
+```mermaid
+flowchart LR
+    subgraph WN["Worker Node"]
+        subgraph PA["Pod A (10.244.1.15)"]
+            APPA["Application"]
+            ETHA["eth0"]
+        end
+        VA["veth-a<br/>(dedicated to Pod A)"]
+        BR["Linux Bridge (cbr0/cni0)<br/>virtual switch"]
+        VB["veth-b<br/>(dedicated to Pod B)"]
+        subgraph PB["Pod B (10.244.1.20)"]
+            ETHB["eth0"]
+            APPB["Application"]
+        end
+    end
+    APPA -->|"1. Packet sent<br/>dst: 10.244.1.20"| ETHA
+    ETHA -->|"veth pair"| VA
+    VA -->|"2. Forward to bridge"| BR
+    BR -->|"3. Find destination<br/>by MAC address"| VB
+    VB -->|"veth pair"| ETHB
+    ETHB -->|"4. Packet arrives"| APPB
+```
 
 ### veth pair: a Virtual Network Cable
 
@@ -156,9 +195,38 @@ All of this happens **inside the node**, never touching the physical network, so
 
 Now for **Pods on different nodes** — this is the core area where implementations differ from one CNI plugin to another.
 
-![Pod-to-Pod communication flow across nodes — a packet from Pod A on Worker-1 is encapsulated by the CNI (overlay/direct routing), crosses the physical network, and is decapsulated on Worker-2 before reaching Pod B](/images/kubernetes-network-guide-2-pod-to-pod/img-03-image-33.png)
-
-*Diagram labels are in Korean — the steps are: 1. packet sent (dst: 10.244.2.23), 2. destination is another node's range, hand off to the CNI, 3. encapsulation (outer: 192.168.1.20), 4. inter-node transfer over the physical network, 5. decapsulation, 6. packet arrives; "애플리케이션" means application and "물리 NIC / 물리 네트워크" mean physical NIC / physical network.*
+```mermaid
+flowchart TB
+    subgraph W1["Worker-1 (192.168.1.10)"]
+        subgraph PA["Pod A (10.244.1.15)"]
+            APPA["Application"]
+        end
+        VETH1["veth"]
+        BR1["Bridge"]
+        CNI1["CNI plugin<br/>(Overlay or Direct Routing)"]
+        NIC1["eth0<br/>(physical NIC)"]
+    end
+    PHY["Physical network"]
+    subgraph W2["Worker-2 (192.168.1.20)"]
+        NIC2["eth0<br/>(physical NIC)"]
+        CNI2["CNI plugin<br/>(Overlay or Direct Routing)"]
+        BR2["Bridge"]
+        VETH2["veth"]
+        subgraph PB["Pod B (10.244.2.23)"]
+            APPB["Application"]
+        end
+    end
+    APPA -->|"1. Packet sent<br/>dst: 10.244.2.23"| VETH1
+    VETH1 --> BR1
+    BR1 -->|"2. Another node's range<br/>hand off to the CNI"| CNI1
+    CNI1 -->|"3. Encapsulation<br/>outer: 192.168.1.20"| NIC1
+    NIC1 -->|"4. Inter-node transfer"| PHY
+    PHY --> NIC2
+    NIC2 -->|"5. Decapsulation"| CNI2
+    CNI2 --> BR2
+    BR2 --> VETH2
+    VETH2 -->|"6. Packet arrives"| APPB
+```
 
 ### The Problem: Pod IPs Only Mean Something Inside the Cluster
 
@@ -359,9 +427,31 @@ How does the name `user-service.svc` get resolved to an IP? That's the job of **
 
 [CoreDNS](https://coredns.io/) is Kubernetes' default DNS server. It manages DNS records for every Service and Pod.
 
-![CoreDNS service discovery flow — a Pod resolves a Service domain via DNS to get the ClusterIP, and kube-proxy/eBPF picks an actual Pod IP via DNAT](/images/kubernetes-network-guide-2-pod-to-pod/img-04-image-34.png)
-
-*Diagram labels are in Korean — the steps are: 1. DNS lookup for user-service.default.svc.cluster.local, 2. ClusterIP returned (10.96.100.50), 3. HTTP request (dst: 10.96.100.50), 4. DNAT selects a Pod IP; "호출하는 Pod" means the calling Pod, "애플리케이션" means application, and "또는" means "or."*
+```mermaid
+flowchart LR
+    subgraph K8S["Kubernetes cluster"]
+        API["API Server"]
+        subgraph CALLER["Calling Pod"]
+            APP["Application<br/>curl http://user-service"]
+        end
+        DNS["CoreDNS<br/>(kube-dns Service)"]
+        subgraph SVC["user-service (Service)"]
+            CIP["ClusterIP<br/>10.96.100.50"]
+        end
+        PROXY["kube-proxy or eBPF<br/>(DNAT handling)"]
+        subgraph PODS["user-service Pods"]
+            POD1["Pod 1<br/>10.244.1.15"]
+            POD2["Pod 2<br/>10.244.2.23"]
+        end
+    end
+    API -->|"watch Service/Endpoints"| DNS
+    APP -->|"1. DNS lookup<br/>user-service.default.svc.cluster.local"| DNS
+    DNS -->|"2. ClusterIP returned<br/>10.96.100.50"| APP
+    APP -->|"3. HTTP request<br/>dst: 10.96.100.50"| CIP
+    CIP --> PROXY
+    PROXY -->|"4. DNAT selects a Pod IP"| POD1
+    PROXY -.->|"or"| POD2
+```
 
 CoreDNS works like this:
 

@@ -2,7 +2,7 @@
 title: 'AWS EC2 Monitoring Guide (3) – Completing the Setup with a CloudWatch Dashboard and Log Collection'
 description: 'How to bring CPU, memory, disk, and network metrics together on a single CloudWatch dashboard, then collect server logs and connect alarms to complete your EC2 monitoring setup.'
 pubDate: '2026-01-06T22:36:55+09:00'
-updatedDate: '2026-01-06T22:36:55+09:00'
+updatedDate: '2026-08-01T19:26:17+09:00'
 category: tech
 subcategory: 'AWS'
 tags: ['aws', 'cloud-watch', 'cloud-watch-agent', 'cloud-watch-logs', 'ec2', 'monitoring']

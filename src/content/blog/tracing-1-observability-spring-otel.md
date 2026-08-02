@@ -2,7 +2,7 @@
 title: 'Tracing 이해하기 (1) – Observability의 역사부터 Spring 생태계까지 (feat. OTel)'
 description: 'Observability 세 기둥과 Distributed Tracing이 필요한 이유, Zipkin B3에서 OpenTracing/OpenCensus 분열을 거쳐 OpenTelemetry로 통합되기까지의 역사, 그리고 Spring 생태계의 현재.'
 pubDate: '2026-02-07T20:26:31+09:00'
-updatedDate: '2026-02-07T20:26:31+09:00'
+updatedDate: '2026-08-03T02:05:00+09:00'
 category: tech
 subcategory: 'Tracing'
 tags: ['b3', 'micrometer', 'msa', 'observability', 'opentelemetry', 'spring-boot', 'tracing', 'w3c']
@@ -56,7 +56,21 @@ tags: ['b3', 'micrometer', 'msa', 'observability', 'opentelemetry', 'spring-boot
 
 대시보드에서 갑자기 에러율이 치솟는 걸 발견했다고 가정해봅시다. Metrics가 알려주는 건 “에러가 많이 발생하고 있다”는 사실뿐입니다. 어떤 요청에서 에러가 났는지, 그 요청이 어떤 경로를 거쳤는지는 알 수 없습니다. 로그를 뒤져야 하는데, 에러가 발생한 시간대의 로그가 수만 건이라면? 그중에서 문제의 요청을 찾는 건 사막에서 바늘 찾기입니다.
 
-![관측성의 분리된 세계 — Metrics·Logging·Tracing이 서로 연결되지 않아 ‘어떤 요청에서 에러가 났는지’ 추적하기 어려운 상황](/images/tracing-1-observability-spring-otel/img-02-image-40.png)
+```mermaid
+flowchart LR
+    subgraph SEP["❌ 분리된 세계"]
+        direction LR
+        M["📊 Metrics<br/>14:23에 에러율 급증"] -.- QM["어떤 요청에서<br/>에러가 났지?"]
+        L["📝 Logging<br/>14:23 전후 수만 건의 로그"] -.- QL["이 중 어떤 로그가<br/>해당 요청 건이지?"]
+        T["🔍 Tracing<br/>요청 A의 전체 경로"] -.- QT["이 trace와 관련된<br/>로그는 어디 있지?"]
+    end
+    style M fill:#dbeafe,color:#0f172a
+    style L fill:#dcfce7,color:#0f172a
+    style T fill:#f3e8ff,color:#0f172a
+    style QM fill:#fee2e2,color:#0f172a
+    style QL fill:#fee2e2,color:#0f172a
+    style QT fill:#fee2e2,color:#0f172a
+```
 
 세 가지 데이터가 서로 연결되지 않으니, 문제 해결에 필요한 정보를 모으는 것 자체가 일입니다.
 
@@ -64,7 +78,25 @@ tags: ['b3', 'micrometer', 'msa', 'observability', 'opentelemetry', 'spring-boot
 
 해결책은 의외로 단순합니다. 모든 데이터에 동일한 식별자를 붙이면 됩니다.
 
-![Trace ID로 통합된 관측성 — 하나의 trace_id로 Metrics(Exemplar)·Tracing·Logging이 연결되어 요청을 끝까지 추적](/images/tracing-1-observability-spring-otel/img-03-image-41.png)
+```mermaid
+flowchart LR
+    subgraph UNI["✅ Trace ID로 통합된 세계"]
+        direction LR
+        TID["🏷️ trace_id: abc-123-xyz"]
+        M["📊 Metrics<br/>에러율 급증 감지<br/>+ Exemplar"]
+        T["🔍 Tracing<br/>요청 경로 & 소요 시간"]
+        L["📝 Logging<br/>상세 에러 메시지"]
+        TID --> M
+        TID --> T
+        TID --> L
+        M -->|"exemplar 클릭"| T
+        T -->|"trace_id로 검색"| L
+    end
+    style TID fill:#fef3c7,color:#0f172a
+    style M fill:#dbeafe,color:#0f172a
+    style T fill:#f3e8ff,color:#0f172a
+    style L fill:#dcfce7,color:#0f172a
+```
 
 **Tracing에서는 당연히 Trace ID가 있습니다.** 이건 원래부터 그랬습니다.
 
@@ -115,7 +147,29 @@ Grafana에서 응답 시간 그래프를 보다가 특이점을 클릭하면, Ex
 
 Distributed Tracing이 필요하다는 건 모두가 알았지만, 어떻게 구현할지는 제각각이었습니다.
 
-![Distributed Tracing 표준 진화 타임라인 — 2012 Zipkin·B3, 2015~16 OpenTracing vs OpenCensus 분열, 2019 W3C Trace Context·OpenTelemetry, 현재 업계 표준 정착](/images/tracing-1-observability-spring-otel/img-04-image-42.png)
+```mermaid
+---
+title: Distributed Tracing 표준의 진화
+---
+flowchart LR
+    subgraph Y1["2012"]
+        direction TB
+        A1["Zipkin & B3 포맷"] --- A2["Twitter가 오픈소스 공개"] --- A3["사실상 (de facto)<br/>표준으로 자리잡음"]
+    end
+    subgraph Y2["2015-2016"]
+        direction TB
+        B1["OpenTracing vs<br/>OpenCensus"] --- B2["CNCF의 OpenTracing 출범"] --- B3["Google의 OpenCensus 발표"] --- B4["커뮤니티 분열"]
+    end
+    subgraph Y3["2019"]
+        direction TB
+        C1["W3C Trace Context 표준"] --- C2["OpenTelemetry 탄생"] --- C3["Traces + Metrics +<br/>Logs 통합"]
+    end
+    subgraph Y4["현재"]
+        direction TB
+        D1["업계 표준으로 정착"] --- D2["AWS, Azure, GCP 지원"] --- D3["Datadog, New Relic 호환"]
+    end
+    Y1 --> Y2 --> Y3 --> Y4
+```
 
 ### Zipkin과 B3 포맷
 
@@ -240,7 +294,33 @@ Micrometer는 원래 메트릭 수집을 위한 Facade 라이브러리였습니�
 
 Micrometer Tracing은 같은 철학을 Tracing에 적용합니다.
 
-![Micrometer Tracing 계층 구조 — 애플리케이션의 Tracer/Observation API가 Micrometer Tracing 추상화를 거쳐 Bridge(bridge-otel·bridge-brave)로, 다시 OpenTelemetry SDK/Brave·Zipkin 구현체로 연결](/images/tracing-1-observability-spring-otel/img-05-image-39.png)
+```mermaid
+flowchart TB
+    subgraph APP["Your Application"]
+        A1["@WithSpan, Tracer API,<br/>Observation API"]
+    end
+    subgraph MT["Micrometer Tracing API"]
+        M1["추상화 레이어"]
+    end
+    subgraph BR["Bridge Layer"]
+        B1["micrometer-tracing<br/>-bridge-otel"]
+        B2["micrometer-tracing<br/>-bridge-brave"]
+    end
+    subgraph IMPL["Implementation"]
+        I1["OpenTelemetry SDK"]
+        I2["Brave/Zipkin"]
+    end
+    APP --> MT
+    MT --> B1
+    MT --> B2
+    B1 --> I1
+    B2 --> I2
+    style M1 fill:#dcfce7,color:#0f172a
+    style B1 fill:#fed7aa,color:#0f172a
+    style B2 fill:#fed7aa,color:#0f172a
+    style I1 fill:#dbeafe,color:#0f172a
+    style I2 fill:#dbeafe,color:#0f172a
+```
 
 **Bridge**가 핵심입니다. `micrometer-tracing-bridge-otel`을 사용하면 내부적으로 OpenTelemetry SDK가 동작하고, `micrometer-tracing-bridge-brave`를 사용하면 Brave가 동작합니다. 애플리케이션 코드는 Micrometer Tracing API만 사용하면 됩니다.
 

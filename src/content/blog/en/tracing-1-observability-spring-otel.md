@@ -2,7 +2,7 @@
 title: 'Understanding Tracing (1) – From the History of Observability to the Spring Ecosystem (feat. OTel)'
 description: 'Why the three pillars of observability need distributed tracing, the history from Zipkin B3 through the OpenTracing/OpenCensus split to the OpenTelemetry merger, and where the Spring ecosystem stands today.'
 pubDate: '2026-02-07T20:26:31+09:00'
-updatedDate: '2026-02-07T20:26:31+09:00'
+updatedDate: '2026-08-03T02:05:00+09:00'
 category: tech
 subcategory: 'Tracing'
 tags: ['b3', 'micrometer', 'msa', 'observability', 'opentelemetry', 'spring-boot', 'tracing', 'w3c']
@@ -56,9 +56,21 @@ The problem is that these three evolved separately for a long time.
 
 Suppose you notice the error rate suddenly spiking on a dashboard. All Metrics tells you is "a lot of errors are happening." It can't tell you which request errored, or what path that request took. You have to dig through logs — and if there are tens of thousands of log lines in the window when the errors occurred? Finding the problematic request among them is like finding a needle in the desert.
 
-![The disconnected worlds of observability — Metrics, Logging, and Tracing aren't linked to each other, making it hard to trace which request caused an error](/images/tracing-1-observability-spring-otel/img-02-image-40.png)
-
-*Diagram labels are in Korean — titled "Disconnected worlds": Metrics ("error rate spikes at 14:23" — "which request errored?"), Logging ("tens of thousands of logs around 14:23" — "which of these logs belongs to that request?"), Tracing ("the full path of request A" — "where are the logs related to this trace?").*
+```mermaid
+flowchart LR
+    subgraph SEP["❌ Disconnected Worlds"]
+        direction LR
+        M["📊 Metrics<br/>Error rate spikes at 14:23"] -.- QM["Which request<br/>errored?"]
+        L["📝 Logging<br/>Tens of thousands of logs around 14:23"] -.- QL["Which of these logs<br/>belongs to that request?"]
+        T["🔍 Tracing<br/>The full path of request A"] -.- QT["Where are the logs<br/>related to this trace?"]
+    end
+    style M fill:#dbeafe,color:#0f172a
+    style L fill:#dcfce7,color:#0f172a
+    style T fill:#f3e8ff,color:#0f172a
+    style QM fill:#fee2e2,color:#0f172a
+    style QL fill:#fee2e2,color:#0f172a
+    style QT fill:#fee2e2,color:#0f172a
+```
 
 Because the three kinds of data aren't connected to each other, just gathering the information you need to solve a problem is a job in itself.
 
@@ -66,9 +78,25 @@ Because the three kinds of data aren't connected to each other, just gathering t
 
 The solution is surprisingly simple: attach the same identifier to all of the data.
 
-![Observability unified by Trace ID — a single trace_id links Metrics (Exemplar), Tracing, and Logging so a request can be followed end to end](/images/tracing-1-observability-spring-otel/img-03-image-41.png)
-
-*Diagram labels are in Korean — titled "A world unified by Trace ID": one trace_id links Metrics ("error-rate spike detected + Exemplar"), a "click the exemplar" jump into Tracing ("request path & latency"), and a "search by trace_id" jump into Logging ("detailed error messages").*
+```mermaid
+flowchart LR
+    subgraph UNI["✅ A World Unified by Trace ID"]
+        direction LR
+        TID["🏷️ trace_id: abc-123-xyz"]
+        M["📊 Metrics<br/>Error-rate spike detected<br/>+ Exemplar"]
+        T["🔍 Tracing<br/>Request path & latency"]
+        L["📝 Logging<br/>Detailed error message"]
+        TID --> M
+        TID --> T
+        TID --> L
+        M -->|"click the exemplar"| T
+        T -->|"search by trace_id"| L
+    end
+    style TID fill:#fef3c7,color:#0f172a
+    style M fill:#dbeafe,color:#0f172a
+    style T fill:#f3e8ff,color:#0f172a
+    style L fill:#dcfce7,color:#0f172a
+```
 
 **Tracing has a Trace ID by definition.** That was always the case.
 
@@ -119,9 +147,29 @@ Link all three kinds of data with a single Trace ID, and the time from "anomaly 
 
 Everyone knew distributed tracing was necessary, but everyone implemented it differently.
 
-![Timeline of distributed tracing standards — 2012 Zipkin and B3, 2015–16 the OpenTracing vs OpenCensus split, 2019 W3C Trace Context and OpenTelemetry, and today's settled industry standard](/images/tracing-1-observability-spring-otel/img-04-image-42.png)
-
-*Diagram labels are in Korean — a timeline titled "The evolution of distributed tracing standards": 2012 — Zipkin & B3 format, open-sourced by Twitter, became the de facto standard; 2015–2016 — OpenTracing vs OpenCensus, CNCF launches OpenTracing, Google announces OpenCensus, the community splits; 2019 — the W3C Trace Context standard, OpenTelemetry is born, Traces + Metrics + Logs unified; today — settled as the industry standard, supported by AWS/Azure/GCP, compatible with Datadog and New Relic.*
+```mermaid
+---
+title: The Evolution of Distributed Tracing Standards
+---
+flowchart LR
+    subgraph Y1["2012"]
+        direction TB
+        A1["Zipkin & B3 format"] --- A2["Open-sourced by Twitter"] --- A3["Became the<br/>de facto standard"]
+    end
+    subgraph Y2["2015-2016"]
+        direction TB
+        B1["OpenTracing vs<br/>OpenCensus"] --- B2["CNCF launches OpenTracing"] --- B3["Google announces OpenCensus"] --- B4["Community splits"]
+    end
+    subgraph Y3["2019"]
+        direction TB
+        C1["W3C Trace Context standard"] --- C2["OpenTelemetry is born"] --- C3["Traces + Metrics +<br/>Logs unified"]
+    end
+    subgraph Y4["Today"]
+        direction TB
+        D1["Settled as the industry standard"] --- D2["AWS, Azure, GCP support"] --- D3["Datadog, New Relic compatible"]
+    end
+    Y1 --> Y2 --> Y3 --> Y4
+```
 
 ### Zipkin and the B3 Format
 
@@ -246,9 +294,33 @@ Micrometer was originally a facade library for metrics collection. Just as SLF4J
 
 Micrometer Tracing applies the same philosophy to tracing.
 
-![Micrometer Tracing layer structure — the application's Tracer/Observation API goes through the Micrometer Tracing abstraction to a Bridge (bridge-otel or bridge-brave), and on to the OpenTelemetry SDK or Brave/Zipkin implementation](/images/tracing-1-observability-spring-otel/img-05-image-39.png)
-
-*Diagram labels are in Korean — only one box, actually: the layer inside "Micrometer Tracing API" reads "abstraction layer"; every other label is already in English.*
+```mermaid
+flowchart TB
+    subgraph APP["Your Application"]
+        A1["@WithSpan, Tracer API,<br/>Observation API"]
+    end
+    subgraph MT["Micrometer Tracing API"]
+        M1["Abstraction Layer"]
+    end
+    subgraph BR["Bridge Layer"]
+        B1["micrometer-tracing<br/>-bridge-otel"]
+        B2["micrometer-tracing<br/>-bridge-brave"]
+    end
+    subgraph IMPL["Implementation"]
+        I1["OpenTelemetry SDK"]
+        I2["Brave/Zipkin"]
+    end
+    APP --> MT
+    MT --> B1
+    MT --> B2
+    B1 --> I1
+    B2 --> I2
+    style M1 fill:#dcfce7,color:#0f172a
+    style B1 fill:#fed7aa,color:#0f172a
+    style B2 fill:#fed7aa,color:#0f172a
+    style I1 fill:#dbeafe,color:#0f172a
+    style I2 fill:#dbeafe,color:#0f172a
+```
 
 The **Bridge** is the key. Use `micrometer-tracing-bridge-otel` and the OpenTelemetry SDK runs underneath; use `micrometer-tracing-bridge-brave` and Brave runs instead. Application code only ever touches the Micrometer Tracing API.
 

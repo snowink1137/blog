@@ -2,7 +2,7 @@
 title: 'AWS EC2 Monitoring Guide (1) – Checking Server Health with CloudWatch'
 description: 'How the EC2 monitoring tab relates to CloudWatch, basic vs. detailed monitoring costs, and what the free tier covers — part one of a series on monitoring EC2 server health.'
 pubDate: '2026-01-06T22:22:22+09:00'
-updatedDate: '2026-01-06T22:22:22+09:00'
+updatedDate: '2026-08-01T19:26:17+09:00'
 category: tech
 subcategory: 'AWS'
 tags: ['aws', 'cloud', 'cloud-watch', 'ec2', 'monitoring']

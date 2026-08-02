@@ -2,7 +2,7 @@
 title: 'Kubernetes 네트워크 이해하기 (2): Pod 간 통신과 서비스 디스커버리'
 description: 'Pod IP는 누가 할당하고 Pod끼리는 어떻게 통신하는가 — CNI, veth pair, Linux Bridge, 노드 간 라우팅, CoreDNS 서비스 디스커버리까지 패킷 흐름으로 이해한다.'
 pubDate: '2026-01-09T20:01:00+09:00'
-updatedDate: '2026-01-09T20:01:00+09:00'
+updatedDate: '2026-08-03T02:05:00+09:00'
 category: tech
 subcategory: 'Kubernetes'
 tags: ['calico', 'cilium', 'cni', 'container-network-interface', 'core-dns', 'kubernetes', 'network']
@@ -77,7 +77,29 @@ Pod가 생성될 때 네트워크는 어떻게 설정될까요? [Kubernetes 공�
 6. 컨테이너 런타임 → kubelet: "네트워크 준비 완료"
 7. kubelet: 컨테이너 시작
 ```
-![Pod 생성 시 네트워크 설정 흐름도 — kubelet이 컨테이너 런타임과 CNI 플러그인을 호출해 IPAM으로 IP를 할당받고 veth pair를 만들어 Pod에 네트워크를 구성](/images/kubernetes-network-guide-2-pod-to-pod/img-01-image-31.png)
+
+```mermaid
+flowchart TB
+    subgraph CP["Control Plane (Master Node)"]
+        API["API Server"]
+    end
+    subgraph WN["Worker Node"]
+        KUBELET["kubelet"]
+        CRI["컨테이너 런타임<br/>(containerd, CRI-O)"]
+        CNI["CNI 플러그인<br/>(Cilium, Calico 등)"]
+        IPAM["IPAM<br/>IP 주소 관리"]
+        POD["Pod<br/>10.244.1.15"]
+    end
+    API -->|"1. Pod 생성 요청"| KUBELET
+    KUBELET -->|"2. 네트워크 네임스페이스 생성"| CRI
+    CRI -->|"3. ADD 명령 실행"| CNI
+    CNI -->|"4. IP 할당 요청"| IPAM
+    IPAM -->|"5. IP 반환 (10.244.1.15)"| CNI
+    CNI -->|"6. veth pair 생성<br/>라우팅 규칙 설정"| POD
+    CNI -->|"7. 설정 완료"| CRI
+    CRI -->|"8. 네트워크 준비 완료"| KUBELET
+    KUBELET -->|"9. 컨테이너 시작"| POD
+```
 
 CNI 플러그인은 `/opt/cni/bin/` 디렉토리에 실행 파일로 존재하고, 설정은 `/etc/cni/net.d/`에 JSON 형태로 저장됩니다.
 
@@ -102,7 +124,28 @@ Pod IP는 보통 노드별로 다른 대역을 사용합니다. 여기서 **CIDR
 
 이제 실제 통신 과정을 살펴보겠습니다. 먼저 **같은 노드에 있는 Pod끼리** 통신하는 경우입니다.
 
-![같은 노드 내 Pod 간 통신 흐름 — Pod A의 eth0에서 veth pair와 Linux Bridge(cni0)를 거쳐 Pod B로 패킷 전달](/images/kubernetes-network-guide-2-pod-to-pod/img-02-image-32.png)
+```mermaid
+flowchart LR
+    subgraph WN["Worker Node"]
+        subgraph PA["Pod A (10.244.1.15)"]
+            APPA["애플리케이션"]
+            ETHA["eth0"]
+        end
+        VA["veth-a<br/>(Pod A 전용)"]
+        BR["Linux Bridge (cbr0/cni0)<br/>가상 스위치"]
+        VB["veth-b<br/>(Pod B 전용)"]
+        subgraph PB["Pod B (10.244.1.20)"]
+            ETHB["eth0"]
+            APPB["애플리케이션"]
+        end
+    end
+    APPA -->|"1. 패킷 전송<br/>dst: 10.244.1.20"| ETHA
+    ETHA -->|"veth pair"| VA
+    VA -->|"2. Bridge로 전달"| BR
+    BR -->|"3. MAC 주소로<br/>목적지 찾기"| VB
+    VB -->|"veth pair"| ETHB
+    ETHB -->|"4. 패킷 도착"| APPB
+```
 
 ### veth pair: 가상 네트워크 케이블
 
@@ -152,7 +195,38 @@ Pod A(10.244.1.15)가 같은 노드의 Pod B(10.244.1.20)에게 패킷을 보내
 
 이제 **다른 노드에 있는 Pod끼리** 통신하는 경우를 살펴보겠습니다. 이 부분이 CNI 플러그인마다 구현이 다른 핵심 영역입니다.
 
-![다른 노드 간 Pod 통신 흐름 — Worker-1의 Pod A 패킷이 CNI(Overlay/Direct Routing)로 캡슐화돼 물리 네트워크를 지나 Worker-2에서 역캡슐화되어 Pod B로 도착](/images/kubernetes-network-guide-2-pod-to-pod/img-03-image-33.png)
+```mermaid
+flowchart TB
+    subgraph W1["Worker-1 (192.168.1.10)"]
+        subgraph PA["Pod A (10.244.1.15)"]
+            APPA["애플리케이션"]
+        end
+        VETH1["veth"]
+        BR1["Bridge"]
+        CNI1["CNI 플러그인<br/>(Overlay 또는 Direct Routing)"]
+        NIC1["eth0<br/>(물리 NIC)"]
+    end
+    PHY["물리 네트워크"]
+    subgraph W2["Worker-2 (192.168.1.20)"]
+        NIC2["eth0<br/>(물리 NIC)"]
+        CNI2["CNI 플러그인<br/>(Overlay 또는 Direct Routing)"]
+        BR2["Bridge"]
+        VETH2["veth"]
+        subgraph PB["Pod B (10.244.2.23)"]
+            APPB["애플리케이션"]
+        end
+    end
+    APPA -->|"1. 패킷 전송<br/>dst: 10.244.2.23"| VETH1
+    VETH1 --> BR1
+    BR1 -->|"2. 다른 노드 대역<br/>CNI로 전달"| CNI1
+    CNI1 -->|"3. 캡슐화<br/>외부: 192.168.1.20"| NIC1
+    NIC1 -->|"4. 노드 간 전송"| PHY
+    PHY --> NIC2
+    NIC2 -->|"5. 역캡슐화"| CNI2
+    CNI2 --> BR2
+    BR2 --> VETH2
+    VETH2 -->|"6. 패킷 도착"| APPB
+```
 
 ### 문제: Pod IP는 클러스터 내부에서만 의미가 있다
 
@@ -353,7 +427,31 @@ curl http://user-service.svc:8080/api/users
 
 [CoreDNS](https://coredns.io/)는 Kubernetes의 기본 DNS 서버입니다. 모든 Service와 Pod에 대한 DNS 레코드를 관리합니다.
 
-![CoreDNS 서비스 디스커버리 흐름 — Pod가 Service 도메인을 DNS 조회해 ClusterIP를 받고, kube-proxy/eBPF가 DNAT로 실제 Pod IP를 선택](/images/kubernetes-network-guide-2-pod-to-pod/img-04-image-34.png)
+```mermaid
+flowchart LR
+    subgraph K8S["Kubernetes 클러스터"]
+        API["API Server"]
+        subgraph CALLER["호출하는 Pod"]
+            APP["애플리케이션<br/>curl http://user-service"]
+        end
+        DNS["CoreDNS<br/>(kube-dns Service)"]
+        subgraph SVC["user-service (Service)"]
+            CIP["ClusterIP<br/>10.96.100.50"]
+        end
+        PROXY["kube-proxy 또는 eBPF<br/>(DNAT 처리)"]
+        subgraph PODS["user-service Pods"]
+            POD1["Pod 1<br/>10.244.1.15"]
+            POD2["Pod 2<br/>10.244.2.23"]
+        end
+    end
+    API -->|"watch Service/Endpoints"| DNS
+    APP -->|"1. DNS 조회<br/>user-service.default.svc.cluster.local"| DNS
+    DNS -->|"2. ClusterIP 반환<br/>10.96.100.50"| APP
+    APP -->|"3. HTTP 요청<br/>dst: 10.96.100.50"| CIP
+    CIP --> PROXY
+    PROXY -->|"4. DNAT로 Pod IP 선택"| POD1
+    PROXY -.->|"또는"| POD2
+```
 
 CoreDNS는 다음과 같이 동작합니다:
 

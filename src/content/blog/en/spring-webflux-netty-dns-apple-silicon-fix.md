@@ -2,7 +2,7 @@
 title: 'Fixing Netty DNS Resolution Failures on Apple Silicon Macs (feat. Understanding Gradle Dependency Configurations)'
 description: 'Why Spring Cloud Gateway alone fails DNS resolution on Apple Silicon Macs (Netty''s own DNS resolver) and how to fix it — plus a look at native library dependencies and Gradle Configuration concepts.'
 pubDate: '2026-01-04T16:43:48+09:00'
-updatedDate: '2026-01-04T16:43:48+09:00'
+updatedDate: '2026-08-03T02:05:00+09:00'
 category: tech
 subcategory: 'Spring'
 tags: ['apple-silicon', 'dns', 'gradle', 'netty', 'spring-cloud-gateway', 'spring-webflux']
@@ -40,9 +40,39 @@ Spring WebFlux uses `reactor-netty` by default. Whether you're calling external 
 
 ## The Cause: Why Doesn't Netty Use the System DNS?
 
-![Netty DNS resolution flowchart — with the netty-resolver-dns-native-macos (osx-aarch_64) library present, macOS native DNS successfully resolves internal VPN domains; without it, the fallback DNS uses public servers (8.8.8.8) and internal domain resolution fails with SearchDomainUnknownHostException](/images/spring-webflux-netty-dns-apple-silicon-fix/img-01-netty-dns-flowchart.png)
-
-*Diagram labels are in Korean — the flow shows Netty checking whether the native library exists: if `netty-resolver-dns-native-macos` (osx-aarch_64) is present, macOS native DNS uses the VPN DNS server (10.x.x.x) and internal domain resolution succeeds; if not, the fallback DNS reads /etc/resolv.conf, uses public servers like 8.8.8.8, and resolution fails with SearchDomainUnknownHostException.*
+```mermaid
+flowchart TB
+    subgraph SPRING["🖥️ Spring WebFlux"]
+        A["WebClient / Gateway<br/>external API call"]
+    end
+    subgraph NETTY["⚡ Netty DNS Resolver"]
+        B{"Native library<br/>present?"}
+        C["✅ macOS Native DNS"]
+        D["❌ Fallback DNS<br/>reads /etc/resolv.conf"]
+    end
+    subgraph MACOS["🍎 macOS system DNS"]
+        E["VPN DNS server<br/>10.x.x.x"]
+        F["Public DNS server<br/>8.8.8.8, etc."]
+    end
+    subgraph RESULT["Result"]
+        G["✅ Internal domain resolved<br/>api.internal.example.com"]
+        H["❌ DNS resolution fails<br/>SearchDomainUnknownHostException"]
+    end
+    A --> B
+    B -->|"netty-resolver-dns-native-macos<br/>osx-aarch_64 present"| C
+    B -->|"library missing"| D
+    C --> E
+    D --> F
+    E --> G
+    F --> H
+    style A fill:#dbeafe,color:#0f172a
+    style C fill:#c8e6c9,color:#0f172a
+    style G fill:#c8e6c9,color:#0f172a
+    style D fill:#ffcdd2,color:#0f172a
+    style H fill:#ffcdd2,color:#0f172a
+    style E fill:#fff9c4,color:#0f172a
+    style F fill:#fff9c4,color:#0f172a
+```
 
 Netty uses its own DNS resolver. The reason is **performance**.
 
@@ -82,9 +112,38 @@ You might wonder why the code above uses `runtimeOnly`. Here's a summary of Grad
 | `compileOnly` | ✅ | ❌ | Needed only for compilation, provided externally at runtime (Lombok, etc.) |
 | `runtimeOnly` | ❌ | ✅ | Never referenced directly in code, detected by the framework at runtime |
 
-![Gradle dependency Configuration comparison — how implementation (compile + packaging), compileOnly (compile only; Lombok, Servlet API), and runtimeOnly (packaging only; JDBC drivers, Netty native) participate in the compile, packaging, and runtime stages](/images/spring-webflux-netty-dns-apple-silicon-fix/img-02-gradle-dependency-config.png)
-
-*Diagram labels are in Korean — it compares implementation (compile ✅ / JAR ✅, used directly in code), compileOnly (compile ✅ / JAR ❌; Lombok, Servlet API), and runtimeOnly (compile ❌ / JAR ✅; JDBC drivers, Netty native) across the source, compile, packaging (BOOT-INF/classes, BOOT-INF/lib), and runtime (java -jar app.jar) stages.*
+```mermaid
+flowchart LR
+    subgraph SRC["📝 Source code"]
+        S[".kt / .java files"]
+    end
+    subgraph CONF["Dependency Configuration"]
+        IMPL["implementation<br/>Compile ✅ · JAR ✅<br/>Used directly in code"]
+        CO["compileOnly<br/>Compile ✅ · JAR ❌<br/>Lombok, Servlet API"]
+        RO["runtimeOnly<br/>Compile ❌ · JAR ✅<br/>JDBC drivers, Netty Native"]
+    end
+    subgraph COMPILE["🔨 Compile stage"]
+        BC["Bytecode generation<br/>.class files"]
+    end
+    subgraph PKG["📦 Packaging stage"]
+        CLS["BOOT-INF/classes/<br/>compiled classes"]
+        LIB["BOOT-INF/lib/<br/>dependency JARs"]
+    end
+    subgraph RUN["🚀 Runtime"]
+        JAR["java -jar app.jar"]
+    end
+    S --> BC
+    BC --> CLS
+    CLS --> JAR
+    LIB --> JAR
+    IMPL -.->|"compile + package"| BC
+    IMPL -.->|"compile + package"| LIB
+    CO -.->|"compile only"| BC
+    RO -.->|"package only"| LIB
+    style IMPL fill:#c8e6c9,color:#0f172a
+    style CO fill:#fff9c4,color:#0f172a
+    style RO fill:#bbdefb,color:#0f172a
+```
 
 `netty-resolver-dns-native-macos` is never imported directly in your code. Netty scans the classpath at runtime, detects it, and uses it automatically. That makes `runtimeOnly` the right fit.
 

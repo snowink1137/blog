@@ -2,7 +2,7 @@
 title: 'Understanding Kubernetes Computing (1): How Pods Are Scheduled and Run'
 description: 'From kubectl apply to a running container — tracing step by step how the API Server, Controller Manager, Scheduler, and kubelet each play their part in placing and running a Pod.'
 pubDate: '2026-01-10T19:54:00+09:00'
-updatedDate: '2026-01-10T19:54:00+09:00'
+updatedDate: '2026-08-03T02:05:00+09:00'
 category: tech
 subcategory: 'Kubernetes'
 tags: ['kubelet', 'kubernetes', 'pod', 'scheduler']
@@ -28,9 +28,47 @@ This post answers the following questions:
 
 A Kubernetes cluster is broadly divided into the **control plane** and the **worker nodes**.
 
-![Kubernetes cluster architecture — the Control Plane (API Server, etcd, Scheduler, Controller Manager) and worker nodes (kubelet, kube-proxy, container runtime, Pods)](/images/kubernetes-computing-pod-lifecycle/img-01-image-35.png)
-
-*Diagram labels are in Korean — they describe each component's role: API Server "entry point for all requests", etcd "cluster state store", Scheduler "decides Pod placement", Controller Manager "maintains desired state", kubelet "manages the Pod lifecycle", kube-proxy "network rules".*
+```mermaid
+flowchart TB
+    subgraph CP["Control Plane (Master Node)"]
+        API["API Server<br/>Entry point for every request"]
+        ETCD["etcd<br/>Cluster state store"]
+        SCHED["Scheduler<br/>Decides Pod placement"]
+        CM["Controller Manager<br/>Maintains desired state"]
+        API <--> ETCD
+        API <--> SCHED
+        API <--> CM
+    end
+    subgraph W1["Worker Node 1"]
+        KL1["kubelet<br/>Manages the Pod lifecycle"]
+        KP1["kube-proxy<br/>Network rules"]
+        CR1["Container Runtime<br/>containerd / CRI-O"]
+        POD1["Pod"]
+        KL1 --> CR1
+        CR1 --> POD1
+    end
+    subgraph W2["Worker Node 2"]
+        KL2["kubelet<br/>Manages the Pod lifecycle"]
+        KP2["kube-proxy<br/>Network rules"]
+        CR2["Container Runtime<br/>containerd / CRI-O"]
+        POD2["Pod"]
+        POD3["Pod"]
+        KL2 --> CR2
+        CR2 --> POD2
+        CR2 --> POD3
+    end
+    API <--> KL1
+    API <--> KP1
+    API <--> KL2
+    API <--> KP2
+    style API fill:#ffe0b2,color:#0f172a
+    style ETCD fill:#ffcdd2,color:#0f172a
+    style KL1 fill:#b2ebf2,color:#0f172a
+    style KL2 fill:#b2ebf2,color:#0f172a
+    style POD1 fill:#c8e6c9,color:#0f172a
+    style POD2 fill:#c8e6c9,color:#0f172a
+    style POD3 fill:#c8e6c9,color:#0f172a
+```
 
 ### Why Is It Split This Way?
 
@@ -105,9 +143,37 @@ spec:
 | `template` | Template for the Pods to create (labels, container definitions) |
 | `resources` | CPU/Memory requests and limits |
 
-![End-to-end Pod creation flow — kubectl apply → API Server → stored in etcd → Controller Manager (Deployment → ReplicaSet → Pod) → Scheduler picks a node → kubelet → container runtime → CNI → Pod Running](/images/kubernetes-computing-pod-lifecycle/img-02-image-36.png)
-
-*Diagram labels are in Korean — the numbered steps read: 1. send Deployment, 2. store, 3. watch, 4. create Pod (status: Pending), 5. watch, 6. select node and record nodeName, 7. watch, 8. call CRI, 9. set up network, 10. done.*
+```mermaid
+flowchart TB
+    USER["User<br/>kubectl apply -f deployment.yaml"]
+    subgraph CP["Control Plane"]
+        API["API Server<br/>Authentication / Authorization / Admission"]
+        ETCD["etcd<br/>Stores Deployment, ReplicaSet, Pod"]
+        CM["Controller Manager<br/>Deployment → ReplicaSet → Pod"]
+        SCHED["Scheduler<br/>Filtering → Scoring"]
+    end
+    subgraph WN["Worker Node (selected node)"]
+        KL["kubelet<br/>Receives the Pod creation request"]
+        CR["Container Runtime<br/>Pulls the image & creates the container"]
+        CNI["CNI Plugin<br/>Sets up networking"]
+        RUN["Pod Running!"]
+    end
+    USER -->|"1. Send Deployment"| API
+    API -->|"2. Store"| ETCD
+    ETCD -->|"3. Watch"| CM
+    CM -->|"4. Create Pod (status: Pending)"| API
+    API -->|"5. Watch"| SCHED
+    SCHED -->|"6. Select node · record nodeName"| API
+    API -->|"7. Watch"| KL
+    KL -->|"8. Call CRI"| CR
+    CR -->|"9. Set up network"| CNI
+    CNI -->|"10. Done"| RUN
+    style API fill:#ffe0b2,color:#0f172a
+    style ETCD fill:#ffcdd2,color:#0f172a
+    style KL fill:#b2ebf2,color:#0f172a
+    style CNI fill:#e1bee7,color:#0f172a
+    style RUN fill:#c8e6c9,color:#0f172a
+```
 
 ### Step 1: kubectl → API Server
 
@@ -246,9 +312,32 @@ status:
 
 The Scheduler places each Pod on the "most suitable" node. The process has two phases: **Filtering** and **Scoring**.
 
-![Scheduler node selection — the Filtering phase eliminates nodes that fail the requirements, then the Scoring phase picks the highest-scoring node and records it in nodeName](/images/kubernetes-computing-pod-lifecycle/img-03-image-37.png)
-
-*Diagram labels are in Korean — they read: "new Pod detected", "scheduling process", "Phase 1: Filtering" with filter conditions (enough CPU/Memory? NodeSelector match? Taint tolerated?) and results (Node 3 rejected for insufficient memory, Node 4 for a taint mismatch), "Phase 2: Scoring" with criteria (resource balance, image presence, Pod affinity) and per-node scores, then "node selected — Pod updated with nodeName: node-2".*
+```mermaid
+flowchart TB
+    subgraph DETECT["New Pod detected"]
+        POD["Pod<br/>nodeName: (none)<br/>status: Pending"]
+    end
+    subgraph SP["Scheduling process"]
+        subgraph F["Phase 1: Filtering"]
+            FC["Filter conditions<br/>· Enough CPU/Memory?<br/>· NodeSelector match?<br/>· Taint tolerated?"]
+            FR["Result<br/>✅ Node 1<br/>✅ Node 2<br/>❌ Node 3 (not enough memory)<br/>❌ Node 4 (taint mismatch)<br/>✅ Node 5"]
+            FC --> FR
+        end
+        subgraph SG["Phase 2: Scoring"]
+            SC["Scoring criteria<br/>· Resource balance<br/>· Image already present<br/>· Pod affinity"]
+            SR["Result<br/>Node 1: 75 pts<br/>Node 2: 82 pts ⭐<br/>Node 5: 68 pts"]
+            SC --> SR
+        end
+        FR --> SC
+    end
+    subgraph DONE["Node selected"]
+        UP["Update Pod<br/>nodeName: node-2"]
+    end
+    POD --> FC
+    SR --> UP
+    style POD fill:#bbdefb,color:#0f172a
+    style UP fill:#c8e6c9,color:#0f172a
+```
 
 ### Filtering: Eliminating Unsuitable Nodes
 
@@ -366,9 +455,40 @@ The kubelet is the worker node's **agent**. It:
 
 The kubelet doesn't run containers itself. Instead it talks to the container runtime through a standard interface called **CRI** (Container Runtime Interface).
 
-![Container runtime layers — the kubelet calls a high-level runtime (containerd, CRI-O) over CRI (gRPC), which goes through the OCI standard down to the low-level runtime runc, which isolates and runs containers with namespaces and cgroups](/images/kubernetes-computing-pod-lifecycle/img-04-image-38.png)
-
-*Diagram labels are in Korean — the layers read: kubelet "Pod lifecycle management, probe execution, status reporting" → CRI layer "gRPC communication, standard interface" → high-level runtimes (containerd "split off from Docker, most widely used", CRI-O "Kubernetes-only lightweight runtime") → OCI layer "container image & runtime spec" → low-level runtime runc "sets up Linux namespaces and cgroups, runs the process isolated" → "container process running in an isolated environment".*
+```mermaid
+flowchart TB
+    subgraph K8S["Kubernetes"]
+        KL["kubelet<br/>Manages the Pod lifecycle<br/>Runs probes, reports status"]
+    end
+    subgraph CRI["CRI layer"]
+        GRPC["gRPC communication<br/>Standard interface"]
+    end
+    subgraph HIGH["High-level runtime"]
+        CD["containerd<br/>Split out of Docker<br/>Most widely used"]
+        CRIO["CRI-O<br/>Kubernetes-only<br/>Lightweight runtime"]
+    end
+    subgraph OCIL["OCI layer"]
+        SPEC["OCI standard<br/>Container image & runtime spec"]
+    end
+    subgraph LOW["Low-level runtime"]
+        RUNC["runc<br/>Sets up Linux namespaces, cgroups<br/>Runs the process isolated"]
+    end
+    subgraph RES["Result"]
+        PROC["Container process<br/>Running in an isolated environment"]
+    end
+    KL -->|"Pod create/delete request"| GRPC
+    GRPC -->|"Pull image<br/>Create container"| CD
+    GRPC -->|"Pull image<br/>Create container"| CRIO
+    CD --> SPEC
+    CRIO --> SPEC
+    SPEC -->|"Run container"| RUNC
+    RUNC -->|"Start process"| PROC
+    style KL fill:#bbdefb,color:#0f172a
+    style GRPC fill:#ffe0b2,color:#0f172a
+    style SPEC fill:#e1bee7,color:#0f172a
+    style RUNC fill:#ffcdd2,color:#0f172a
+    style PROC fill:#b2ebf2,color:#0f172a
+```
 
 ```text
 kubelet

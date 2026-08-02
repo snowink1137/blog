@@ -2,7 +2,7 @@
 title: 'Understanding Kubernetes Storage (2): Using and Managing PV/PVC in Practice'
 description: 'What the three AccessModes really mean, the Deployment + RWO PVC trap, the PV lifecycle and Reclaim Policy — the problems you actually run into when operating PV/PVC.'
 pubDate: '2026-01-12T19:01:00+09:00'
-updatedDate: '2026-01-12T19:01:00+09:00'
+updatedDate: '2026-08-03T02:05:00+09:00'
 category: tech
 subcategory: 'Kubernetes'
 tags: ['kubernetes', 'pv', 'pvc', 'storage']
@@ -154,9 +154,21 @@ To delete a PVC, you have to do it explicitly with `kubectl delete pvc my-pvc`.
 
 ### PV States (Phase)
 
-![PersistentVolume state transition diagram — a PV starts as Available after creation, becomes Bound when a PVC binds to it, and on PVC deletion is either deleted (Delete policy) or moved to Released (Retain policy); removing claimRef returns a Released PV to Available for reuse](/images/kubernetes-pod-storage-pv-pvc-2/img-01-image-5.png)
-
-*Diagram labels are in Korean — the transitions read: "create PV" → Available ("usable, waiting for a PVC to bind"), "bind to PVC" → Bound ("attached to a PVC, in use by a Pod"), "delete PVC (Delete policy)" → PV and storage deleted, "delete PVC (Retain policy)" → Released ("old data remains, no automatic reuse"), and "remove claimRef (manual step)" → back to Available.*
+```mermaid
+flowchart TB
+    START(("Start")) -->|"create PV"| AVAILABLE["Available"]
+    AVAILABLE -->|"bind to PVC"| BOUND["Bound"]
+    BOUND -->|"delete PVC (Retain policy)"| RELEASED["Released"]
+    BOUND -->|"delete PVC (Delete policy)<br/>PV and storage deleted"| GONE((("PV deleted")))
+    RELEASED -->|"remove claimRef<br/>(manual step)"| AVAILABLE
+    RELEASED -->|"delete PV manually"| GONE
+    AVAILABLE -.- NOTE_A["usable<br/>waiting for a PVC to bind"]
+    BOUND -.- NOTE_B["attached to a PVC<br/>in use by a Pod"]
+    RELEASED -.- NOTE_C["old data remains<br/>no automatic reuse"]
+    style NOTE_A fill:#fff9c4,color:#0f172a,stroke:#c9b458
+    style NOTE_B fill:#fff9c4,color:#0f172a,stroke:#c9b458
+    style NOTE_C fill:#fff9c4,color:#0f172a,stroke:#c9b458
+```
 
 | State | Meaning |
 | --- | --- |

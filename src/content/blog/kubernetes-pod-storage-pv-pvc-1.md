@@ -2,7 +2,7 @@
 title: 'Kubernetes 스토리지 이해하기 (1): Pod는 데이터를 어떻게 저장하고 유지하는가'
 description: 'Kubernetes 볼륨 개념부터 emptyDir·hostPath 같은 Volume 타입, 그리고 PV/PVC로 Pod와 스토리지의 생명주기를 분리하는 구조까지 — 스토리지 시리즈 첫 편.'
 pubDate: '2026-01-11T19:56:00+09:00'
-updatedDate: '2026-01-11T19:56:00+09:00'
+updatedDate: '2026-08-03T02:05:00+09:00'
 category: tech
 subcategory: 'Kubernetes'
 tags: ['csi', 'kubernetes', 'pv', 'pvc', 'storage']
@@ -91,7 +91,30 @@ spec:
 
 ### Volume 타입들
 
-![Pod 볼륨 구조도 — Pod의 volumeMounts가 spec.volumes[]의 emptyDir·persistentVolumeClaim·configMap에 연결되고, PVC는 PV를 거쳐 실제 스토리지(AWS EBS·NFS)로 이어짐](/images/kubernetes-pod-storage-pv-pvc-1/img-01-image.png)
+```mermaid
+flowchart TB
+    subgraph POD["Pod"]
+        VM1["volumeMounts:<br/>- mountPath: /cache"]
+        VM2["volumeMounts:<br/>- mountPath: /data"]
+        VM3["volumeMounts:<br/>- mountPath: /config"]
+    end
+    subgraph VOLS["spec.volumes[]"]
+        V1["emptyDir: {}"]
+        V2["persistentVolumeClaim:<br/>claimName: my-pvc"]
+        V3["configMap:<br/>name: my-config"]
+    end
+    VM1 --> V1
+    VM2 --> V2
+    VM3 --> V3
+    V1 --> TMP["노드 임시 공간<br/>(Pod 삭제 시 삭제)"]
+    V2 --> PVC["PersistentVolumeClaim"]
+    V3 --> CM["ConfigMap"]
+    PVC -->|"바인딩"| PV["PersistentVolume"]
+    PV -->|"연결"| REAL["실제 스토리지<br/>(AWS EBS, NFS 등)"]
+    style PVC fill:#c8e6c9,color:#0f172a
+    style PV fill:#c8e6c9,color:#0f172a
+    style REAL fill:#ffcdd2,color:#0f172a
+```
 
 | Volume 타입 | 설명 | 데이터 지속성 |
 | --- | --- | --- |
@@ -103,7 +126,23 @@ spec:
 
 **`persistentVolumeClaim` 타입을 사용할 때만 PVC/PV라는 별도 리소스가 관여합니다.**
 
-![Volume 타입 개요 — spec.volumes[]의 emptyDir·hostPath·configMap·secret·persistentVolumeClaim, 그리고 PVC→PV→실제 스토리지로 이어지는 바인딩](/images/kubernetes-pod-storage-pv-pvc-1/img-02-image-1.png)
+```mermaid
+flowchart TB
+    subgraph VOLS["Pod의 spec.volumes[]"]
+        E["emptyDir<br/>→ Pod와 함께 생성/삭제"]
+        H["hostPath<br/>→ 노드 경로 직접 사용"]
+        C["configMap<br/>→ ConfigMap 참조"]
+        S["secret<br/>→ Secret 참조"]
+        P["persistentVolumeClaim<br/>→ PVC 참조"]
+    end
+    P -->|"참조"| PVC["PersistentVolumeClaim (PVC)<br/>스토리지 요청"]
+    PVC -->|"바인딩"| PV["PersistentVolume (PV)<br/>클러스터 레벨 스토리지"]
+    PV -->|"연결"| REAL["실제 스토리지<br/>(AWS EBS, NFS 등)"]
+    style P fill:#c8e6c9,color:#0f172a
+    style PVC fill:#c8e6c9,color:#0f172a
+    style PV fill:#c8e6c9,color:#0f172a
+    style REAL fill:#ffcdd2,color:#0f172a
+```
 
 ### emptyDir: 빈 디렉토리로 시작하는 공유 볼륨
 
@@ -311,7 +350,22 @@ Block Storage는 네트워크로 연결된 가상 블록 디바이스입니다.
 
 **예시:** AWS EBS, GCP Persistent Disk (Zonal), Azure Managed Disk
 
-![블록 스토리지 마운트 3단계 — CSI Controller가 EBS 볼륨을 노드에 attach(/dev/xvdf), CSI Node Plugin이 마운트, bind mount로 Pod의 /data에 연결](/images/kubernetes-pod-storage-pv-pvc-1/img-03-image-2.png)
+```mermaid
+flowchart TB
+    subgraph CLOUD["클라우드 프로바이더 (AZ-a)"]
+        BS["Block Storage<br/>(예: AWS EBS vol-123)"]
+    end
+    subgraph NODE["워커 노드 (AZ-a)"]
+        DEV["/dev/xvdf<br/>(attach된 디바이스)"]
+        KPATH["/var/lib/kubelet/pods/.../volumes/..."]
+    end
+    subgraph POD["Pod"]
+        DATA["/data<br/>(컨테이너 내부 경로)"]
+    end
+    BS -->|"① 네트워크 attach<br/>(CSI Controller)"| DEV
+    DEV -->|"② 마운트<br/>(CSI Node Plugin)"| KPATH
+    KPATH -->|"③ bind mount"| DATA
+```
 
 **흐름:**
 
@@ -390,7 +444,32 @@ Block Storage의 경우 (단일 Pod 기준):
 
 ### CSI 드라이버 구조
 
-![CSI 드라이버 구조 — 각 노드의 Node Plugin(DaemonSet)이 Pod 경로에 마운트하고, Controller Plugin이 스토리지 백엔드(EBS·GCP PD·NFS 등)에 볼륨을 생성·attach](/images/kubernetes-pod-storage-pv-pvc-1/img-04-image-3.png)
+```mermaid
+flowchart TB
+    subgraph WORKERS["워커 노드들"]
+        subgraph N1["Node 1"]
+            NP1["Node Plugin<br/>(DaemonSet)"]
+            POD1["Pod"]
+            NP1 <-->|"Pod 경로에<br/>마운트/언마운트"| POD1
+        end
+        subgraph N2["Node 2"]
+            NP2["Node Plugin<br/>(DaemonSet)"]
+            POD2["Pod"]
+            NP2 <-->|"Pod 경로에<br/>마운트/언마운트"| POD2
+        end
+    end
+    subgraph CP["Control Plane"]
+        API["API Server"]
+    end
+    subgraph CSI["CSI Driver"]
+        CTRL["Controller Plugin (Deployment)<br/>CreateVolume / DeleteVolume<br/>ControllerPublishVolume / ControllerUnpublishVolume"]
+    end
+    subgraph BACKEND["스토리지 백엔드"]
+        SB["AWS EBS / GCP PD /<br/>Azure Disk / NFS"]
+    end
+    API <-->|"PVC/PV 이벤트"| CTRL
+    CTRL <-->|"볼륨 생성/삭제<br/>노드에 attach/detach"| SB
+```
 
 CSI 드라이버는 두 가지 컴포넌트로 구성됩니다:
 
@@ -438,7 +517,26 @@ Pod 스케줄링 → Controller: attach → Node: mount → Pod 사용 가능!
 
 ### 동적 프로비저닝 흐름
 
-![동적 프로비저닝 시퀀스 — PVC 생성 → CSI Controller가 CreateVolume으로 클라우드 볼륨 생성 → PV 자동 생성·바인딩 → ControllerPublishVolume attach → NodePublishVolume 마운트 → Pod 볼륨 사용](/images/kubernetes-pod-storage-pv-pvc-1/img-05-image-4.png)
+```mermaid
+sequenceDiagram
+    participant DEV as 개발자
+    participant API as API Server
+    participant CTRL as CSI Controller Plugin
+    participant CLOUD as 클라우드 API
+    participant NODE as CSI Node Plugin
+    participant POD as Pod
+    DEV->>API: ① PVC 생성 (storageClassName: fast-ssd)
+    API->>CTRL: ② PVC 감지
+    CTRL->>CLOUD: ③ CreateVolume (예: EBS 생성)
+    CLOUD-->>CTRL: 볼륨 ID 반환
+    CTRL->>API: ④ PV 자동 생성 & PVC 바인딩
+    DEV->>API: ⑤ Pod 생성 (PVC 참조)
+    API->>CTRL: ⑥ Pod 스케줄링됨
+    CTRL->>CLOUD: ⑦ ControllerPublishVolume (노드에 attach)
+    CLOUD-->>NODE: 디바이스 연결됨
+    NODE->>POD: ⑧ NodePublishVolume (Pod 경로에 마운트)
+    POD-->>DEV: ⑨ Pod 실행, 볼륨 사용 가능
+```
 
 1.  개발자가 PVC 생성 (StorageClass 지정)
 2.  CSI Controller가 PVC 감지

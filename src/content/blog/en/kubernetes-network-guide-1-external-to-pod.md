@@ -2,7 +2,7 @@
 title: 'Understanding Kubernetes Networking (1): How an External Request Reaches a Pod'
 description: 'Tracing the full path of an external HTTP request through LB → Ingress Controller → Service → Pod — covering kube-proxy and iptables, conntrack, and troubleshooting commands for every hop.'
 pubDate: '2026-01-08T20:00:00+09:00'
-updatedDate: '2026-01-08T20:00:00+09:00'
+updatedDate: '2026-08-03T02:05:00+09:00'
 category: tech
 subcategory: 'Kubernetes'
 tags: ['ingress', 'kubernetes', 'network', 'service']
@@ -18,9 +18,49 @@ In this post I'll walk through, step by step, the entire journey an external use
 
 Here is the complete flow an external request takes to reach a Pod.
 
-![Kubernetes external traffic flow overview — a user request travels through DNS lookup → external load balancer → NodePort → Ingress Controller → Service → application Pod](/images/kubernetes-network-guide-1-external-to-pod/img-01-k8s-traffic-flow-overview-2.png)
+```mermaid
+flowchart TB
+    subgraph EXT["External network"]
+        USER["User<br/>requests example.com"]
+        DNS["DNS server"]
+        LB["External Load Balancer<br/>(public IP)"]
+        USER -->|"1. DNS lookup"| DNS
+        DNS -->|"2. returns public IP"| USER
+        USER -->|"3. HTTP request"| LB
+    end
 
-*Diagram labels are in Korean — it shows the request path from the user through DNS lookup, the external load balancer, NodePort, the Ingress Controller stack (Service + nginx-ingress Pods), and finally the application Service and Pods on a worker node, with the Control Plane (API Server, etcd) watching Ingress resources on the side.*
+    subgraph K8S["Kubernetes cluster"]
+        IR["Ingress Resource<br/>(defines routing rules)"]
+        subgraph CP["Control Plane"]
+            API["API Server"]
+            ETCD[("etcd")]
+            API <--> ETCD
+        end
+        subgraph IN["Ingress Node"]
+            subgraph ICS["Ingress Controller stack"]
+                ISVC["Service<br/>(exposed externally via NodePort)"]
+                NG1["Pod: nginx-ingress-xxx<br/>(Ingress Controller)"]
+                NG2["Pod: nginx-ingress-yyy<br/>(Ingress Controller)"]
+                ISVC -->|"5. distributes traffic"| NG1
+                ISVC -.->|"or"| NG2
+            end
+        end
+        subgraph WN["Worker Node"]
+            subgraph APP["Application stack"]
+                ASVC["Service<br/>(ClusterIP)"]
+                POD1["Pod: my-app-xxx"]
+                POD2["Pod: my-app-yyy"]
+                ASVC -->|"7. selects a Pod"| POD1
+                ASVC -.->|"or"| POD2
+            end
+        end
+    end
+
+    IR -.->|"stored"| ETCD
+    NG1 <-->|"watch"| API
+    LB -->|"4. forwards to NodePort<br/>(e.g. 31492)"| ISVC
+    NG1 -->|"6. matches Host/Path,<br/>forwards to Service"| ASVC
+```
 
 ```text
 User → DNS → External LB → Ingress Node Service → Ingress Controller Pod → Worker Node Service → Worker Node Pod
@@ -214,9 +254,16 @@ With a DaemonSet, one nginx Pod runs on every Ingress-role node, so whichever no
 
 How does the Ingress Controller know about every Ingress resource in the cluster? The answer is the **Kubernetes API Server's watch feature**.
 
-![Ingress sync flow — kubectl apply → API Server receives the request → stored in etcd → Ingress Controller detects the change via watch → nginx.conf regenerated → nginx reload](/images/kubernetes-network-guide-1-external-to-pod/img-02-ingress-sync-flow.png)
-
-*Diagram labels are in Korean — the steps are: 1. developer runs kubectl apply, 2. API Server receives the request, 3. etcd stores the Ingress, 4. Ingress Controller detects the change via watch, 5. nginx.conf is regenerated, 6. nginx reload applies the configuration.*
+```mermaid
+flowchart TB
+    A["1. Developer<br/>kubectl apply -f my-ingress.yaml"]
+    B["2. API Server<br/>receives the request"]
+    C[("3. etcd<br/>stores the Ingress")]
+    D["4. Ingress Controller<br/>detects the change via watch"]
+    E["5. nginx.conf<br/>config file regenerated"]
+    F["6. nginx reload<br/>configuration applied"]
+    A --> B --> C --> D --> E --> F
+```
 
 The synchronization flow, step by step:
 
@@ -298,9 +345,23 @@ So the Ingress Controller has picked the destination Service. But a Service's Cl
 
 The component behind this magic is **kube-proxy**.
 
-![Three-stage kube-proxy operation diagram — detecting Service/Endpoints changes via API Server watch, updating iptables NAT rules, and DNAT-ing a packet's ClusterIP to a Pod IP](/images/kubernetes-network-guide-1-external-to-pod/img-03-kube-proxy-flow.png)
-
-*Diagram labels are in Korean — stage 1: the API Server watch notifies kube-proxy of Service/Endpoints changes; stage 2: kube-proxy writes ClusterIP:Port → Pod IP:Port mappings into the iptables NAT table; stage 3: a packet destined for a ClusterIP matches the iptables rules and is DNAT-ed to the actual Pod.*
+```mermaid
+flowchart TB
+    subgraph S1["Stage 1: API Server watch"]
+        direction LR
+        API["API Server"] -->|"detects Service/Endpoints<br/>changes"| KP1["kube-proxy"]
+    end
+    subgraph S2["Stage 2: iptables rule update"]
+        direction LR
+        KP2["kube-proxy"] -->|"ClusterIP:Port →<br/>Pod IP:Port mapping"| NAT["iptables<br/>NAT table"]
+    end
+    subgraph S3["Stage 3: packet processing"]
+        direction LR
+        PKT["Packet arrives<br/>dst: ClusterIP"] -->|"if headed for a ClusterIP"| RULE["iptables<br/>rule match"]
+        RULE -->|"performs DNAT"| POD["Pod<br/>actual destination"]
+    end
+    S1 --> S2 --> S3
+```
 
 kube-proxy's operation in three stages:
 
@@ -337,9 +398,22 @@ sudo iptables -t nat -L KUBE-SERVICES -n | head -20
 
 For example, if there's a ClusterIP Service called `user-service`, a rule chain like the following gets created.
 
-![iptables chain flow — a packet arriving at the ClusterIP passes KUBE-SERVICES → the KUBE-SVC chain → a KUBE-SEP endpoint chain chosen at 50% probability → DNAT to Pod A/B](/images/kubernetes-network-guide-1-external-to-pod/img-04-iptables-chain-flow-1.png)
-
-*Diagram labels are in Korean — an incoming packet destined for the ClusterIP (10.96.100.50:80) matches KUBE-SERVICES, enters the KUBE-SVC-XXXX (user-service) chain, is routed to KUBE-SEP-AAAA or KUBE-SEP-BBBB at 50% probability each, and is DNAT-ed to Pod A (10.244.1.15:8080) or Pod B (10.244.2.23:8080).*
+```mermaid
+flowchart TB
+    PKT["Incoming packet<br/>dst: 10.96.100.50:80<br/>(ClusterIP)"]
+    SVCS["KUBE-SERVICES<br/>checks whether the destination is a ClusterIP"]
+    SVC["KUBE-SVC-XXXX<br/>(user-service chain)"]
+    SEPA["KUBE-SEP-AAAA<br/>Endpoint A (50% chance)"]
+    SEPB["KUBE-SEP-BBBB<br/>Endpoint B (50% chance)"]
+    PODA["Forwarded to Pod A<br/>DNAT → 10.244.1.15:8080"]
+    PODB["Forwarded to Pod B<br/>DNAT → 10.244.2.23:8080"]
+    PKT --> SVCS
+    SVCS -->|"ClusterIP match"| SVC
+    SVC -->|"random 50%"| SEPA
+    SVC -->|"random 50%"| SEPB
+    SEPA --> PODA
+    SEPB --> PODB
+```
 
 | Chain name | Role | Description |
 | --- | --- | --- |
