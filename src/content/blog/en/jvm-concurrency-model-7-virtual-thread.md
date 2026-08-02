@@ -433,7 +433,7 @@ suspend fun fetchUserWithOrders(userId: Long): UserWithOrders = coroutineScope {
 
 ### StructuredTaskScope — Java's Counterpart
 
-Java is getting **structured concurrency** too. Starting with JEP 428 (JDK 19 incubator), it has gone through multiple previews — [JEP 499](https://openjdk.org/jeps/499) (Fourth Preview) in JDK 24 [JEP 505](https://openjdk.org/jeps/505) (Fifth Preview) in JDK 25, and [JEP 525](https://openjdk.org/jeps/525) (Sixth Preview) in JDK 26, with API changes along the way. It uses `StructuredTaskScope`.
+Java is getting **structured concurrency** too. Starting with JEP 428 (JDK 19 incubator), it has gone through multiple previews — [JEP 499](https://openjdk.org/jeps/499) (Fourth Preview) in JDK 24, [JEP 505](https://openjdk.org/jeps/505) (Fifth Preview) in JDK 25, and [JEP 525](https://openjdk.org/jeps/525) (Sixth Preview) in JDK 26, with API changes along the way. It uses `StructuredTaskScope`.
 
 ```java
 // Structured concurrency in Java (preview feature)
