@@ -47,7 +47,7 @@ Coroutine의 핵심은 **중단(suspend)과 재개(resume)** 입니다. suspend 
 
 > **🤔 Coroutine도 WebFlux처럼 Event Loop인가요?**
 > 
-> 아닙니다. Coroutine은 **Dispatcher**가 스레드 풀에서 가용한 스레드를 할당하는 방식입니다. suspend 후 resume될 때 같은 스레드가 비어있지 않으면 다른 스레드가 할당될 수 있습니다. Event Loop와는 다른 메커니즘이지만, **“스레드가 바뀔 수 있다”**는 점에서 ThreadLocal 문제가 동일하게 발생합니다.
+> 아닙니다. Coroutine은 **Dispatcher**가 스레드 풀에서 가용한 스레드를 할당하는 방식입니다. suspend 후 resume될 때 같은 스레드가 비어있지 않으면 다른 스레드가 할당될 수 있습니다. Event Loop와는 다른 메커니즘이지만, “**스레드가 바뀔 수 있다**”는 점에서 ThreadLocal 문제가 동일하게 발생합니다.
 
 ```kotlin
 suspend fun processOrder(orderId: String) {

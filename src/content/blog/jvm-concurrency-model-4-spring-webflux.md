@@ -243,7 +243,7 @@ MVC와 WebFlux의 성능 차이는 **동시 연결 수**에 따라 극적으로 
 
 > 이 수치는 다양한 벤치마크에서 관찰되는 일반적 경향입니다. 실제 성능은 I/O 대기 시간, 비즈니스 로직 복잡도, 하드웨어 등에 따라 달라집니다. 직접적인 벤치마크 결과는 [Aleksandr Filichkin의 MVC vs WebFlux 비교](https://filia-aleks.medium.com/microservice-performance-battle-spring-mvc-vs-webflux-80d39fd81bf0), [The Practical Developer의 성능 분석](https://thepracticaldeveloper.com/full-reactive-stack-4-conclusions/), [Ippon Technologies의 WebFlux 성능 테스트](https://blog.ippon.tech/spring-5-webflux-performance-tests) 등에서 확인할 수 있습니다.
 
-핵심은 명확합니다 — WebFlux는 **“더 빠른 프레임워크”가 아니라 “더 많은 동시 연결을 적은 리소스로 처리하는 프레임워크”**입니다.
+핵심은 명확합니다 — WebFlux는 “**더 빠른 프레임워크”가 아니라 “더 많은 동시 연결을 적은 리소스로 처리하는 프레임워크**”입니다.
 
 ## WebFlux 핸들러 — 두 가지 프로그래밍 모델
 
@@ -632,7 +632,7 @@ void shouldHandleErrorGracefully() {
 | **WebFlux** | Reactor + Netty 기반의 논블로킹 웹 프레임워크 |
 | **핵심 규칙** | 이벤트 루프 스레드에서 블로킹 금지 |
 
-WebFlux를 도입할 때 가장 많이 하는 실수는 **“MVC보다 빠르다”**는 기대입니다. WebFlux는 MVC보다 **처리량(throughput)이 높은 것이지, 개별 요청의 응답 속도(latency)가 빠른 것이 아닙니다.** 같은 DB 조회가 100ms 걸리면, MVC든 WebFlux든 100ms입니다. WebFlux의 장점은 그 100ms 동안 스레드가 다른 요청을 처리할 수 있다는 것입니다.
+WebFlux를 도입할 때 가장 많이 하는 실수는 “**MVC보다 빠르다**”는 기대입니다. WebFlux는 MVC보다 **처리량(throughput)이 높은 것이지, 개별 요청의 응답 속도(latency)가 빠른 것이 아닙니다.** 같은 DB 조회가 100ms 걸리면, MVC든 WebFlux든 100ms입니다. WebFlux의 장점은 그 100ms 동안 스레드가 다른 요청을 처리할 수 있다는 것입니다.
 
 ```mermaid
 flowchart LR

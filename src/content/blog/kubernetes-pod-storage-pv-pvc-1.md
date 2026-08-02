@@ -48,7 +48,7 @@ Kubernetes Volume (Pod에 연결하기 위한 추상화)
 
 > “At its core, a volume is a directory, possibly with some data in it, which is accessible to the containers in a pod.”
 
-즉, Kubernetes 볼륨은 “스토리지 자체”가 아니라 **“Pod 내 컨테이너가 접근할 수 있는 디렉토리”**입니다. 같은 단어지만 레이어가 다른 개념이에요.
+즉, Kubernetes 볼륨은 “스토리지 자체”가 아니라 “**Pod 내 컨테이너가 접근할 수 있는 디렉토리**”입니다. 같은 단어지만 레이어가 다른 개념이에요.
 
 | 용어 | 일반적인 의미 | Kubernetes에서의 의미 |
 | --- | --- | --- |
@@ -146,7 +146,7 @@ flowchart TB
 
 ### emptyDir: 빈 디렉토리로 시작하는 공유 볼륨
 
-**“emptyDir”**이라는 이름은 Pod가 생성될 때 **빈 디렉토리** (empty directory) 로 시작하기 때문입니다.
+“**emptyDir**”이라는 이름은 Pod가 생성될 때 **빈 디렉토리** (empty directory) 로 시작하기 때문입니다.
 
 ```text
 Pod 스케줄링 → 노드에 빈 디렉토리 생성 → 컨테이너들이 데이터를 채워넣음 → Pod 삭제 시 함께 삭제
@@ -342,7 +342,7 @@ spec:
 
 ## 볼륨은 어디에 실재하는가?
 
-**“볼륨이 실제로 어디에 있는 거야?”**라는 질문에 답해보겠습니다. 스토리지 타입에 따라 다릅니다.
+“**볼륨이 실제로 어디에 있는 거야?**”라는 질문에 답해보겠습니다. 스토리지 타입에 따라 다릅니다.
 
 ### Block Storage – 가장 일반적
 

@@ -114,7 +114,7 @@ Pod IP는 보통 노드별로 다른 대역을 사용합니다. 여기서 **CIDR
 └── worker-3: 10.244.3.0/24 (이 노드의 Pod들은 10.244.3.x)
 ```
 
-이렇게 노드별로 서브넷을 나누면 **“10.244.2.x IP는 worker-2에 있다”**는 것을 라우팅 테이블만으로 알 수 있어서, 다른 노드로 패킷을 전달할 때 효율적입니다.
+이렇게 노드별로 서브넷을 나누면 “**10.244.2.x IP는 worker-2에 있다**”는 것을 라우팅 테이블만으로 알 수 있어서, 다른 노드로 패킷을 전달할 때 효율적입니다.
 
 > **IPAM(IP Address Management)이란?**
 > 
@@ -298,7 +298,7 @@ BGP를 사용하면 이 라우팅 정보를 노드들끼리 자동으로 공유�
 
 ### Flannel: 단순함의 대명사
 
-[Flannel](https://github.com/flannel-io/flannel)은 가장 단순한 CNI 플러그인 중 하나입니다. CoreOS(현재 Red Hat)에서 개발했으며, **“Pod 간 통신만 되면 된다”**는 철학으로 설계되었습니다.
+[Flannel](https://github.com/flannel-io/flannel)은 가장 단순한 CNI 플러그인 중 하나입니다. CoreOS(현재 Red Hat)에서 개발했으며, “**Pod 간 통신만 되면 된다**”는 철학으로 설계되었습니다.
 
 **특징**:
 
@@ -380,7 +380,7 @@ helm install cilium cilium/cilium --namespace kube-system
 
 > **eBPF와 노드 간 전송은 별개의 내용입니다**
 > 
-> Cilium의 핵심인 eBPF는 **“패킷 처리 엔진”**이지, “노드 간 전송 방식”이 아닙니다.  
+> Cilium의 핵심인 eBPF는 “**패킷 처리 엔진**”이지, “노드 간 전송 방식”이 아닙니다.  
 > Cilium도 노드 간 통신에는 Flannel, Calico처럼 **Overlay(VXLAN) 또는 Native Routing** 중 하나를 선택합니다.
 > 
 > | 레이어 | 역할 | Cilium의 선택 |

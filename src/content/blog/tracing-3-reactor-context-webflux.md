@@ -91,7 +91,7 @@ sequenceDiagram
 
 > **🤔 왜 WebFlux가 더 적은 스레드로 더 많은 요청을 처리할 수 있나요?**
 > 
-> 핵심은 **“대기 시간의 활용”**입니다. MVC에서 DB 응답을 기다리는 동안 스레드는 아무것도 못 하고 멈춰있습니다. 반면 WebFlux에서는 DB 호출을 시작한 후 “응답 오면 알려줘”라고 콜백을 등록하고, 스레드는 즉시 **다른 요청을 처리**하러 갑니다. 응답이 도착하면 그때 다시 처리를 이어갑니다.
+> 핵심은 “**대기 시간의 활용**”입니다. MVC에서 DB 응답을 기다리는 동안 스레드는 아무것도 못 하고 멈춰있습니다. 반면 WebFlux에서는 DB 호출을 시작한 후 “응답 오면 알려줘”라고 콜백을 등록하고, 스레드는 즉시 **다른 요청을 처리**하러 갑니다. 응답이 도착하면 그때 다시 처리를 이어갑니다.
 
 ### WebFlux에서 ThreadLocal이 실패하는 이유
 
@@ -1036,9 +1036,9 @@ flowchart TB
 
 > **📌 Java Agent vs Library Instrumentation**
 > 
-> 이 문제는 **“계측 방식의 차이”**에서 비롯됩니다. Library 방식(Micrometer, Spring Boot Auto-configuration)은 리액티브 체인 경계에서만 동작하지만, Java Agent 방식은 바이트코드 레벨에서 모든 곳에 계측을 삽입합니다.
+> 이 문제는 “**계측 방식의 차이**”에서 비롯됩니다. Library 방식(Micrometer, Spring Boot Auto-configuration)은 리액티브 체인 경계에서만 동작하지만, Java Agent 방식은 바이트코드 레벨에서 모든 곳에 계측을 삽입합니다.
 > 
-> 이 주제는 시리즈의 후속 글 **“Instrumentation 방식 비교: Java Agent vs Library의 동작 원리”**에서 자세히 다루겠습니다. Agent가 어떻게 라이브러리 내부까지 traceId를 전파하는지, 그리고 각 방식의 장단점을 비교해보겠습니다.
+> 이 주제는 시리즈의 후속 글 “**Instrumentation 방식 비교: Java Agent vs Library의 동작 원리**”에서 자세히 다루겠습니다. Agent가 어떻게 라이브러리 내부까지 traceId를 전파하는지, 그리고 각 방식의 장단점을 비교해보겠습니다.
 
 ### 5\. 테스트 시 Context 설정
 

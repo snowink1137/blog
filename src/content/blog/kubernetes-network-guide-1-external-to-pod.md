@@ -335,7 +335,7 @@ server {
 > | 실제 동작 | Ingress Controller가 규칙을 읽어서 처리 | kube-proxy가 iptables/IPVS로 구현 |
 > | 비유 | 교통 표지판 (어디로 갈지 안내) | 도로 (실제 이동 경로) |
 > 
-> 핵심은 **Ingress는 “라우팅 규칙”의 정의**이고, \*\*Service는 “실제 트래픽 전달”\*\*을 담당한다는 점입니다. Ingress Controller가 요청을 받아 어떤 Service로 보낼지 결정하면, 그 이후는 Service가 담당합니다.
+> 핵심은 **Ingress는 “라우팅 규칙”의 정의**이고, **Service는 “실제 트래픽 전달”을 담당**한다는 점입니다. Ingress Controller가 요청을 받아 어떤 Service로 보낼지 결정하면, 그 이후는 Service가 담당합니다.
 
 ## Service에서 Pod까지: kube-proxy와 iptables
 
