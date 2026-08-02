@@ -181,9 +181,9 @@ tracestate: vendor1=value1,vendor2=value2
 
 | 구성 요소 | B3 Multi-Header | W3C Trace Context |
 | --- | --- | --- |
-| Trace ID | `` X-B3-TraceId: `0af7651916cd43dd8448eb211c80319c` `` | `traceparent`의 2번째 필드 |
-| Span ID | `` X-B3-SpanId: `b7ad6b7169203331` `` | `traceparent`의 3번째 필드 |
-| Parent Span ID | `````` X-B3-ParentSpanId: ````` ````6b7169``` `` `b7ad` `` ```203331```` ````` `````` | ❌ 헤더에 없음 (이유는 아래에서 설명) |
+| Trace ID | `X-B3-TraceId: 0af7651916cd43dd8448eb211c80319c` | `traceparent`의 2번째 필드 |
+| Span ID | `X-B3-SpanId: b7ad6b7169203331` | `traceparent`의 3번째 필드 |
+| Parent Span ID | `X-B3-ParentSpanId: b7ad6b7169203331` | ❌ 헤더에 없음 (이유는 아래에서 설명) |
 | Sampled | `X-B3-Sampled: 1` | `traceparent`의 4번째 필드 (`01`) |
 
 > 💡 **ParentSpanId는 어디로 갔나?**
@@ -194,7 +194,7 @@ tracestate: vendor1=value1,vendor2=value2
 > 
 > **W3C 방식**: `traceparent`에 있는 SpanId가 수신 측에서 자동으로 parent가 됨
 > 
-> ```
+> ```text
 > Service A가 Service B를 호출할 때:
 > 
 > [A가 보내는 헤더]
@@ -343,13 +343,13 @@ management:
 > 
 > Spring WebFlux(Reactor 기반)를 사용한다면 Context Propagation 설정이 필요합니다:
 > 
-> ```
+> ```yaml
 > spring:
 >   reactor:
 >     context-propagation: auto
 > ```
 > 
-> 이 설정이 없으면 Reactor의 비동기 체인에서 Trace Context가 유실될 수 있습니다. `auto`로 설정하면 Reactor Context와 ThreadLocal 간 자동 전파가 활성화됩니다. 자세한 원리는 [다음 편](#)에서 다룹니다.
+> 이 설정이 없으면 Reactor의 비동기 체인에서 Trace Context가 유실될 수 있습니다. `auto`로 설정하면 Reactor Context와 ThreadLocal 간 자동 전파가 활성화됩니다. 자세한 원리는 [다음 편](/tracing-3-reactor-context-webflux/)에서 다룹니다.
 
 ### 그래서 뭘 써야 하나?
 

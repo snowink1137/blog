@@ -63,7 +63,7 @@ context.get();          // "user-B" 반환 (Thread-1에 영향 없음)
 > 
 > 아니요! `new ThreadLocal<>()`은 **ThreadLocal 객체만 생성**합니다. 실제 저장은 **`set()` 호출 시점**에 일어납니다:
 > 
-> ```javascript
+> ```java
 > ThreadLocal<String> tl = new ThreadLocal<>();  // 아직 아무 일도 안 일어남
 > tl.set("value");  // 이 시점에 Thread의 ThreadLocalMap에 저장
 > ```
@@ -711,7 +711,7 @@ logging:
 
 > **🤔 Appender와 Encoder의 동작 흐름**
 > 
-> ```
+> ```mermaid
 > flowchart LR
 >     L["log.info() 호출"] --> E["LoggingEvent 생성"]
 >     E --> R["Root Logger"]

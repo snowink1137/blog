@@ -85,7 +85,7 @@ spec:
 > 
 > 하지만 **같은 AZ 내에 노드가 여러 개**라면? Scheduler는 그중 아무 노드나 선택할 수 있습니다. RWO 볼륨이 이미 Node-1에 attach되어 있어도, Scheduler는 Node-2에 Pod를 스케줄링할 수 있어요.
 > 
-> ```
+> ```text
 > AZ-a에 Node-1, Node-2, Node-3 존재
 > RWO 볼륨이 Node-1에 attach됨
 > 
@@ -332,7 +332,7 @@ PVC:  data-postgres-3, data-postgres-4는 유지됨!
 > 
 > PVC를 삭제하려면 수동으로 해야 합니다:
 > 
-> ```javascript
+> ```bash
 > kubectl delete pvc data-postgres-3 data-postgres-4
 > ```
 

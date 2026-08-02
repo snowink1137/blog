@@ -500,7 +500,7 @@ spec:
 > 
 > 기본값인 `Immediate`는 PVC 생성 즉시 볼륨을 생성합니다. **AZ 종속적인 Block Storage** (EBS, GCP PD Zonal 등) 를 사용할 때, 볼륨이 특정 AZ에 먼저 생성되고 Pod가 다른 AZ의 노드에 스케줄링되면 문제가 됩니다.
 > 
-> ```
+> ```text
 > Immediate 모드 + AZ 종속 스토리지:
 >   PVC 생성 → 볼륨이 AZ-a에 생성 → Pod가 AZ-b에 스케줄링 → 💥 실패!
 > 

@@ -305,7 +305,7 @@ kube-proxy의 동작을 3단계로 나눠보면:
 > 
 > kube-proxy는 **DaemonSet**으로 배포되어 모든 노드에서 실행됩니다.
 > 
-> ```javascript
+> ```text
 > $ kubectl get daemonset -n kube-system
 > NAME         DESIRED   CURRENT   READY   NODE SELECTOR
 > kube-proxy   5         5         5       <none>
@@ -360,7 +360,7 @@ sudo iptables -t nat -L KUBE-SERVICES -n | head -20
 > 
 > 맞습니다. iptables는 규칙을 순차적으로 평가하므로 Service와 Pod 수가 많아지면 성능 저하가 발생할 수 있습니다. 이를 해결하기 위한 대안으로:
 > 
-> -   **IPVS(**(IP Virtual Server)** 모드**: kube-proxy의 또 다른 모드로, 해시 테이블 기반이라 규칙 수에 관계없이 O(1) 성능
+> -   **IPVS (IP Virtual Server) 모드**: kube-proxy의 또 다른 모드로, 해시 테이블 기반이라 규칙 수에 관계없이 O(1) 성능
 > -   **eBPF 기반 (Cilium 등)**: 커널 레벨에서 직접 패킷 처리, iptables 완전 대체 가능
 
 ## 응답의 역방향 흐름

@@ -305,7 +305,7 @@ Flux.just(1, 2, 3)           // FluxArray
 > 
 > Reactor에서 **연산자를 호출할 때마다 새로운 Publisher가 생성**됩니다. `.map()`을 호출하면 원본 Flux를 감싸는 `FluxMap`이 만들어지고, `.filter()`를 호출하면 그걸 또 감싸는 `FluxFilter`가 만들어집니다.
 > 
-> ```
+> ```text
 > FluxFilter ─감싸고 있음→ FluxMap ─감싸고 있음→ FluxArray
 > ```
 > 
@@ -425,7 +425,7 @@ flowchart BT
 
 > **⚠️ 중요: subscribe 람다에서는 Context가 없습니다!**
 > 
-> ```javascript
+> ```java
 > Flux.just(1, 2, 3)
 >     .doOnNext(v -> {
 >         // ✅ contextWrite 위 → Context 있음
@@ -649,7 +649,7 @@ public Mono<Order> createOrder(@RequestBody OrderRequest request) {
 
 > **⚠️ subscribe() vs block()의 차이**
 > 
-> ```javascript
+> ```java
 > // block() - 현재 스레드에서 완료까지 대기
 > Order result = orderService.createOrder(request)
 >     .contextCapture()
@@ -665,7 +665,7 @@ public Mono<Order> createOrder(@RequestBody OrderRequest request) {
 > 
 > **🚨 중요**: WebFlux에서 `block()`을 사용하면 **Event Loop 스레드를 blocking**하게 됩니다. WebFlux의 핵심 장점은 소수의 스레드(보통 4~8개)로 수천 개의 요청을 처리하는 것인데, 이 스레드가 blocking되면 전체 처리량이 급격히 떨어집니다. 사실상 **WebFlux를 쓰는 의미가 없어지는 것**이죠.
 > 
-> ```javascript
+> ```java
 > // ❌ 절대 금지: Event Loop 스레드에서 block()
 > @GetMapping("/order/{id}")
 > public Mono<Order> getOrder(@PathVariable String id) {
@@ -962,7 +962,7 @@ public Flux<Order> getOrders() {
 > 
 > **signal** (tap에서 사용):
 > 
-> ```javascript
+> ```java
 > signal.isOnNext()         // 데이터가 흘러왔는지 확인
 > signal.isOnError()        // 에러가 발생했는지 확인
 > signal.isOnComplete()     // 스트림이 완료됐는지 확인

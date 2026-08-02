@@ -617,7 +617,7 @@ class OrderController(
 > 
 > Flow는 **cold stream**이라서, 함수 호출 시점에는 아무것도 실행되지 않습니다. 실제 실행은 누군가 `collect()`를 호출할 때 시작됩니다.
 > 
-> ```javascript
+> ```kotlin
 > fun getAllOrders(): Flow<Order> = flow { ... }  // Flow "정의"만 함
 > 
 > // 실제 실행은 collect 시점
