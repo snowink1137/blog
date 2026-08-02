@@ -639,9 +639,9 @@ flowchart LR
     A[Spring MVC] -->|thread-per-request limits| B[Spring WebFlux]
     B -->|reactive code complexity| C[Kotlin Coroutines - Part 5]
 
-    style A fill:#ffcdd2
-    style B fill:#c8e6c9
-    style C fill:#bbdefb
+    style A fill:#ffcdd2,color:#0f172a
+    style B fill:#c8e6c9,color:#0f172a
+    style C fill:#bbdefb,color:#0f172a
 ```
 
 WebFlux's reactive code is powerful, but there's plenty of feedback that `flatMap` chains and Mono/Flux return types hurt code readability. In the next post we cover **Kotlin Coroutines**, which address this problem. We'll look at how to keep the non-blocking benefits of reactive while writing asynchronous logic as naturally as if it were synchronous code.

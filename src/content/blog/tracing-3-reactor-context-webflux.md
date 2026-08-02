@@ -1018,9 +1018,9 @@ flowchart TB
     B -.->|"실제 I/O 작업"| C
     C --> D
     
-    style B fill:#ccffcc,stroke:#00aa00
-    style C fill:#ffcccc,stroke:#ff0000
-    style D fill:#ffcccc,stroke:#ff0000
+    style B fill:#ccffcc,color:#0f172a,stroke:#00aa00
+    style C fill:#ffcccc,color:#0f172a,stroke:#ff0000
+    style D fill:#ffcccc,color:#0f172a,stroke:#ff0000
 ```
 
 라이브러리 내부에서 로그를 찍을 때:

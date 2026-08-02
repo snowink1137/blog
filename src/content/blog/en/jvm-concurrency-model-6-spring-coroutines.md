@@ -683,10 +683,10 @@ flowchart LR
     B -->|Spring integration| C[WebFlux + Coroutines]
     C -->|next: JVM-native| D[Virtual Threads - Part 7]
 
-    style A fill:#ffcdd2
-    style B fill:#c8e6c9
-    style C fill:#bbdefb
-    style D fill:#fff9c4
+    style A fill:#ffcdd2,color:#0f172a
+    style B fill:#c8e6c9,color:#0f172a
+    style C fill:#bbdefb,color:#0f172a
+    style D fill:#fff9c4,color:#0f172a
 ```
 
 Throughout this series we've followed the evolution of the asynchronous world — Future → CompletableFuture → Reactor → Coroutines, with readability and structure improving at each step. But all of that was progress within the "non-blocking asynchronous" paradigm; in the synchronous MVC world, there was no fundamental way to make blocking code like JDBC lightweight.

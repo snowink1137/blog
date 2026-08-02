@@ -72,8 +72,8 @@ graph TB
 
     A_MEM -.->|"no access"| B_MEM
 
-    style A_MEM fill:#e1f5fe
-    style B_MEM fill:#fce4ec
+    style A_MEM fill:#e1f5fe,color:#0f172a
+    style B_MEM fill:#fce4ec,color:#0f172a
 ```
 
 ### Key Differences Between Process and Thread
@@ -105,8 +105,8 @@ graph LR
     CLONE --> TASK["task_struct created"]
     TASK --> SCHED["Managed by the same scheduler"]
 
-    style CLONE fill:#fff3e0
-    style TASK fill:#e8f5e9
+    style CLONE fill:#fff3e0,color:#0f172a
+    style TASK fill:#e8f5e9,color:#0f172a
 ```
 
 Looking at the key flags makes this structure even clearer.
@@ -166,9 +166,9 @@ flowchart TB
     CLONE_CALL --> TASK[task_struct created]
     TASK --> OS_SCHED[OS scheduler]
 
-    style JAVA fill:#e3f2fd
-    style TASK fill:#e8f5e9
-    style OS_SCHED fill:#fff3e0
+    style JAVA fill:#e3f2fd,color:#0f172a
+    style TASK fill:#e8f5e9,color:#0f172a
+    style OS_SCHED fill:#fff3e0,color:#0f172a
 ```
 
 This 1:1 mapping has two implications.
@@ -338,10 +338,10 @@ flowchart LR
     CF -- ".thenApply()" --> NONBLOCK
     CF -. ".get() also possible" .-> BLOCK
 
-    style FUTURE fill:#ffcdd2
-    style CF fill:#c8e6c9
-    style BLOCK fill:#ffcdd2
-    style NONBLOCK fill:#c8e6c9
+    style FUTURE fill:#ffcdd2,color:#0f172a
+    style CF fill:#c8e6c9,color:#0f172a
+    style BLOCK fill:#ffcdd2,color:#0f172a
+    style NONBLOCK fill:#c8e6c9,color:#0f172a
 ```
 
 ```mermaid
@@ -514,10 +514,10 @@ graph TB
 
     SEL -->|"select() → returns only the ready ones"| RESULT["Process only B and D"]
 
-    style SEL fill:#fff3e0
-    style CH2 fill:#c8e6c9
-    style CH4 fill:#c8e6c9
-    style RESULT fill:#e3f2fd
+    style SEL fill:#fff3e0,color:#0f172a
+    style CH2 fill:#c8e6c9,color:#0f172a
+    style CH4 fill:#c8e6c9,color:#0f172a
+    style RESULT fill:#e3f2fd,color:#0f172a
 ```
 
 ```java
@@ -700,10 +700,10 @@ graph LR
     B -->|"code complexity"| C["Coroutines(async + non-blocking, but written in a sync style)"]
     A -->|"a different approach"| D["Virtual Threads(sync + blocking style, lightweight threads)"]
 
-    style A fill:#ffcdd2
-    style B fill:#c8e6c9
-    style C fill:#bbdefb
-    style D fill:#fff9c4
+    style A fill:#ffcdd2,color:#0f172a
+    style B fill:#c8e6c9,color:#0f172a
+    style C fill:#bbdefb,color:#0f172a
+    style D fill:#fff9c4,color:#0f172a
 ```
 
 In the next post, we'll walk through Java's traditional concurrency model — from Thread to CompletableFuture — with code.

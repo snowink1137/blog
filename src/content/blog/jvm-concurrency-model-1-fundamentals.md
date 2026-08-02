@@ -72,8 +72,8 @@ graph TB
 
     A_MEM -.->|"접근 불가"| B_MEM
 
-    style A_MEM fill:#e1f5fe
-    style B_MEM fill:#fce4ec
+    style A_MEM fill:#e1f5fe,color:#0f172a
+    style B_MEM fill:#fce4ec,color:#0f172a
 ```
 
 ### Process와 Thread의 핵심 차이
@@ -105,8 +105,8 @@ graph LR
     CLONE --> TASK["task_struct 생성"]
     TASK --> SCHED["동일한 스케줄러에서 관리"]
 
-    style CLONE fill:#fff3e0
-    style TASK fill:#e8f5e9
+    style CLONE fill:#fff3e0,color:#0f172a
+    style TASK fill:#e8f5e9,color:#0f172a
 ```
 
 핵심 플래그들을 살펴보면 이 구조가 더 명확해집니다.
@@ -166,9 +166,9 @@ flowchart TB
     CLONE_CALL --> TASK[task_struct 생성]
     TASK --> OS_SCHED[OS 스케줄러]
 
-    style JAVA fill:#e3f2fd
-    style TASK fill:#e8f5e9
-    style OS_SCHED fill:#fff3e0
+    style JAVA fill:#e3f2fd,color:#0f172a
+    style TASK fill:#e8f5e9,color:#0f172a
+    style OS_SCHED fill:#fff3e0,color:#0f172a
 ```
 
 이 1:1 매핑은 두 가지 의미를 가집니다.
@@ -339,10 +339,10 @@ flowchart LR
     CF -- ".thenApply()" --> NONBLOCK
     CF -. ".get()도 가능" .-> BLOCK
 
-    style FUTURE fill:#ffcdd2
-    style CF fill:#c8e6c9
-    style BLOCK fill:#ffcdd2
-    style NONBLOCK fill:#c8e6c9
+    style FUTURE fill:#ffcdd2,color:#0f172a
+    style CF fill:#c8e6c9,color:#0f172a
+    style BLOCK fill:#ffcdd2,color:#0f172a
+    style NONBLOCK fill:#c8e6c9,color:#0f172a
 ```
 
 ```mermaid
@@ -515,10 +515,10 @@ graph TB
 
     SEL -->|"select() → 준비된 것만 반환"| RESULT["B, D만 처리"]
 
-    style SEL fill:#fff3e0
-    style CH2 fill:#c8e6c9
-    style CH4 fill:#c8e6c9
-    style RESULT fill:#e3f2fd
+    style SEL fill:#fff3e0,color:#0f172a
+    style CH2 fill:#c8e6c9,color:#0f172a
+    style CH4 fill:#c8e6c9,color:#0f172a
+    style RESULT fill:#e3f2fd,color:#0f172a
 ```
 
 ```java
@@ -701,10 +701,10 @@ graph LR
     B -->|"코드 복잡도"| C["Coroutine(비동기+논블로킹. but 동기 스타일로 코드 작성)"]
     A -->|"다른 접근"| D["Virtual Thread(동기+블로킹 스타일. 경량 스레드)"]
 
-    style A fill:#ffcdd2
-    style B fill:#c8e6c9
-    style C fill:#bbdefb
-    style D fill:#fff9c4
+    style A fill:#ffcdd2,color:#0f172a
+    style B fill:#c8e6c9,color:#0f172a
+    style C fill:#bbdefb,color:#0f172a
+    style D fill:#fff9c4,color:#0f172a
 ```
 
 다음 글에서는 Java의 전통적인 동시성 모델(Thread부터 CompletableFuture까지)을 코드와 함께 살펴보겠습니다.

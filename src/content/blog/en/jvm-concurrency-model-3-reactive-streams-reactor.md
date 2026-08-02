@@ -560,10 +560,10 @@ flowchart LR
     B -->|implementation| C[Project Reactor]
     C -->|web framework| D[Spring WebFlux - Part 4]
 
-    style A fill:#c8e6c9
-    style B fill:#ffe0b2
-    style C fill:#ffcdd2
-    style D fill:#bbdefb
+    style A fill:#c8e6c9,color:#0f172a
+    style B fill:#ffe0b2,color:#0f172a
+    style C fill:#ffcdd2,color:#0f172a
+    style D fill:#bbdefb,color:#0f172a
 ```
 
 In the next post we'll cover **WebFlux**, the framework Spring built on top of Reactor. We'll look at how Reactor's Mono/Flux are put to work in the web world — HTTP request-response, WebSocket, SSE — how it connects to Netty's **event loop** architecture, and how it differs from classic Spring MVC.

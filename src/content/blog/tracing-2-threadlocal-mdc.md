@@ -216,7 +216,7 @@ flowchart LR
         D --> E[응답 완료]
     end
     
-    style Thread fill:#e8f5e9,stroke:#4caf50
+    style Thread fill:#e8f5e9,color:#0f172a,stroke:#4caf50
 ```
 
 DB 호출이나 외부 API 호출에서 **blocking이 발생해도 스레드는 그대로 기다립니다**. 이것이 “Thread-per-Request” 모델입니다. 이 경우 ThreadLocal은 아무 문제 없이 동작합니다.
@@ -912,9 +912,9 @@ flowchart TB
         WA -.->|"누가 받을지 모름"| WB
     end
     
-    style MVC fill:#e3f2fd,stroke:#1976d2
-    style WebFlux fill:#fff3e0,stroke:#f57c00
-    style RC fill:#ffecb3,stroke:#ffa000
+    style MVC fill:#e3f2fd,color:#0f172a,stroke:#1976d2
+    style WebFlux fill:#fff3e0,color:#0f172a,stroke:#f57c00
+    style RC fill:#ffecb3,color:#0f172a,stroke:#ffa000
 ```
 
 ## 정리

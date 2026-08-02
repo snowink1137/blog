@@ -623,8 +623,8 @@ flowchart TD
     H -->|Yes| E
     H -->|No| C
     
-    style C fill:#e1f5fe
-    style E fill:#fff3e0
+    style C fill:#e1f5fe,color:#0f172a
+    style E fill:#fff3e0,color:#0f172a
 ```
 
 | 기준 | Library Instrumentation | Java Agent |

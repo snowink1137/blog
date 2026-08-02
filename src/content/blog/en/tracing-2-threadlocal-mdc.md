@@ -216,7 +216,7 @@ flowchart LR
         D --> E[Response complete]
     end
     
-    style Thread fill:#e8f5e9,stroke:#4caf50
+    style Thread fill:#e8f5e9,color:#0f172a,stroke:#4caf50
 ```
 
 Even when a DB call or an external API call **blocks, the thread just sits and waits**. This is the "thread-per-request" model. In this case, ThreadLocal works with no issues whatsoever.
@@ -912,9 +912,9 @@ flowchart TB
         WA -.->|"doesn't know who's next"| WB
     end
     
-    style MVC fill:#e3f2fd,stroke:#1976d2
-    style WebFlux fill:#fff3e0,stroke:#f57c00
-    style RC fill:#ffecb3,stroke:#ffa000
+    style MVC fill:#e3f2fd,color:#0f172a,stroke:#1976d2
+    style WebFlux fill:#fff3e0,color:#0f172a,stroke:#f57c00
+    style RC fill:#ffecb3,color:#0f172a,stroke:#ffa000
 ```
 
 ## Wrap-up

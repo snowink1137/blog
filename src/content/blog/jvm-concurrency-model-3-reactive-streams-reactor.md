@@ -560,10 +560,10 @@ flowchart LR
     B -->|구현체| C[Project Reactor]
     C -->|웹 프레임워크| D[Spring WebFlux - Part 4]
 
-    style A fill:#c8e6c9
-    style B fill:#ffe0b2
-    style C fill:#ffcdd2
-    style D fill:#bbdefb
+    style A fill:#c8e6c9,color:#0f172a
+    style B fill:#ffe0b2,color:#0f172a
+    style C fill:#ffcdd2,color:#0f172a
+    style D fill:#bbdefb,color:#0f172a
 ```
 
 다음 글에서는 Reactor 위에 Spring이 구축한 **WebFlux** 프레임워크를 다룹니다. Reactor의 Mono/Flux가 HTTP 요청-응답, WebSocket, SSE 같은 웹 환경에서 어떻게 활용되는지, Netty의 **이벤트 루프** 아키텍처와 어떻게 연결되는지, 그리고 기존 Spring MVC와는 어떤 차이가 있는지 살펴보겠습니다.

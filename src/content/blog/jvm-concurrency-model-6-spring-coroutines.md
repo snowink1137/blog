@@ -683,10 +683,10 @@ flowchart LR
     B -->|Spring 통합| C[WebFlux + Coroutines]
     C -->|다음: JVM 네이티브| D[Virtual Thread - Part 7]
 
-    style A fill:#ffcdd2
-    style B fill:#c8e6c9
-    style C fill:#bbdefb
-    style D fill:#fff9c4
+    style A fill:#ffcdd2,color:#0f172a
+    style B fill:#c8e6c9,color:#0f172a
+    style C fill:#bbdefb,color:#0f172a
+    style D fill:#fff9c4,color:#0f172a
 ```
 
 지금까지 시리즈에서 비동기 세계의 발전을 따라왔습니다 — Future → CompletableFuture → Reactor → Coroutines로, 점점 가독성과 구조가 개선되었습니다. 하지만 이 모든 것은 “논블로킹 비동기”라는 패러다임 안의 발전이었고, 동기 MVC 세계에서는 JDBC 같은 블로킹 코드를 경량화하는 근본적인 해법이 없었습니다.

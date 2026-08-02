@@ -409,8 +409,8 @@ flowchart LR
     T2[Thread 2] -->|보유| LB
     T2 -.->|대기| LA
 
-    style T1 fill:#ffcdd2
-    style T2 fill:#ffcdd2
+    style T1 fill:#ffcdd2,color:#0f172a
+    style T2 fill:#ffcdd2,color:#0f172a
 ```
 
 Deadlock을 예방하는 가장 기본적인 전략은 **락 획득 순서를 통일**하는 것입니다. 모든 스레드가 항상 A → B 순서로 락을 잡으면 순환 대기가 발생하지 않습니다.
@@ -696,7 +696,7 @@ flowchart TB
     Q3[작업 D] --> T3
     T1 -.->|작업 C를 훔쳐감| T2
 
-    style T2 fill:#fff9c4
+    style T2 fill:#fff9c4,color:#0f172a
 ```
 
 각 스레드는 **자신만의 작업 큐(deque)** 를 가집니다. 일이 끝난 유휴 스레드는 다른 바쁜 스레드의 큐에서 **작업을 훔쳐와서** 실행합니다. 이 방식으로 모든 코어가 최대한 쉬지 않고 일하게 됩니다.
@@ -745,10 +745,10 @@ flowchart LR
     B -->|get 블로킹| C[CompletableFuture]
     C -->|콜백 체이닝 복잡도| D[Reactive Streams - Part 3]
 
-    style A fill:#ffcdd2
-    style B fill:#ffe0b2
-    style C fill:#c8e6c9
-    style D fill:#bbdefb
+    style A fill:#ffcdd2,color:#0f172a
+    style B fill:#ffe0b2,color:#0f172a
+    style C fill:#c8e6c9,color:#0f172a
+    style D fill:#bbdefb,color:#0f172a
 ```
 
 **Thread**는 가장 원시적인 동시성 도구이고, 결과 반환과 스레드 관리의 한계를 **ExecutorService + Future**가 해결했습니다. Future의 블로킹 문제를 **CompletableFuture**가 콜백으로 해결했지만, 체인이 복잡해지면 가독성이 떨어지고, 배압(backpressure) 같은 스트림 제어를 할 수 없다는 한계가 남아 있습니다.

@@ -639,9 +639,9 @@ flowchart LR
     A[Spring MVC] -->|thread-per-request 한계| B[Spring WebFlux]
     B -->|리액티브 코드 복잡도| C[Kotlin Coroutines - Part 5]
 
-    style A fill:#ffcdd2
-    style B fill:#c8e6c9
-    style C fill:#bbdefb
+    style A fill:#ffcdd2,color:#0f172a
+    style B fill:#c8e6c9,color:#0f172a
+    style C fill:#bbdefb,color:#0f172a
 ```
 
 WebFlux의 리액티브 코드는 강력하지만, `flatMap` 체이닝과 Mono/Flux 반환 타입이 코드의 가독성을 떨어뜨린다는 피드백도 많습니다. 다음 글에서는 이 문제를 해결하는 **Kotlin Coroutines**를 다룹니다. 리액티브의 논블로킹 장점을 유지하면서, 마치 동기 코드처럼 자연스럽게 비동기 로직을 작성하는 방법을 살펴보겠습니다.

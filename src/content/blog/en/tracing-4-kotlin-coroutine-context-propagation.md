@@ -865,9 +865,9 @@ flowchart LR
     RC <-->|"Reactor<br/>Context"| CC
     TL <-->|"Thread<br/>ContextElement"| CC
     
-    style TL fill:#e1f5fe
-    style RC fill:#fff3e0
-    style CC fill:#f3e5f5
+    style TL fill:#e1f5fe,color:#0f172a
+    style RC fill:#fff3e0,color:#0f172a
+    style CC fill:#f3e5f5,color:#0f172a
 ```
 
 In the next post we'll cover **Java Agent vs Library Instrumentation** — how a Java agent solves the "traceId lost in a library's internal logging" problem mentioned in Part 3, and how the two approaches compare.

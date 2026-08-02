@@ -1018,9 +1018,9 @@ flowchart TB
     B -.->|"actual I/O work"| C
     C --> D
     
-    style B fill:#ccffcc,stroke:#00aa00
-    style C fill:#ffcccc,stroke:#ff0000
-    style D fill:#ffcccc,stroke:#ff0000
+    style B fill:#ccffcc,color:#0f172a,stroke:#00aa00
+    style C fill:#ffcccc,color:#0f172a,stroke:#ff0000
+    style D fill:#ffcccc,color:#0f172a,stroke:#ff0000
 ```
 
 When a library logs internally:

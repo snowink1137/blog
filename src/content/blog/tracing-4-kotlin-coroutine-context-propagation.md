@@ -865,9 +865,9 @@ flowchart LR
     RC <-->|"Reactor<br/>Context"| CC
     TL <-->|"Thread<br/>ContextElement"| CC
     
-    style TL fill:#e1f5fe
-    style RC fill:#fff3e0
-    style CC fill:#f3e5f5
+    style TL fill:#e1f5fe,color:#0f172a
+    style RC fill:#fff3e0,color:#0f172a
+    style CC fill:#f3e5f5,color:#0f172a
 ```
 
 다음 글에서는 **Java Agent vs Library Instrumentation**을 다룹니다. 3편에서 언급한 “라이브러리 내부 로깅에서 traceId 유실” 문제를 Java Agent가 어떻게 해결하는지, 그리고 두 접근 방식의 장단점을 비교해보겠습니다.

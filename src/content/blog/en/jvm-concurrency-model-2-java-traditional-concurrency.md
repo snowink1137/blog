@@ -409,8 +409,8 @@ flowchart LR
     T2[Thread 2] -->|holds| LB
     T2 -.->|waits for| LA
 
-    style T1 fill:#ffcdd2
-    style T2 fill:#ffcdd2
+    style T1 fill:#ffcdd2,color:#0f172a
+    style T2 fill:#ffcdd2,color:#0f172a
 ```
 
 The most basic deadlock-prevention strategy is to **standardize the lock acquisition order**. If every thread always acquires locks in A → B order, circular waiting can't occur.
@@ -696,7 +696,7 @@ flowchart TB
     Q3[Task D] --> T3
     T1 -.->|steals Task C| T2
 
-    style T2 fill:#fff9c4
+    style T2 fill:#fff9c4,color:#0f172a
 ```
 
 Each thread has **its own work queue (a deque)**. An idle thread that has finished its work **steals a task** from a busy thread's queue and runs it. This way every core stays as busy as possible.
@@ -745,10 +745,10 @@ flowchart LR
     B -->|blocking get| C[CompletableFuture]
     C -->|callback chaining complexity| D[Reactive Streams - Part 3]
 
-    style A fill:#ffcdd2
-    style B fill:#ffe0b2
-    style C fill:#c8e6c9
-    style D fill:#bbdefb
+    style A fill:#ffcdd2,color:#0f172a
+    style B fill:#ffe0b2,color:#0f172a
+    style C fill:#c8e6c9,color:#0f172a
+    style D fill:#bbdefb,color:#0f172a
 ```
 
 **Thread** is the most primitive concurrency tool; **ExecutorService + Future** solved its problems of returning results and managing threads. **CompletableFuture** solved Future's blocking problem with callbacks — but when chains grow complex, readability suffers, and there's no stream-level control like backpressure. Those limitations remain.
