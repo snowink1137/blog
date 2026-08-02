@@ -2,6 +2,7 @@
 import { SITE_TITLE } from '../../consts';
 import { getSortedPosts, getTechSubcategories, type Locale } from '../../lib/posts';
 import HeaderLink from './HeaderLink.astro';
+import LangToggle from './LangToggle.astro';
 import ThemeToggle from './ThemeToggle.astro';
 
 interface Props {
@@ -15,8 +16,6 @@ const { locale = 'ko' } = Astro.props;
 const altHref = Astro.props.altHref ?? (locale === 'ko' ? '/en/' : '/');
 const prefix = locale === 'en' ? '/en' : '';
 const homeHref = locale === 'en' ? '/en/' : '/';
-const langToggleClass =
-  'text-xs font-semibold px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors';
 const searchLabel = locale === 'en' ? 'Search' : '검색';
 
 const posts = await getSortedPosts(locale);
@@ -87,18 +86,14 @@ const viewAllLabel = locale === 'en' ? 'View all' : '전체 보기';
           <path d="m21 21-4.3-4.3"></path>
         </svg>
       </a>
-      <a href={altHref} class={langToggleClass} aria-label={locale === 'ko' ? 'Read in English' : '한국어로 보기'}>
-        {locale === 'ko' ? 'EN' : 'KO'}
-      </a>
+      <LangToggle locale={locale} altHref={altHref} />
       <ThemeToggle />
     </div>
 
     <!-- Mobile: theme toggle + lang toggle + search + hamburger -->
     <div class="flex sm:hidden items-center gap-3">
       <ThemeToggle />
-      <a href={altHref} class={langToggleClass} aria-label={locale === 'ko' ? 'Read in English' : '한국어로 보기'}>
-        {locale === 'ko' ? 'EN' : 'KO'}
-      </a>
+      <LangToggle locale={locale} altHref={altHref} />
       <a
         href="/search"
         class="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors"

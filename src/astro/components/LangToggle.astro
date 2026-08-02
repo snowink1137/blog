@@ -1,0 +1,21 @@
+---
+// 한/영 전환 세그먼트 토글 — 현재 언어가 채워진 쪽. 클릭하면 반대편 URL 로 이동.
+interface Props {
+  locale: 'ko' | 'en';
+  altHref: string;
+}
+
+const { locale, altHref } = Astro.props;
+const activeClass = 'px-2 py-0.5 bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-100';
+const inactiveClass =
+  'px-2 py-0.5 text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors';
+---
+
+<a
+  href={altHref}
+  class="group flex items-center rounded-full border border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 text-xs font-semibold overflow-hidden transition-colors"
+  aria-label={locale === 'ko' ? 'Read in English' : '한국어로 보기'}
+>
+  <span class={locale === 'ko' ? activeClass : inactiveClass}>KO</span>
+  <span class={locale === 'en' ? activeClass : inactiveClass}>EN</span>
+</a>
