@@ -433,7 +433,7 @@ suspend fun fetchUserWithOrders(userId: Long): UserWithOrders = coroutineScope {
 
 ### StructuredTaskScope — Java's Counterpart
 
-Java is getting **structured concurrency** too. Starting with JEP 428 (JDK 19 incubator), it has gone through multiple previews — [JEP 499](https://openjdk.org/jeps/499) (Fourth Preview) in JDK 24 and [JEP 505](https://openjdk.org/jeps/505) (Fifth Preview) in JDK 25, with API changes along the way. It uses `StructuredTaskScope`.
+Java is getting **structured concurrency** too. Starting with JEP 428 (JDK 19 incubator), it has gone through multiple previews — [JEP 499](https://openjdk.org/jeps/499) (Fourth Preview) in JDK 24 [JEP 505](https://openjdk.org/jeps/505) (Fifth Preview) in JDK 25, and [JEP 525](https://openjdk.org/jeps/525) (Sixth Preview) in JDK 26, with API changes along the way. It uses `StructuredTaskScope`.
 
 ```java
 // Structured concurrency in Java (preview feature)
@@ -473,7 +473,7 @@ In coroutines' `coroutineScope`, a child's exception propagates to the parent au
 
 `ShutdownOnSuccess` cancels the rest once one subtask succeeds — useful for the pattern of firing requests at multiple servers and taking the fastest response.
 
-> Structured Concurrency started in Java 19 (incubator) and is **still in preview** as of JDK 25. Preview features require the `--enable-preview` flag, and the API keeps shifting between versions — in JDK 25, for example, `StructuredTaskScope`'s public constructors were replaced with static factory methods. Realistically, using a preview feature in production is a big ask, so most projects implement parallelism with virtual threads + `ExecutorService` or `CompletableFuture` instead. Once Structured Concurrency is finalized, safer and more structured parallel code will be within reach.
+> Structured Concurrency started in Java 19 (incubator) and is **still in preview** as of JDK 26. Preview features require the `--enable-preview` flag, and the API keeps shifting between versions — in JDK 25, for example, `StructuredTaskScope`'s public constructors were replaced with static factory methods. Realistically, using a preview feature in production is a big ask, so most projects implement parallelism with virtual threads + `ExecutorService` or `CompletableFuture` instead. Once Structured Concurrency is finalized, safer and more structured parallel code will be within reach.
 
 ## Coroutines vs Virtual Threads — The Full Comparison
 

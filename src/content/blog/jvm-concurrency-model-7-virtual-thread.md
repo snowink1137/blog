@@ -433,7 +433,7 @@ suspend fun fetchUserWithOrders(userId: Long): UserWithOrders = coroutineScope {
 
 ### StructuredTaskScope — Java의 대응
 
-Java에서도 **Structured Concurrency**가 도입되었습니다. JEP 428(JDK 19 인큐베이터)을 시작으로 여러 차례 프리뷰를 거치고 있으며, JDK 24에서는 [JEP 499](https://openjdk.org/jeps/499)(Fourth Preview), JDK 25에서는 [JEP 505](https://openjdk.org/jeps/505)(Fifth Preview)로 API 변경과 함께 계속 프리뷰 중입니다. `StructuredTaskScope`를 사용합니다.
+Java에서도 **Structured Concurrency**가 도입되었습니다. JEP 428(JDK 19 인큐베이터)을 시작으로 여러 차례 프리뷰를 거치고 있으며, JDK 24에서는 [JEP 499](https://openjdk.org/jeps/499)(Fourth Preview), JDK 25에서는 [JEP 505](https://openjdk.org/jeps/505)(Fifth Preview), JDK 26에서는 [JEP 525](https://openjdk.org/jeps/525)(Sixth Preview)로 API 변경과 함께 계속 프리뷰 중입니다. `StructuredTaskScope`를 사용합니다.
 
 ```java
 // Java의 구조화된 동시성 (프리뷰 기능)
@@ -473,7 +473,7 @@ UserWithOrders fetchUserWithOrders(Long userId) throws Exception {
 
 `ShutdownOnSuccess`는 하나의 subtask가 성공하면 나머지를 취소합니다 — 여러 서버에 동시 요청을 보내고 가장 빠른 응답을 사용하는 패턴에 유용합니다.
 
-> Structured Concurrency는 Java 19(인큐베이터)부터 시작하여 JDK 25 현재까지도 **프리뷰 단계**입니다. 프리뷰 기능을 사용하려면 `--enable-preview` 플래그가 필요하고, JDK 25에서는 `StructuredTaskScope`의 public 생성자가 static factory 메서드로 변경되는 등 API가 버전마다 달라지고 있습니다. 현실적으로 프로덕션에서 프리뷰 기능을 사용하는 것은 부담이 크므로, 대부분의 프로젝트에서는 Virtual Thread + `ExecutorService` 또는 `CompletableFuture` 조합으로 병렬 처리를 구현하고 있습니다. Structured Concurrency가 정식으로 확정되면 더 안전하고 구조적인 병렬 코드가 가능해질 것입니다.
+> Structured Concurrency는 Java 19(인큐베이터)부터 시작하여 JDK 26 현재까지도 **프리뷰 단계**입니다. 프리뷰 기능을 사용하려면 `--enable-preview` 플래그가 필요하고, JDK 25에서는 `StructuredTaskScope`의 public 생성자가 static factory 메서드로 변경되는 등 API가 버전마다 달라지고 있습니다. 현실적으로 프로덕션에서 프리뷰 기능을 사용하는 것은 부담이 크므로, 대부분의 프로젝트에서는 Virtual Thread + `ExecutorService` 또는 `CompletableFuture` 조합으로 병렬 처리를 구현하고 있습니다. Structured Concurrency가 정식으로 확정되면 더 안전하고 구조적인 병렬 코드가 가능해질 것입니다.
 
 ## 코루틴 vs Virtual Thread — 종합 비교
 
