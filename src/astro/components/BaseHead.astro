@@ -36,6 +36,8 @@ const {
   article,
 } = Astro.props;
 const canonicalURL = new URL(canonicalPath ?? Astro.url.pathname, Astro.site);
+// /en/ 경로에서는 RSS 자동발견이 영어 피드를 가리키도록
+const isEnPath = Astro.url.pathname === '/en/' || Astro.url.pathname.startsWith('/en/');
 ---
 
 <!-- Global Metadata -->
@@ -49,8 +51,8 @@ const canonicalURL = new URL(canonicalPath ?? Astro.url.pathname, Astro.site);
 <link
 	rel="alternate"
 	type="application/rss+xml"
-	title={SITE_TITLE}
-	href={new URL('rss.xml', Astro.site)}
+	title={isEnPath ? `${SITE_TITLE} — English` : SITE_TITLE}
+	href={new URL(isEnPath ? 'en/rss.xml' : 'rss.xml', Astro.site)}
 />
 <meta name="generator" content={Astro.generator} />
 
