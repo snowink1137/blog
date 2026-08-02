@@ -130,7 +130,7 @@ graph LR
 > 
 > 터미널에서 `ls`를 실행하는 과정이 바로 이 패턴입니다.
 > 
-> ```
+> ```mermaid
 > sequenceDiagram
 >     participant Bash as bash (PID 100)
 >     participant Child as 자식 (PID 101)
@@ -393,18 +393,18 @@ process(rs); // 결과가 이미 존재
 > 
 > **Java IO**(`java.io`)는 Java 초기부터 있던 I/O API입니다. `InputStream`, `OutputStream`, `Reader`, `Writer` 등의 클래스로 구성되며, 모든 I/O 작업이 **블로킹**으로 동작합니다. `inputStream.read()`를 호출하면 데이터가 올 때까지 스레드가 멈춥니다.
 > 
-> **Java NIO**(`java.nio`, New I/O)는 Java 1.4에서 추가된 I/O API입니다. 핵심 차이는 \*\*채널(Channel)\*\*과 **버퍼(Buffer)** 기반이라는 것, 그리고 **논블로킹 모드를 지원**한다는 것입니다. `channel.configureBlocking(false)`로 설정하면, `read()` 호출 시 데이터가 없어도 스레드가 멈추지 않고 즉시 반환됩니다.
+> **Java NIO**(`java.nio`, New I/O)는 Java 1.4에서 추가된 I/O API입니다. 핵심 차이는 **채널(Channel)** 과 **버퍼(Buffer)** 기반이라는 것, 그리고 **논블로킹 모드를 지원**한다는 것입니다. `channel.configureBlocking(false)`로 설정하면, `read()` 호출 시 데이터가 없어도 스레드가 멈추지 않고 즉시 반환됩니다.
 > 
 > **Channel**은 파일이나 소켓 같은 I/O 소스에 대한 **양방향 연결 통로**입니다. 큐처럼 데이터를 자체적으로 저장하는 것이 아니라, I/O 소스와 프로그램 사이를 연결하는 파이프에 가깝습니다. **Buffer**는 채널을 통해 읽거나 쓸 데이터를 **임시로 담아두는 메모리 블록**입니다. Java IO의 Stream은 `read()`를 호출하면 바이트가 하나씩 흘러오는 방식이지만, NIO는 “채널에서 버퍼로 데이터를 읽어와” (`channel.read(buffer)`) 또는 “버퍼의 데이터를 채널로 써” (`channel.write(buffer)`)처럼 **버퍼 단위로 데이터를 주고받습니다.**
 > 
-> ```
+> ```mermaid
 > flowchart LR
 >     subgraph Java-IO
 >         SOCK1[소켓] -->|단방향| IS[InputStream] -->|바이트 단위| PROG1[프로그램]
 >     end
 > ```
 > 
-> ```
+> ```mermaid
 > flowchart LR
 >     subgraph Java-NIO
 >         SOCK2[소켓] <-->|양방향| SC[SocketChannel] <-->|버퍼 단위| BUF[ByteBuffer] <--> PROG2[프로그램]
@@ -611,7 +611,7 @@ processResult(result);
 > 
 > `Future.get()` 호출 전에 다른 유용한 작업을 할 수 있다면 의미가 있습니다. 예를 들어 A, B 두 작업을 병렬로 제출하고, 제출과 `get()` 사이에 다른 작업을 먼저 처리한 뒤 각각의 결과가 필요한 시점에 `get()`을 호출하면, 순차 실행보다 빠를 수 있습니다. 하지만 이런 경우에도 `CompletableFuture.allOf()`를 사용하는 것이 더 나은 선택인 경우가 많습니다.
 > 
-> ```javascript
+> ```java
 > // 비동기+블로킹이 그나마 유용한 케이스
 > Future<String> futureA = executor.submit(() -> callServiceA());
 > Future<String> futureB = executor.submit(() -> callServiceB());

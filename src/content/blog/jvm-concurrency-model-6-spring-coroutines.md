@@ -212,7 +212,7 @@ Spring은 suspend fun의 반환 타입을 Reactor 타입으로 자동 매핑합�
 
 > **Flow/Flux의 스트리밍 응답 — 연결이 유지되는가?** HTTP 응답의 Content-Type에 따라 동작이 다릅니다. 기본값인 `application/json`이면 Spring은 Flux의 모든 원소를 수집해서 JSON 배열(`[{...}, {...}]`)로 만든 뒤 **한 번에 응답**합니다 — 일반 HTTP 요청/응답과 같고, 클라이언트 입장에서는 `List`를 반환하는 것과 비슷합니다(서버 내부의 메모리 사용 방식만 다름). 반면 `text/event-stream`(SSE)이나 `application/x-ndjson`으로 설정하면, 데이터가 **준비되는 대로 하나씩** 클라이언트에 전송되고 연결이 Flux가 완료될 때까지 유지됩니다. 이것이 진짜 “스트리밍” 응답이며, WebSocket과 달리 **서버→클라이언트 단방향**이고 일반 HTTP 위에서 동작합니다.
 > 
-> ```javascript
+> ```kotlin
 > // SSE — 데이터가 준비되는 대로 하나씩 전송, 연결 유지
 > @GetMapping("/users/stream", produces = [MediaType.TEXT_EVENT_STREAM_VALUE])
 > fun streamUsers(): Flow<User> = userRepository.findAll()

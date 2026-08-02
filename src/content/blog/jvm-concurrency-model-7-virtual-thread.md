@@ -238,7 +238,7 @@ User fetchUser(Long id) {
 
 ```mermaid
 flowchart LR
-    subgraph Couroutine
+    subgraph Coroutine
         direction TB
         A1["suspend fun 호출"] --> A2["suspend 지점 도달"]
         A2 --> A3["COROUTINE_SUSPENDED 반환"]
@@ -380,7 +380,7 @@ spring.threads.virtual.enabled=true
 
 **MDC, Tracing 등 ThreadLocal 기반 도구**: Slf4j의 MDC(Mapped Diagnostic Context), Spring Security의 `SecurityContextHolder`, Micrometer Tracing 같은 도구들은 내부적으로 ThreadLocal을 사용합니다. Virtual Thread에서도 이들은 기본적으로 **정상 동작**합니다. 하나의 요청이 하나의 Virtual Thread에서 시작부터 끝까지 처리되는 Spring MVC 모델에서는, 요청 시작 시 설정한 MDC 값이 동일 Virtual Thread 안에서 계속 유지됩니다.
 
-다만 **주의할 점**이 있습니다. Platform Thread는 풀에서 재사용되므로 수백 개 수준이었지만, Virtual Thread는 요청마다 생성되어 수만~수십만 개가 동시에 존재할 수 있습니다. ThreadLocal은 스레드별로 별도 복사본을 유지하므로, **스레드 수에 비례하여 메모리가 증가**합니다. 특히 ThreadLocal을 캐시 용도로 사용하는 패턴(커넥션 캐시, 포맷터 재사용 등)은 Virtual Thread 환경에서 메모리 문제가 될 수 있습니다. Java에서는 이를 대체할 `ScopedValue`(JEP 487, JDK 25 프리뷰)를 도입하고 있으며, 불변이고 스코프가 명확하여 Virtual Thread 환경에 더 적합합니다.
+다만 **주의할 점**이 있습니다. Platform Thread는 풀에서 재사용되므로 수백 개 수준이었지만, Virtual Thread는 요청마다 생성되어 수만~수십만 개가 동시에 존재할 수 있습니다. ThreadLocal은 스레드별로 별도 복사본을 유지하므로, **스레드 수에 비례하여 메모리가 증가**합니다. 특히 ThreadLocal을 캐시 용도로 사용하는 패턴(커넥션 캐시, 포맷터 재사용 등)은 Virtual Thread 환경에서 메모리 문제가 될 수 있습니다. Java에서는 이를 대체할 `ScopedValue`([JEP 506](https://openjdk.org/jeps/506), JDK 25에서 정식 도입)를 제공하며, 불변이고 스코프가 명확하여 Virtual Thread 환경에 더 적합합니다.
 
 ```java
 // 기존 Spring MVC 코드 — 변경 없이 Virtual Thread 위에서 실행
