@@ -5,7 +5,7 @@ pubDate: '2026-03-08T18:33:02+09:00'
 updatedDate: '2026-03-08T18:33:02+09:00'
 category: tech
 subcategory: 'JVM'
-tags: ['java', 'reactive-streams', 'reactor', '동시성']
+tags: ['java', 'reactive-streams', 'reactor', 'concurrency']
 ---
 
 > **Understanding JVM Concurrency Models series**

@@ -5,7 +5,7 @@ pubDate: '2026-05-16T01:02:36+09:00'
 updatedDate: '2026-05-16T01:02:36+09:00'
 category: tech
 subcategory: 'JVM'
-tags: ['jvm', 'kotlin', 'java', 'reactor', 'kotlin-coroutines', 'spring-webflux', 'virtual-thread', '동시성']
+tags: ['jvm', 'kotlin', 'java', 'reactor', 'kotlin-coroutines', 'spring-webflux', 'virtual-thread', 'concurrency']
 ---
 
 > **Understanding JVM Concurrency Models series**

@@ -5,7 +5,7 @@ pubDate: '2026-03-03T23:30:48+09:00'
 updatedDate: '2026-03-03T23:30:48+09:00'
 category: tech
 subcategory: 'JVM'
-tags: ['completable-future', 'executor-service', 'fork-join-pool', 'future', 'java', 'synchronized', 'thread', 'thread-pool', '동시성']
+tags: ['completable-future', 'executor-service', 'fork-join-pool', 'future', 'java', 'synchronized', 'thread', 'thread-pool', 'concurrency']
 ---
 
 > **Understanding JVM Concurrency Models series**

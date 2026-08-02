@@ -5,7 +5,7 @@ pubDate: '2026-02-28T17:16:47+09:00'
 updatedDate: '2026-02-28T17:16:47+09:00'
 category: tech
 subcategory: 'JVM'
-tags: ['asynchronous', 'blocking', 'jvm', 'non-blocking', 'synchronous', '동시성', '병렬성']
+tags: ['asynchronous', 'blocking', 'jvm', 'non-blocking', 'synchronous', 'concurrency', 'parallelism']
 ---
 
 > **Understanding the JVM Concurrency Model series**

@@ -5,7 +5,7 @@ pubDate: '2026-03-21T21:18:17+09:00'
 updatedDate: '2026-03-21T21:18:17+09:00'
 category: tech
 subcategory: 'JVM'
-tags: ['jvm', 'kotlin', 'kotlin-coroutines', 'coroutines', 'flow', 'channel', '동시성']
+tags: ['jvm', 'kotlin', 'kotlin-coroutines', 'coroutines', 'flow', 'channel', 'concurrency']
 ---
 
 > **Understanding JVM Concurrency Models series**

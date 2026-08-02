@@ -5,7 +5,7 @@ pubDate: '2026-03-15T17:09:24+09:00'
 updatedDate: '2026-03-15T17:09:24+09:00'
 category: tech
 subcategory: 'JVM'
-tags: ['event-loop', 'netty', 'reactor', 'spring-webflux', '동시성']
+tags: ['event-loop', 'netty', 'reactor', 'spring-webflux', 'concurrency']
 ---
 
 > **Understanding the JVM Concurrency Model series**
