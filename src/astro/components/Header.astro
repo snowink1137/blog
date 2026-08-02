@@ -77,7 +77,7 @@ const viewAllLabel = locale === 'en' ? 'View all' : '전체 보기';
       <HeaderLink href={`${prefix}/tags`}>Tags</HeaderLink>
       <HeaderLink href={`${prefix}/about`}>About</HeaderLink>
       <a
-        href="/search"
+        href={`${prefix}/search`}
         class="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors"
         aria-label={searchLabel}
       >
@@ -93,7 +93,7 @@ const viewAllLabel = locale === 'en' ? 'View all' : '전체 보기';
     <!-- Mobile: 검색 → 언어 → 테마 → 햄버거 (데스크탑 유틸 묶음과 같은 상대 순서, 햄버거는 맨 끝 고정) -->
     <div class="flex sm:hidden items-center gap-3">
       <a
-        href="/search"
+        href={`${prefix}/search`}
         class="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors"
         aria-label={searchLabel}
       >

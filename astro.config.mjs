@@ -54,7 +54,7 @@ for (const file of readdirSync(blogDir, { recursive: true })) {
 }
 
 // 한/영 짝이 있는 정적 페이지 — sitemap hreflang 대상 (head 의 alternates 와 동일하게 유지할 것)
-const pairedStatics = new Set(['/about/', '/privacy-policy/', '/tech/']);
+const pairedStatics = new Set(['/about/', '/privacy-policy/', '/tech/', '/search/']);
 if (enLifeCount > 0) pairedStatics.add('/life/');
 
 // 정적 콘텐츠 페이지(about·privacy): 페이지 파일 안 `const updatedDate = '...'` 에서 읽음.
