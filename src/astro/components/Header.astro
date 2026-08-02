@@ -90,10 +90,8 @@ const viewAllLabel = locale === 'en' ? 'View all' : '전체 보기';
       <ThemeToggle />
     </div>
 
-    <!-- Mobile: theme toggle + lang toggle + search + hamburger -->
+    <!-- Mobile: 검색 → 언어 → 테마 → 햄버거 (데스크탑 유틸 묶음과 같은 상대 순서, 햄버거는 맨 끝 고정) -->
     <div class="flex sm:hidden items-center gap-3">
-      <ThemeToggle />
-      <LangToggle locale={locale} altHref={altHref} />
       <a
         href="/search"
         class="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors"
@@ -104,6 +102,8 @@ const viewAllLabel = locale === 'en' ? 'View all' : '전체 보기';
           <path d="m21 21-4.3-4.3"></path>
         </svg>
       </a>
+      <LangToggle locale={locale} altHref={altHref} />
+      <ThemeToggle />
       <button
         type="button"
         id="mobile-menu-button"
