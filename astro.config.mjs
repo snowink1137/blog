@@ -99,8 +99,9 @@ export default defineConfig({
       filter: (page) => {
         const p = new URL(page).pathname;
         const base = p.startsWith('/en/') ? p.slice(3) : p;
-        // 얇은 아카이브(태그·페이지네이션)는 한/영 모두 제외
-        if (base.startsWith('/tags/') || base.startsWith('/page/')) return false;
+        // 얇은 아카이브(태그·페이지네이션)와 디자인 미리보기는 한/영 모두 제외
+        if (base.startsWith('/tags/') || base.startsWith('/page/') || base.startsWith('/preview/'))
+          return false;
         // 미번역 글의 /en/ 폴백(원문 복제)은 canonical 이 원문이라 제외
         const m = p.match(/^\/en\/([^/]+)\/$/);
         if (m && koSlugs.has(m[1]) && !translatedSlugs.has(m[1])) return false;
