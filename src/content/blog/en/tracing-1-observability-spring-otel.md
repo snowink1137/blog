@@ -28,7 +28,14 @@ In a monolithic architecture, a single request is handled inside a single proces
 
 When a user clicks the order button, a flow like this can unfold:
 
-![Example microservice request path — a distributed call fanning out from the API Gateway through the Order Service to the Inventory, Payment, Notification, and User Services](/images/tracing-1-observability-spring-otel/img-01-image-37.png)
+```mermaid
+flowchart LR
+    GW["API Gateway"] --> ORD["Order Service"]
+    ORD --> INV["Inventory Service"]
+    INV --> PAY["Payment Service"]
+    PAY --> NOTI["Notification Service"]
+    ORD --> USER["User Service"]
+```
 
 If a delay occurs somewhere in there, how do you find it? Lining up each service's logs by timestamp and tracing through them is unrealistic. What if we assigned every request a unique ID and made that ID follow the request through every service? That's the core idea of distributed tracing.
 

@@ -28,7 +28,14 @@ tags: ['b3', 'micrometer', 'msa', 'observability', 'opentelemetry', 'spring-boot
 
 사용자가 주문 버튼을 클릭하면 다음과 같은 흐름이 발생할 수 있습니다:
 
-![마이크로서비스 요청 경로 예시 — API Gateway에서 Order Service를 거쳐 Inventory·Payment·Notification·User Service로 흩어지는 분산 호출](/images/tracing-1-observability-spring-otel/img-01-image-37.png)
+```mermaid
+flowchart LR
+    GW["API Gateway"] --> ORD["Order Service"]
+    ORD --> INV["Inventory Service"]
+    INV --> PAY["Payment Service"]
+    PAY --> NOTI["Notification Service"]
+    ORD --> USER["User Service"]
+```
 
 이 중 어딘가에서 지연이 발생했다면, 어떻게 찾을까요? 각 서비스의 로그를 시간대별로 맞춰가며 추적하는 건 비현실적입니다. 요청마다 고유한 ID를 부여하고, 이 ID가 모든 서비스를 따라다니게 하면 어떨까요? 이것이 Distributed Tracing의 핵심 아이디어입니다.
 
