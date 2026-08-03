@@ -103,6 +103,7 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
       alternates={alternates}
       canonicalPath={fallback ? koPath : undefined}
       ogImagePath={ogImagePath}
+      contentLang={contentLang}
       ogType="article"
       article={{
         publishedTime: pubDate.toISOString(),

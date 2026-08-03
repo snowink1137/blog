@@ -15,6 +15,8 @@ interface Props {
   // 빌드 때 생성한 OG 카드 경로 (`/og/<slug>.png`). 글 페이지가 넘겨줌.
   // 없으면 언어별 사이트 공용 카드를 쓴다.
   ogImagePath?: string;
+  // 본문의 실제 언어. 미번역 글의 /en/ 폴백은 경로가 /en/ 여도 내용이 한국어라 'ko' 를 넘긴다.
+  contentLang?: 'ko' | 'en';
   ogType?: 'website' | 'article';
   // 글일 때만 채워짐 → og:type=article + article:* 하위 태그 출력
   article?: {
@@ -32,6 +34,7 @@ const {
   alternates,
   canonicalPath,
   ogImagePath,
+  contentLang,
   ogType = 'website',
   article,
 } = Astro.props;
@@ -40,6 +43,9 @@ const canonicalURL = new URL(canonicalPath ?? Astro.url.pathname, Astro.site);
 const isEnPath = Astro.url.pathname === '/en/' || Astro.url.pathname.startsWith('/en/');
 // 공유 카드: 글은 전용 카드, 그 외에는 언어별 사이트 공용 카드
 const ogImageURL = new URL(ogImagePath ?? (isEnPath ? '/og/en/site.png' : '/og/site.png'), Astro.site);
+// SNS 스크래퍼(카카오·페북 등)가 언어를 판단할 근거. 없으면 hreflang 을 보고 반대 언어판을 집어올 수 있다.
+const ogLocale = (contentLang ?? (isEnPath ? 'en' : 'ko')) === 'en' ? 'en_US' : 'ko_KR';
+const ogLocaleAlt = ogLocale === 'en_US' ? 'ko_KR' : 'en_US';
 ---
 
 <!-- Global Metadata -->
@@ -87,6 +93,9 @@ const ogImageURL = new URL(ogImagePath ?? (isEnPath ? '/og/en/site.png' : '/og/s
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content={ogType} />
+<meta property="og:site_name" content={SITE_TITLE} />
+<meta property="og:locale" content={ogLocale} />
+{alternates && <meta property="og:locale:alternate" content={ogLocaleAlt} />}
 <meta property="og:url" content={Astro.url} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
