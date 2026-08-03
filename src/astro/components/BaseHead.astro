@@ -51,6 +51,14 @@ const ogLocaleAlt = ogLocale === 'en_US' ? 'ko_KR' : 'en_US';
 <!-- Global Metadata -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<!-- Pretendard: 동적 서브셋판. 통짜 woff2 는 2MB 라 모바일에서 LCP 를 20초대로 만들었다.
+     서브셋은 unicode-range 로 쪼개져 있어 실제로 쓰인 글자 범위만 내려받는다. -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link
+	rel="stylesheet"
+	href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+/>
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />

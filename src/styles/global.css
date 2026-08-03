@@ -1,4 +1,5 @@
-@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css");
+/* Pretendard 는 BaseHead 에서 <link> 로 직접 불러온다.
+   CSS @import 는 global.css 를 받은 뒤에야 폰트 CSS 를 발견해 왕복이 한 번 더 생긴다. */
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
