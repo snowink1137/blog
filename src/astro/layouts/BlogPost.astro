@@ -21,6 +21,8 @@ interface Props {
   alternates?: { ko: string; en: string };
   // 미번역 글의 /en/ 페이지 — 한국어 원문을 렌더하되 안내 박스 + canonical→원문
   fallback?: boolean;
+  // 빌드 때 생성한 OG 카드 경로 (`/og/<slug>.png`)
+  ogImagePath?: string;
 }
 
 const {
@@ -35,6 +37,7 @@ const {
   locale = 'ko',
   alternates,
   fallback = false,
+  ogImagePath,
 } = Astro.props;
 
 // 폴백 페이지는 URL 만 /en/ 이고 내용은 한국어 — 문서 언어·canonical·JSON-LD 는 원문 기준
@@ -97,9 +100,9 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
     <BaseHead
       title={title}
       description={description}
-      image={heroImage}
       alternates={alternates}
       canonicalPath={fallback ? koPath : undefined}
+      ogImagePath={ogImagePath}
       ogType="article"
       article={{
         publishedTime: pubDate.toISOString(),

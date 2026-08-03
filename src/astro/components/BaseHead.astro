@@ -1,7 +1,5 @@
 ---
 import '../../styles/global.css';
-import type { ImageMetadata } from 'astro';
-import FallbackImage from '../../assets/blog-placeholder-1.jpg';
 import { SITE_TITLE } from '../../consts';
 import Ads from './Ads.astro';
 import Analytics from './Analytics.astro';
@@ -9,12 +7,14 @@ import Analytics from './Analytics.astro';
 interface Props {
   title: string;
   description: string;
-  image?: ImageMetadata;
   noindex?: boolean;
   // 한/영 번역 짝이 있는 페이지만 채움 → hreflang alternate 링크 출력 (양쪽이 같은 세트를 가져야 유효)
   alternates?: { ko: string; en: string };
   // 자기 자신이 대표 URL 이 아닐 때(미번역 글의 /en/ 폴백 등) canonical 을 이 경로로 지정
   canonicalPath?: string;
+  // 빌드 때 생성한 OG 카드 경로 (`/og/<slug>.png`). 글 페이지가 넘겨줌.
+  // 없으면 언어별 사이트 공용 카드를 쓴다.
+  ogImagePath?: string;
   ogType?: 'website' | 'article';
   // 글일 때만 채워짐 → og:type=article + article:* 하위 태그 출력
   article?: {
@@ -28,16 +28,18 @@ interface Props {
 const {
   title,
   description,
-  image = FallbackImage,
   noindex = false,
   alternates,
   canonicalPath,
+  ogImagePath,
   ogType = 'website',
   article,
 } = Astro.props;
 const canonicalURL = new URL(canonicalPath ?? Astro.url.pathname, Astro.site);
 // /en/ 경로에서는 RSS 자동발견이 영어 피드를 가리키도록
 const isEnPath = Astro.url.pathname === '/en/' || Astro.url.pathname.startsWith('/en/');
+// 공유 카드: 글은 전용 카드, 그 외에는 언어별 사이트 공용 카드
+const ogImageURL = new URL(ogImagePath ?? (isEnPath ? '/og/en/site.png' : '/og/site.png'), Astro.site);
 ---
 
 <!-- Global Metadata -->
@@ -88,7 +90,9 @@ const isEnPath = Astro.url.pathname === '/en/' || Astro.url.pathname.startsWith(
 <meta property="og:url" content={Astro.url} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
-<meta property="og:image" content={new URL(image.src, Astro.url)} />
+<meta property="og:image" content={ogImageURL} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
 {ogType === 'article' && article && (
   <>
     {article.publishedTime && (
@@ -109,7 +113,7 @@ const isEnPath = Astro.url.pathname === '/en/' || Astro.url.pathname.startsWith(
 <meta property="twitter:url" content={Astro.url} />
 <meta property="twitter:title" content={title} />
 <meta property="twitter:description" content={description} />
-<meta property="twitter:image" content={new URL(image.src, Astro.url)} />
+<meta property="twitter:image" content={ogImageURL} />
 
 <script is:inline>
   (() => {

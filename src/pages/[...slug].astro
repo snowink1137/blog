@@ -20,12 +20,20 @@ export async function getStaticPaths() {
         locale: isEn ? ('en' as const) : ('ko' as const),
         alternates: paired ? { ko: `/${baseId}/`, en: `/en/${baseId}/` } : undefined,
         fallback: false,
+        ogImagePath: `/og/${post.id}.png`,
       },
     });
     if (!isEn && !paired) {
       paths.push({
         params: { slug: `en/${post.id}` },
-        props: { post, locale: 'en' as const, alternates: undefined, fallback: true },
+        props: {
+          post,
+          locale: 'en' as const,
+          alternates: undefined,
+          fallback: true,
+          // 폴백은 한국어 본문이라 한국어 카드를 그대로 쓴다 (en 카드는 생성되지 않음)
+          ogImagePath: `/og/${post.id}.png`,
+        },
       });
     }
   }
@@ -36,12 +44,19 @@ type Props = {
   locale: 'ko' | 'en';
   alternates?: { ko: string; en: string };
   fallback: boolean;
+  ogImagePath: string;
 };
 
-const { post, locale, alternates, fallback } = Astro.props;
+const { post, locale, alternates, fallback, ogImagePath } = Astro.props;
 const { Content } = await render(post);
 ---
 
-<BlogPost {...post.data} locale={locale} alternates={alternates} fallback={fallback}>
+<BlogPost
+  {...post.data}
+  locale={locale}
+  alternates={alternates}
+  fallback={fallback}
+  ogImagePath={ogImagePath}
+>
   <Content />
 </BlogPost>
