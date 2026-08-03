@@ -16,6 +16,13 @@
 }
 
 @layer base {
+  /* 다크 배경(#020617)에서 기본 액센트는 대비가 4.25:1 로 WCAG AA(4.5:1)에 못 미친다.
+     다크 모드에서만 밝은 파랑으로 올려 링크 가독성을 확보 (7.9:1). */
+  .dark {
+    --color-accent: #60a5fa;
+    --color-accent-hover: #93c5fd;
+  }
+
   html {
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;

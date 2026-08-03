@@ -13,6 +13,9 @@ if (diagrams.length > 0) {
     theme: themeFor(isDark),
     securityLevel: 'strict' as const,
     fontFamily: getComputedStyle(document.body).fontFamily || 'sans-serif',
+    // mermaid 다크 테마 기본 라벨색(#ccc)은 노드 배경(#585858) 대비 4.43:1 로
+    // WCAG AA 에 살짝 못 미친다. 조금 더 밝게 올려 6.5:1 확보.
+    ...(isDark ? { themeVariables: { nodeTextColor: '#f1f5f9', textColor: '#f1f5f9' } } : {}),
   });
 
   const { default: mermaid } = await import('mermaid');
