@@ -23,7 +23,6 @@
     "mermaid": "^11.16.0",
     "pagefind": "^1.5.2",
     "photoswipe": "^5.4.4",
-    "rehype-autolink-headings": "^7.1.0",
     "satori": "^0.29.0",
     "sharp": "^0.34.3",
     "tailwindcss": "^4.3.1"

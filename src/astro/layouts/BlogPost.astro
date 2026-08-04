@@ -1,8 +1,7 @@
 ---
-import type { ImageMetadata, MarkdownHeading } from 'astro';
+import type { ImageMetadata } from 'astro';
 import { SITE_TITLE } from '../../consts';
 import { getSortedPosts } from '../../lib/posts';
-import TableOfContents from '../components/TableOfContents.astro';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
@@ -24,9 +23,6 @@ interface Props {
   fallback?: boolean;
   // 빌드 때 생성한 OG 카드 경로 (`/og/<slug>.png`)
   ogImagePath?: string;
-  // 목차용 제목 목록 (frontmatter 의 toc 가 true 일 때만 표시)
-  headings?: MarkdownHeading[];
-  toc?: boolean;
 }
 
 const {
@@ -42,8 +38,6 @@ const {
   alternates,
   fallback = false,
   ogImagePath,
-  headings = [],
-  toc = false,
 } = Astro.props;
 
 // 폴백 페이지는 URL 만 /en/ 이고 내용은 한국어 — 문서 언어·canonical·JSON-LD 는 원문 기준
@@ -186,10 +180,6 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
               Browse posts in English →
             </a>
           </div>
-        )}
-
-        {toc && (
-          <TableOfContents headings={headings} label={contentLang === 'en' ? 'Contents' : '목차'} />
         )}
 
         {/* heroImage 는 목록 썸네일 용도로만 사용 — 본문 상단에는 렌더하지 않음 */}

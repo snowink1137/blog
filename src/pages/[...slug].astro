@@ -48,7 +48,7 @@ type Props = {
 };
 
 const { post, locale, alternates, fallback, ogImagePath } = Astro.props;
-const { Content, headings } = await render(post);
+const { Content } = await render(post);
 ---
 
 <BlogPost
@@ -57,7 +57,6 @@ const { Content, headings } = await render(post);
   alternates={alternates}
   fallback={fallback}
   ogImagePath={ogImagePath}
-  headings={headings}
 >
   <Content />
 </BlogPost>
