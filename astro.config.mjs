@@ -2,10 +2,12 @@
 
 import { readFileSync, readdirSync } from 'node:fs';
 
+import { rehypeHeadingIds } from '@astrojs/markdown-remark';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import expressiveCode from 'astro-expressive-code';
 import { defineConfig } from 'astro/config';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import tailwindcss from '@tailwindcss/vite';
 
 import rehypeGallery from './src/lib/rehype-gallery.js';
@@ -139,6 +141,18 @@ export default defineConfig({
   markdown: {
     syntaxHighlight: false,
     rehypePlugins: [
+      // Astro 는 유저 rehype 플러그인 "뒤에" 헤딩 id 를 붙이므로, 앵커 링크를 달려면
+      // 여기서 먼저 id 를 만들어야 한다. Astro 의 후행 패스는 이미 id 가 있으면 건너뛴다.
+      rehypeHeadingIds,
+      [
+        rehypeAutolinkHeadings,
+        {
+          behavior: 'append',
+          // 제목 텍스트가 이미 링크 이름 역할을 하므로 보조기기에는 숨긴다
+          properties: { className: ['heading-anchor'], ariaHidden: 'true', tabIndex: -1 },
+          content: { type: 'text', value: '#' },
+        },
+      ],
       [rehypeGallery, {}],
       [rehypeMermaidClient, {}],
     ],

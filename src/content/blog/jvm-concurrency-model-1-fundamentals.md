@@ -3,6 +3,7 @@ title: 'JVM 동시성 모델 이해하기 (1) – 동시성과 병렬성의 기�
 description: 'Process와 Thread의 차이, 동시성 vs 병렬성, 그리고 동기/비동기·블로킹/논블로킹이 서로 독립적인 두 축이라는 것까지 — JVM 동시성 시리즈의 기초 체력 편.'
 pubDate: '2026-02-28T17:16:47+09:00'
 updatedDate: '2026-02-28T17:16:47+09:00'
+toc: true
 category: tech
 subcategory: 'JVM'
 tags: ['asynchronous', 'blocking', 'jvm', 'non-blocking', 'synchronous', '동시성', '병렬성']

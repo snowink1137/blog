@@ -55,6 +55,26 @@
     @apply mx-auto max-w-full h-auto cursor-zoom-in;
   }
 
+  /* 제목 앵커(#): 평소엔 숨어 있다가 제목에 마우스를 올리면 나타난다.
+     터치 기기엔 hover 가 없으므로 항상 옅게 보여준다. */
+  .prose :is(h2, h3, h4) > .heading-anchor {
+    @apply ml-2 text-slate-300 dark:text-slate-600 no-underline opacity-0 transition-opacity;
+  }
+  .prose :is(h2, h3, h4):hover > .heading-anchor,
+  .prose .heading-anchor:focus-visible {
+    @apply opacity-100;
+  }
+  @media (hover: none) {
+    .prose :is(h2, h3, h4) > .heading-anchor {
+      @apply opacity-60;
+    }
+  }
+
+  /* 목차에서 현재 읽고 있는 섹션 */
+  [data-toc] a[data-active] {
+    @apply border-(--color-accent) text-slate-900 dark:text-slate-100 font-medium;
+  }
+
   /* Image gallery: 2-column grid with orphan last image spanning full width */
   .prose .gallery {
     @apply my-8 grid gap-2 max-w-full;

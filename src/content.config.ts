@@ -16,6 +16,8 @@ const blog = defineCollection({
       tags: z.array(z.string()).default([]),
       // 한국 특화 글(연말정산·K패스 등) — 영어 목록(/en/)에 노출하지 않음. 폴백 URL 은 생성됨
       koOnly: z.boolean().default(false),
+      // 본문 목차 표시 (현재 시범 적용 중이라 글별 옵트인)
+      toc: z.boolean().default(false),
     }),
 });
 
