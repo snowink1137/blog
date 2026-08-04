@@ -192,7 +192,7 @@ Flux와의 본질적인 차이는 이렇습니다.
 
 Java Stream은 이미 존재하는 데이터를 동기적으로 처리하는 도구이고, Flux는 **아직 도착하지 않은 데이터를 비동기로 처리하는 도구**입니다. `Flux.interval()`처럼 시간에 따라 데이터가 생성되는 패턴은 Stream으로는 표현할 수 없습니다.
 
-참고로 “여러 번 subscribe 가능”은 Flux만의 특징이 아닙니다. **Mono도 Cold Publisher이면 여러 번 subscribe할 수 있고, 매번 새로 실행됩니다.** Mono와 Flux의 차이는 순수하게 **값의 개수**(0~1개 vs 0~N개)뿐입니다.
+참고로 “여러 번 subscribe 가능”은 Flux만의 특징이 아닙니다. **Mono도 Cold Publisher이면 여러 번 subscribe할 수 있고, 매번 새로 실행됩니다.** Mono와 Flux의 차이는 순수하게 **값의 개수**(0\~1개 vs 0\~N개)뿐입니다.
 
 ### Cold vs Hot Publisher
 
