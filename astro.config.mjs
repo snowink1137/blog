@@ -150,6 +150,9 @@ export default defineConfig({
           // noopener: 새 탭이 원본 창을 조작하지 못하게 (보안)
           // noreferrer: 이동한 사이트에 유입 경로를 넘기지 않음
           rel: ['noopener', 'noreferrer'],
+          // 플러그인은 "도메인이 붙어 있으면 외부"로 판단하므로, 실수로 자기 도메인을
+          // 전체 URL 로 써도 내부로 취급되게 예외 처리한다.
+          test: (element) => !String(element.properties?.href ?? '').startsWith(SITE_URL),
           // 새 창으로 열린다는 시각적 신호. 스크린리더에는 중복이라 숨김
           content: {
             type: 'element',
