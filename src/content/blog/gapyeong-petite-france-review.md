@@ -5,7 +5,6 @@ pubDate: '2025-12-28T15:37:02+09:00'
 updatedDate: '2025-12-28T15:37:02+09:00'
 heroImage: '../../assets/heroes/petite-france.png'
 category: life
-koOnly: true
 tags: ['가평', '쁘띠프랑스']
 ---
 

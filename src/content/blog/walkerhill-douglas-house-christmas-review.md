@@ -5,7 +5,6 @@ pubDate: '2025-12-27T21:20:55+09:00'
 updatedDate: '2025-12-27T21:20:55+09:00'
 heroImage: '../../assets/heroes/walkerhill.png'
 category: life
-koOnly: true
 tags: ['호텔', '워커힐', '크리스마스', '호캉스', '리뷰']
 ---
 
