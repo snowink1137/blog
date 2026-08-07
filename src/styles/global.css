@@ -55,6 +55,11 @@
     @apply mx-auto max-w-full h-auto cursor-zoom-in;
   }
 
+  /* 외부 링크 표시(↗) — 본문 링크에만 붙는다 */
+  .prose .external-link-icon {
+    @apply ml-0.5 align-baseline text-[0.75em] text-slate-400 dark:text-slate-500 no-underline;
+  }
+
   /* Image gallery: 2-column grid with orphan last image spanning full width */
   .prose .gallery {
     @apply my-8 grid gap-2 max-w-full;

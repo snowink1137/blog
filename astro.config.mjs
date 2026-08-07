@@ -6,6 +6,7 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import expressiveCode from 'astro-expressive-code';
 import { defineConfig } from 'astro/config';
+import rehypeExternalLinks from 'rehype-external-links';
 import tailwindcss from '@tailwindcss/vite';
 
 import rehypeGallery from './src/lib/rehype-gallery.js';
@@ -139,6 +140,25 @@ export default defineConfig({
   markdown: {
     syntaxHighlight: false,
     rehypePlugins: [
+      // 본문의 외부 링크만 새 탭으로. 내부 링크(/로 시작)는 건드리지 않는다 —
+      // 같은 사이트 이동은 현재 창이 관례고, 탭이 쌓이면 오히려 불편하다.
+      // 헤더·푸터 링크는 Astro 컴포넌트라 이 플러그인 대상이 아니다.
+      [
+        rehypeExternalLinks,
+        {
+          target: '_blank',
+          // noopener: 새 탭이 원본 창을 조작하지 못하게 (보안)
+          // noreferrer: 이동한 사이트에 유입 경로를 넘기지 않음
+          rel: ['noopener', 'noreferrer'],
+          // 새 창으로 열린다는 시각적 신호. 스크린리더에는 중복이라 숨김
+          content: {
+            type: 'element',
+            tagName: 'span',
+            properties: { className: ['external-link-icon'], ariaHidden: 'true' },
+            children: [{ type: 'text', value: '↗' }],
+          },
+        },
+      ],
       [rehypeGallery, {}],
       [rehypeMermaidClient, {}],
     ],
