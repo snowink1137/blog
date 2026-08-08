@@ -1,0 +1,117 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+  headings: MarkdownHeading[];
+  /** sidebar = 넓은 화면 우측 고정, inline = 좁은 화면 본문 위 접힘 */
+  variant: 'sidebar' | 'inline';
+  label: string;
+}
+
+const { headings, variant, label } = Astro.props;
+
+// h2·h3 만 — h4 이하까지 넣으면 목차가 너무 잘게 쪼개진다
+const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+{
+  items.length >= 3 &&
+    (variant === 'sidebar' ? (
+      <nav
+        aria-label={label}
+        data-toc
+        class="sticky top-20 pl-8 py-12 max-h-[calc(100vh-6rem)] overflow-y-auto"
+      >
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3">
+          {label}
+        </p>
+        <ul class="border-l border-slate-200 dark:border-slate-800">
+          {items.map((h) => (
+            <li>
+              <a
+                href={`#${h.slug}`}
+                data-toc-link={h.slug}
+                class:list={[
+                  'block border-l -ml-px py-1 text-sm leading-snug border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors',
+                  h.depth === 2 ? 'pl-3' : 'pl-6',
+                ]}
+              >
+                {h.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    ) : (
+      <details class="mb-8 rounded-lg border border-slate-200 dark:border-slate-800 not-prose">
+        <summary class="cursor-pointer select-none px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-300">
+          {label}
+        </summary>
+        <ul class="px-4 pb-3 space-y-1.5">
+          {items.map((h) => (
+            <li>
+              <a
+                href={`#${h.slug}`}
+                class:list={[
+                  'block text-sm text-slate-600 dark:text-slate-400 hover:text-(--color-accent)',
+                  h.depth === 3 && 'pl-4',
+                ]}
+              >
+                {h.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </details>
+    ))
+}
+
+<script>
+  // 우측 목차에서 현재 읽는 섹션을 강조한다. 좁은 화면(접힘 목차)에는 없으므로 no-op.
+  const nav = document.querySelector<HTMLElement>('[data-toc]');
+  if (nav) {
+    const links = new Map<string, HTMLAnchorElement>();
+    nav.querySelectorAll<HTMLAnchorElement>('[data-toc-link]').forEach((a) => {
+      links.set(a.dataset.tocLink!, a);
+    });
+    const targets = [...links.keys()]
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+
+    let current: HTMLAnchorElement | null = null;
+    const setActive = (id: string | null) => {
+      const next = id ? (links.get(id) ?? null) : null;
+      if (next === current) return;
+      current?.removeAttribute('data-active');
+      next?.setAttribute('data-active', '');
+      current = next;
+      // 목차가 길어 스크롤될 때 활성 항목이 보이도록
+      next?.scrollIntoView({ block: 'nearest' });
+    };
+
+    const update = () => {
+      const line = 96; // 헤더 높이 + 여유
+      let active: string | null = null;
+      for (const el of targets) {
+        if (el.getBoundingClientRect().top <= line) active = el.id;
+        else break;
+      }
+      setActive(active ?? targets[0]?.id ?? null);
+    };
+
+    update();
+    let ticking = false;
+    addEventListener(
+      'scroll',
+      () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          update();
+          ticking = false;
+        });
+      },
+      { passive: true },
+    );
+  }
+</script>

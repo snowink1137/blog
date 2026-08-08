@@ -55,6 +55,11 @@
     @apply mx-auto max-w-full h-auto cursor-zoom-in;
   }
 
+  /* 목차에서 현재 읽고 있는 섹션 */
+  [data-toc] a[data-active] {
+    @apply border-(--color-accent) text-slate-900 dark:text-slate-100 font-medium;
+  }
+
   /* 외부 링크 표시(↗) — 본문 링크에만 붙는다 */
   .prose .external-link-icon {
     @apply ml-0.5 align-baseline text-[0.75em] text-slate-400 dark:text-slate-500 no-underline;
