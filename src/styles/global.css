@@ -13,6 +13,11 @@
 
   --color-accent: oklch(0.55 0.20 250);
   --color-accent-hover: oklch(0.45 0.22 250);
+
+  /* 목차 3칸 격자(80rem=1280px)를 켜는 폭.
+     1280px 에서 켜면 스크롤바 너비만큼 모자라 목차가 잘리므로,
+     격자 폭 + 스크롤바 + 좌우 여백까지 확보되는 지점부터 켠다. */
+  --breakpoint-toc: 1400px;
 }
 
 @layer base {
@@ -53,6 +58,15 @@
   }
   .prose pre.mermaid svg {
     @apply mx-auto max-w-full h-auto cursor-zoom-in;
+  }
+
+  /* 목차가 길면 자체 스크롤되는데, 스크롤바가 본문 옆에서 도드라져 보여 숨긴다.
+     현재 섹션이 자동으로 보이게 스크롤되므로 스크롤바가 없어도 길잡이는 유지된다. */
+  .toc-panel {
+    scrollbar-width: none;
+  }
+  .toc-panel::-webkit-scrollbar {
+    display: none;
   }
 
   /* 목차에서 현재 읽고 있는 섹션 */

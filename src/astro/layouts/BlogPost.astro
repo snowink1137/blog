@@ -127,8 +127,8 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
       글로 넘어올 때 본문 위치가 움직이지 않게 하기 위함.
       목차 칸의 실제 패널은 왼쪽 여백 2rem 을 빼고 14rem 을 쓴다.
     */}
-    <div class="xl:mx-auto xl:grid xl:max-w-[80rem] xl:grid-cols-[16rem_48rem_16rem]">
-      <div class="hidden xl:block" aria-hidden="true"></div>
+    <div class="toc:mx-auto toc:grid toc:max-w-[80rem] toc:grid-cols-[16rem_48rem_16rem]">
+      <div class="hidden toc:block" aria-hidden="true"></div>
       <main class="max-w-3xl mx-auto px-4 sm:px-6 py-12">
       {/* 폴백 페이지는 검색 인덱스 제외 — 원문과 같은 한국어 내용이라 중복 노출 방지 */}
       <article
@@ -196,7 +196,7 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
         )}
 
         {/* 좁은 화면에서는 목차 칸이 없으므로 본문 위 접힘 블록으로 */}
-        <div class="xl:hidden">
+        <div class="toc:hidden">
           <TableOfContents headings={headings} variant="inline" label={tocLabel} />
         </div>
 
@@ -221,7 +221,7 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
         )}
       </article>
       </main>
-      <div class="hidden xl:block">
+      <div class="hidden toc:block">
         <TableOfContents headings={headings} variant="sidebar" label={tocLabel} />
       </div>
     </div>
