@@ -22,7 +22,7 @@ const posts = (await getSortedPosts('en')).filter((post) => post.data.category =
   </head>
   <body>
     <Header locale="en" altHref="/life/" />
-    <main class="max-w-3xl mx-auto px-4 sm:px-6 py-12">
+    <main class="max-w-content mx-auto px-4 sm:px-6 py-12">
       <header class="mb-10">
         <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">Life</h1>
         <p class="text-slate-600 dark:text-slate-400">Everyday life and notes · {posts.length} {posts.length === 1 ? 'post' : 'posts'}</p>

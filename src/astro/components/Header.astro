@@ -28,7 +28,7 @@ const viewAllLabel = locale === 'en' ? 'View all' : '전체 보기';
 ---
 
 <header class="border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur sticky top-0 z-50">
-  <nav class="max-w-3xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
+  <nav class="max-w-content mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
     <a
       href={homeHref}
       class="font-bold text-slate-900 dark:text-slate-100 hover:text-(--color-accent) transition-colors whitespace-nowrap truncate"
@@ -130,7 +130,7 @@ const viewAllLabel = locale === 'en' ? 'View all' : '전체 보기';
     id="mobile-menu"
     class="hidden sm:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950"
   >
-    <div class="max-w-3xl mx-auto px-4 py-3 flex flex-col gap-1">
+    <div class="max-w-content mx-auto px-4 py-3 flex flex-col gap-1">
       <a href={`${prefix}/tech`} class="py-2 text-sm text-slate-700 dark:text-slate-200 hover:text-(--color-accent)">Tech</a>
       <div class="pl-4 flex flex-col border-l border-slate-200 dark:border-slate-800 ml-1 mb-1">
         {techSubcategories.map(({ name, count }) => (
