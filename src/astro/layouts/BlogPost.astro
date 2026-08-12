@@ -122,13 +122,14 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
   <body>
     <Header locale={locale} altHref={langAltHref} />
     {/*
-      넓은 화면(1400px↑)에서만 3칸 격자: [빈 칸 17.5rem][본문 45rem][목차 17.5rem] = 80rem.
-      가운데 칸은 사이트 공통 컨테이너(--container-content)와 같은 값이어야 한다.
+      3칸 격자: [빈 칸 1fr][본문 45rem][목차 1fr], 최대 80rem.
+      가운데 칸은 사이트 공통 컨테이너(--container-content)와 같은 고정값이어야 한다.
       좌우 칸을 같은 폭으로 둬야 본문이 화면 정중앙에 남는다 — 목록 페이지에서
       글로 넘어올 때 본문 위치가 움직이지 않게 하기 위함.
-      목차 칸의 실제 패널은 좌우 여백 3rem 을 빼고 14.5rem 을 쓴다.
+      좌우를 고정폭이 아니라 1fr 로 두는 게 핵심: 남는 폭을 그대로 나눠 가지므로
+      화면이 좁아도 넘치지 않고(=잘림 구조적으로 불가능), 넓으면 80rem 에서 멈춘다.
     */}
-    <div class="toc:mx-auto toc:grid toc:max-w-[80rem] toc:grid-cols-[17.5rem_45rem_17.5rem]">
+    <div class="toc:mx-auto toc:grid toc:max-w-[80rem] toc:grid-cols-[minmax(0,1fr)_45rem_minmax(0,1fr)]">
       <div class="hidden toc:block" aria-hidden="true"></div>
       <main class="max-w-content mx-auto px-4 sm:px-6 py-12">
       {/* 폴백 페이지는 검색 인덱스 제외 — 원문과 같은 한국어 내용이라 중복 노출 방지 */}
