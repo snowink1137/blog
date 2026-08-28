@@ -12,6 +12,19 @@ const { headings, variant, label } = Astro.props;
 
 // h2·h3 만 — h4 이하까지 넣으면 목차가 너무 잘게 쪼개진다
 const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
+
+// 사이드바는 h2 단위로 묶어서, 지금 읽는 절의 h3 만 펼친다.
+// heading 이 null 인 묶음 = h2 보다 먼저 나온 h3 들 → 접을 대상이 없으니 항상 펼침.
+type Group = { heading: MarkdownHeading | null; children: MarkdownHeading[] };
+const groups: Group[] = [];
+for (const h of items) {
+  if (h.depth === 2) groups.push({ heading: h, children: [] });
+  else if (groups.length === 0) groups.push({ heading: null, children: [h] });
+  else groups[groups.length - 1].children.push(h);
+}
+
+const linkClass =
+  'block py-1.5 text-sm leading-snug text-slate-500 dark:text-slate-400 transition-colors hover:text-slate-900 dark:hover:text-slate-100 data-[active]:font-medium data-[active]:text-slate-900 dark:data-[active]:text-slate-100';
 ---
 
 {
@@ -25,21 +38,47 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
         <p class="text-sm font-semibold text-slate-900 dark:text-slate-200 mb-3">{label}</p>
         <ul class="relative border-l-2 border-slate-200 dark:border-slate-800">
           {/* 현재 위치 막대. 회색 레일 위에 겹쳐 그리고 JS 가 활성 항목으로 옮긴다.
-              항목마다 테두리를 주는 대신 막대 하나를 움직여야 이동이 애니메이션된다. */}
-          <span data-toc-marker aria-hidden="true" class="absolute -left-0.5 w-0.5 rounded-full bg-(--color-accent)" />
-          {items.map((h) => (
+              항목마다 테두리를 켜고 끄는 대신 막대 하나를 움직여야 이동이 애니메이션된다. */}
+          <span
+            data-toc-marker
+            aria-hidden="true"
+            class="absolute -left-0.5 w-0.5 rounded-full bg-(--color-accent)"
+          />
+          {groups.map((g) => (
             <li>
-              <a
-                href={`#${h.slug}`}
-                data-toc-link={h.slug}
-                class:list={[
-                  'block py-1.5 text-sm leading-snug text-slate-500 dark:text-slate-400 transition-colors hover:text-slate-900 dark:hover:text-slate-100',
-                  'data-[active]:font-medium data-[active]:text-slate-900 dark:data-[active]:text-slate-100',
-                  h.depth === 2 ? 'pl-4' : 'pl-8',
-                ]}
-              >
-                {h.text}
-              </a>
+              {g.heading && (
+                <a href={`#${g.heading.slug}`} data-toc-link={g.heading.slug} class:list={[linkClass, 'pl-4']}>
+                  {g.heading.text}
+                </a>
+              )}
+              {g.children.length > 0 &&
+                (g.heading ? (
+                  /* 0fr↔1fr 격자 = 높이를 모르는 채로 여닫이를 애니메이션하는 방법.
+                     JS 없으면 닫힌 채로 남으므로 inert 를 서버에서 미리 박아둔다. */
+                  <div data-toc-group inert class="grid grid-rows-[0fr] data-[open]:grid-rows-[1fr]">
+                    <div class="overflow-hidden">
+                      <ul>
+                        {g.children.map((h) => (
+                          <li>
+                            <a href={`#${h.slug}`} data-toc-link={h.slug} class:list={[linkClass, 'pl-8']}>
+                              {h.text}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                ) : (
+                  <ul>
+                    {g.children.map((h) => (
+                      <li>
+                        <a href={`#${h.slug}`} data-toc-link={h.slug} class:list={[linkClass, 'pl-8']}>
+                          {h.text}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                ))}
             </li>
           ))}
         </ul>
@@ -84,7 +123,7 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
     const marker = nav.querySelector<HTMLElement>('[data-toc-marker]');
     const moveMarker = (el: HTMLAnchorElement | null) => {
       if (!marker) return;
-      if (!el) {
+      if (!el || el.offsetHeight === 0) {
         marker.style.opacity = '0';
         return;
       }
@@ -98,14 +137,50 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
       }
     };
 
+    // h2 묶음 여닫이 — 지금 읽는 절의 h3 만 남기고 접는다
+    const sections = [...nav.querySelectorAll<HTMLElement>('[data-toc-group]')];
+    const groupOf = (link: HTMLAnchorElement) => {
+      const inside = link.closest<HTMLElement>('[data-toc-group]');
+      if (inside) return inside;
+      const next = link.nextElementSibling;
+      return next instanceof HTMLElement && next.hasAttribute('data-toc-group') ? next : null;
+    };
+    const setOpen = (link: HTMLAnchorElement | null) => {
+      const want = link ? groupOf(link) : null;
+      let changed = false;
+      for (const g of sections) {
+        const open = g === want;
+        if (open === g.hasAttribute('data-open')) continue;
+        changed = true;
+        g.toggleAttribute('data-open', open);
+        // 접힌 항목은 보이지 않지만 여전히 탭 이동 대상이라 inert 로 빼둔다
+        g.toggleAttribute('inert', !open);
+      }
+      return changed;
+    };
+
     let current: HTMLAnchorElement | null = null;
+    // 묶음이 펼쳐지는 동안 아래 항목들의 좌표가 계속 바뀌므로, 그 사이엔 매 프레임 따라간다
+    let trackingUntil = 0;
+    const track = () => {
+      moveMarker(current);
+      if (performance.now() < trackingUntil) requestAnimationFrame(track);
+    };
+    const trackDuring = (ms: number) => {
+      const busy = trackingUntil > performance.now();
+      trackingUntil = performance.now() + ms;
+      if (!busy) requestAnimationFrame(track);
+    };
+
     const setActive = (id: string | null) => {
       const next = id ? (links.get(id) ?? null) : null;
       if (next === current) return;
       current?.removeAttribute('data-active');
       next?.setAttribute('data-active', '');
       current = next;
+      const reflowed = setOpen(next);
       moveMarker(next);
+      if (reflowed) trackDuring(400);
       // 목차가 길어 스크롤될 때 활성 항목이 보이도록
       next?.scrollIntoView({ block: 'nearest' });
     };
