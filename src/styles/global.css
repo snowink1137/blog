@@ -77,9 +77,22 @@
     display: none;
   }
 
-  /* 목차에서 현재 읽고 있는 섹션 */
-  [data-toc] a[data-active] {
-    @apply border-(--color-accent) text-slate-900 dark:text-slate-100 font-medium;
+  /* 목차의 현재 위치 막대. 활성 항목이 바뀔 때 레일 위를 미끄러진다.
+     transition 을 CSS 로 두는 이유: 유틸리티 클래스로 주면 top/height 를
+     인라인 스타일로 쓰는 JS 와 선언이 흩어져 추적이 어렵다. */
+  [data-toc-marker] {
+    opacity: 0;
+  }
+  [data-toc-marker][data-ready] {
+    transition:
+      top 0.3s cubic-bezier(0.32, 0.72, 0, 1),
+      height 0.3s cubic-bezier(0.32, 0.72, 0, 1),
+      opacity 0.2s linear;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-toc-marker][data-ready] {
+      transition: opacity 0.2s linear;
+    }
   }
 
   /* 외부 링크 표시(↗) — 본문 링크에만 붙는다 */

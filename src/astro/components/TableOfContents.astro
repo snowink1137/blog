@@ -22,18 +22,20 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
         data-toc
         class="toc-panel sticky top-20 pl-6 pr-3 py-12 max-h-[calc(100vh-6rem)] overflow-y-auto"
       >
-        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3">
-          {label}
-        </p>
-        <ul class="border-l border-slate-200 dark:border-slate-800">
+        <p class="text-sm font-semibold text-slate-900 dark:text-slate-200 mb-3">{label}</p>
+        <ul class="relative border-l-2 border-slate-200 dark:border-slate-800">
+          {/* 현재 위치 막대. 회색 레일 위에 겹쳐 그리고 JS 가 활성 항목으로 옮긴다.
+              항목마다 테두리를 주는 대신 막대 하나를 움직여야 이동이 애니메이션된다. */}
+          <span data-toc-marker aria-hidden="true" class="absolute -left-0.5 w-0.5 rounded-full bg-(--color-accent)" />
           {items.map((h) => (
             <li>
               <a
                 href={`#${h.slug}`}
                 data-toc-link={h.slug}
                 class:list={[
-                  'block border-l -ml-px py-1 text-sm leading-snug border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors',
-                  h.depth === 2 ? 'pl-3' : 'pl-6',
+                  'block py-1.5 text-sm leading-snug text-slate-500 dark:text-slate-400 transition-colors hover:text-slate-900 dark:hover:text-slate-100',
+                  'data-[active]:font-medium data-[active]:text-slate-900 dark:data-[active]:text-slate-100',
+                  h.depth === 2 ? 'pl-4' : 'pl-8',
                 ]}
               >
                 {h.text}
@@ -78,6 +80,24 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => el !== null);
 
+    // 회색 레일 위를 미끄러지는 액센트 막대 — 활성 항목 하나만 정확히 덮는다
+    const marker = nav.querySelector<HTMLElement>('[data-toc-marker]');
+    const moveMarker = (el: HTMLAnchorElement | null) => {
+      if (!marker) return;
+      if (!el) {
+        marker.style.opacity = '0';
+        return;
+      }
+      // a 의 offsetParent 는 relative 인 ul 이라 offsetTop 이 곧 레일 기준 좌표
+      marker.style.top = `${el.offsetTop}px`;
+      marker.style.height = `${el.offsetHeight}px`;
+      marker.style.opacity = '1';
+      // 첫 배치는 어디선가 날아오는 것처럼 보이므로 그때만 전환을 끈다
+      if (!marker.dataset.ready) {
+        requestAnimationFrame(() => (marker.dataset.ready = 'true'));
+      }
+    };
+
     let current: HTMLAnchorElement | null = null;
     const setActive = (id: string | null) => {
       const next = id ? (links.get(id) ?? null) : null;
@@ -85,6 +105,7 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
       current?.removeAttribute('data-active');
       next?.setAttribute('data-active', '');
       current = next;
+      moveMarker(next);
       // 목차가 길어 스크롤될 때 활성 항목이 보이도록
       next?.scrollIntoView({ block: 'nearest' });
     };
@@ -100,6 +121,8 @@ const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
     };
 
     update();
+    // 창 폭이 바뀌면 항목이 접히면서 높이가 달라진다
+    addEventListener('resize', () => moveMarker(current), { passive: true });
     let ticking = false;
     addEventListener(
       'scroll',
