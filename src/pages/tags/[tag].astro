@@ -5,7 +5,7 @@ import Footer from '../../astro/components/Footer.astro';
 import Header from '../../astro/components/Header.astro';
 import PostCard from '../../astro/components/PostCard.astro';
 import { SITE_TITLE } from '../../consts';
-import { isEnPost } from '../../lib/posts';
+import { getTagSet, isEnPost } from '../../lib/posts';
 
 export async function getStaticPaths() {
   const posts = (await getCollection('blog')).filter((post) => !isEnPost(post));
@@ -25,6 +25,10 @@ export async function getStaticPaths() {
 }
 
 const { tag, posts } = Astro.props;
+
+// 영어에 같은 태그가 없으면(동시성↔concurrency 처럼 대응어가 달라서) 영어 태그 목록으로
+const enTags = await getTagSet('en');
+const altHref = enTags.has(tag) ? `/en/tags/${tag}/` : '/en/tags/';
 ---
 
 <!doctype html>
@@ -33,7 +37,7 @@ const { tag, posts } = Astro.props;
     <BaseHead title={`#${tag} | ${SITE_TITLE}`} description={`${tag} 태그가 붙은 글 모음`} noindex />
   </head>
   <body>
-    <Header />
+    <Header altHref={altHref} />
     <main class="max-w-content mx-auto px-4 sm:px-6 py-12">
       <header class="mb-10">
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">

@@ -4,7 +4,7 @@ import Footer from '../../../astro/components/Footer.astro';
 import Header from '../../../astro/components/Header.astro';
 import PostCard from '../../../astro/components/PostCard.astro';
 import { SITE_TITLE } from '../../../consts';
-import { getSortedPosts } from '../../../lib/posts';
+import { getSortedPosts, getTagSet } from '../../../lib/posts';
 
 export async function getStaticPaths() {
   const posts = await getSortedPosts('en');
@@ -22,6 +22,10 @@ export async function getStaticPaths() {
 }
 
 const { tag, posts } = Astro.props;
+
+// 한국어에 같은 태그가 없으면 한국어 태그 목록으로 — 그냥 넘기면 404
+const koTags = await getTagSet('ko');
+const altHref = koTags.has(tag) ? `/tags/${tag}/` : '/tags/';
 ---
 
 <!doctype html>
@@ -30,7 +34,7 @@ const { tag, posts } = Astro.props;
     <BaseHead title={`#${tag} | ${SITE_TITLE}`} description={`Posts tagged ${tag}`} noindex />
   </head>
   <body>
-    <Header locale="en" altHref={`/tags/${tag}/`} />
+    <Header locale="en" altHref={altHref} />
     <main class="max-w-content mx-auto px-4 sm:px-6 py-12">
       <header class="mb-10">
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">

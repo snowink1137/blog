@@ -17,6 +17,14 @@ export async function getSortedPosts(locale: Locale = 'ko'): Promise<CollectionE
     .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 }
 
+/** locale 별 태그 집합. 언어 토글이 실존하는 짝 페이지만 가리키게 할 때 쓴다 —
+    한/영 태그는 각자 글에서 생성되는 독립 구조라 한쪽에만 있는 태그가 많다
+    (동시성↔concurrency 처럼 대응어가 달라서, 같은 슬러그로 넘기면 404 가 난다) */
+export async function getTagSet(locale: Locale = 'ko'): Promise<Set<string>> {
+  const posts = await getSortedPosts(locale);
+  return new Set(posts.flatMap((p) => p.data.tags));
+}
+
 /** tech 글의 서브카테고리 목록을 글 수 내림차순으로 반환 */
 export async function getTechSubcategories(
   locale: Locale = 'ko',

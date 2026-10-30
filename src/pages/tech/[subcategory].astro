@@ -21,6 +21,10 @@ export async function getStaticPaths() {
 }
 
 const { name, posts } = Astro.props;
+
+// 영어에 같은 서브카테고리 글이 없으면 영어 Tech 목록으로
+const enSubcats = await getTechSubcategories('en');
+const altHref = enSubcats.some((s) => s.name === name) ? `/en/tech/${name}/` : '/en/tech/';
 ---
 
 <!doctype html>
@@ -29,7 +33,7 @@ const { name, posts } = Astro.props;
     <BaseHead title={`${name} | ${SITE_TITLE}`} description={`${name} 관련 글 모음`} />
   </head>
   <body>
-    <Header />
+    <Header altHref={altHref} />
     <main class="max-w-content mx-auto px-4 sm:px-6 py-12">
       <header class="mb-10">
         <p class="text-sm text-slate-500 dark:text-slate-400 mb-2">
