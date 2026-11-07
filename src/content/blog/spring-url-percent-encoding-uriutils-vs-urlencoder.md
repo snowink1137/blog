@@ -1,6 +1,6 @@
 ---
 title: 'Spring의 URL 퍼센트 인코딩: UriComponentsBuilder, URLEncoder, UriUtils는 왜 다르게 동작할까?'
-description: '같은 값을 넣어도 세 도구가 각각 다른 URL을 만든다. 규격이 두 겹으로 깔려 있기 때문이다. Spring 6.2와 Java 25로 직접 실행해 차이를 확인하고, 수신 측이 어떤 디코더를 쓰든 안전한 선택을 정리했다.'
+description: '같은 값을 넣어도 세 도구가 각각 다른 URL을 만든다. URL 인코딩 표준이 두 가지 존재했기 때문이다. Spring 6.2와 Java 25로 직접 실행해 차이를 확인하고, 수신 측이 어떤 디코더를 쓰든 안전한 선택을 정리했다.'
 pubDate: '2026-11-07T16:30:00+09:00'
 updatedDate: '2026-11-07T16:30:00+09:00'
 category: tech
@@ -10,11 +10,13 @@ tags: ['url-encoding', 'percent-encoding', 'uriutils', 'urlencoder', 'uricompone
 
 ## 서론
 
-서버 간 API 호출에서 쿼리 파라미터 값에 `+` 가 들어 있었습니다. Spring 표준 도구인 `UriComponentsBuilder` 로 URL을 만들어 보냈는데, 수신 측 로그에는 `+` 가 **공백으로 바뀌어** 찍혀 있었습니다.
+서버 간 API 호출에서 쿼리 파라미터 값에 `+` 가 들어가 있으면 URL 인코딩은 어떻게 될까요?
+
+실무에서 이 상황을 만났습니다. Spring 표준 도구인 `UriComponentsBuilder` 로 URL을 만들어 보냈는데, 수신 측 로그에는 `+` 가 **공백으로 바뀌어** 찍혀 있었습니다.
 
 처음엔 제가 인코딩을 빠뜨린 줄 알았습니다. 그런데 소스를 따라가 보니 `UriComponentsBuilder` 는 제대로 동작하고 있었습니다. **RFC 3986을 충실히 따랐기 때문에** `+` 를 건드리지 않은 거였죠.
 
-문제는 수신 측이 RFC 3986이 아닌 다른 규격으로 디코딩한다는 데 있었습니다. 그리고 그 "다른 규격"은 RFC 3986보다 10년 먼저 세상에 깔린 것이었습니다.
+문제는 수신 측이 RFC 3986이 아닌 다른 표준으로 디코딩한다는 데 있었습니다. 그리고 그 "다른 표준"은 RFC 3986보다 10년 먼저 세상에 깔린 것이었습니다.
 
 이 글은 그때 `UriComponentsBuilder` · `java.net.URLEncoder` · `UriUtils` 사이에서 고민했던 내용을 정리한 것입니다. 추측이 아니라 **Spring 6.2.8 + Java 25 환경에서 직접 실행한 결과**를 기준으로 삼았습니다.
 
@@ -51,16 +53,16 @@ https://api.example.com/search?q=spring&page=2#top
 
 이 질문의 답이 **하나가 아닙니다.** 그리고 그게 이 글의 전부입니다.
 
-## 규격이 두 겹으로 깔려 있다
+## URL 인코딩 표준은 두 가지가 존재했다
 
-이 문제를 "Spring의 버그"로 보면 영원히 헷갈립니다. 원인은 URL 인코딩에 서로 다른 두 규격이 있고 둘 다 현역이라는 데 있습니다.
+이 문제를 "Spring의 버그"로 보면 영원히 헷갈립니다. 원인은 URL 인코딩에 서로 다른 **두 가지 표준**이 존재했고, 둘 다 아직 현역이라는 데 있습니다.
 
-| 시점 | 규격 | 이 글과 관련된 내용 |
+| 시점 | 표준 | 이 글과 관련된 내용 |
 |---|---|---|
-| 1994-12 | [RFC 1738](https://www.rfc-editor.org/rfc/rfc1738.txt) | URL 최초 규격. `~` 를 unsafe로 분류하고 반드시 인코딩하라고 규정 |
+| 1994-12 | [RFC 1738](https://www.rfc-editor.org/rfc/rfc1738.txt) | URL 최초 표준. `~` 를 unsafe로 분류하고 반드시 인코딩하라고 규정 |
 | 1995-11 | [RFC 1866](https://www.rfc-editor.org/rfc/rfc1866.txt) | HTML 2.0. `application/x-www-form-urlencoded` 등장. **공백을 `+` 로 치환** |
 | 1998-08 | [RFC 2396](https://www.rfc-editor.org/rfc/rfc2396.txt) | URI 일반 문법. `~` 가 unreserved로 승격 |
-| 2005-01 | [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986.txt) | 현행 URI 규격. `+` 는 sub-delim이라 쿼리에서 합법 |
+| 2005-01 | [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986.txt) | 현행 URI 표준. `+` 는 sub-delim이라 쿼리에서 합법 |
 
 핵심은 **폼 인코딩이 10년 먼저 깔렸다**는 점입니다. RFC 1866의 원문은 이렇게 말합니다.
 
@@ -68,25 +70,36 @@ https://api.example.com/search?q=spring&page=2#top
 >
 > — RFC 1866, 8.2.1. The form-urlencoded Media Type
 
-1995년에 HTML 폼이 이 방식을 쓰기 시작했고, 이후 10년간 웹 서버와 프레임워크들이 **쿼리 문자열 파서의 기본 동작**으로 이걸 구현했습니다. RFC 3986이 나온 건 2005년입니다. 규격상의 표준은 RFC 3986이지만 실제로 깔려 있는 디팩토 표준은 1995년 폼 인코딩입니다. 지금도 [WHATWG URL Standard](https://url.spec.whatwg.org/#application/x-www-form-urlencoded)가 폼 인코딩을 따로 규정하고 있고 브라우저와 서버가 그걸 씁니다.
+1995년에 HTML 폼이 이 방식을 쓰기 시작했고, 이후 10년간 웹 서버와 프레임워크들이 **쿼리 문자열 파서의 기본 동작**으로 이걸 구현했습니다. RFC 3986이 나온 건 2005년입니다. 문서상의 표준은 RFC 3986이지만, 실제로 깔려 있는 디팩토 표준은 1995년 폼 인코딩입니다. 지금도 [WHATWG URL Standard](https://url.spec.whatwg.org/#application/x-www-form-urlencoded)가 폼 인코딩을 따로 규정하고 있고 브라우저와 서버가 그걸 씁니다.
 
 그래서 이런 역설이 생깁니다. **표준을 가장 충실히 따르는 도구가 현실에서 가장 잘 깨집니다.**
 
-### RFC 3986이 `+` 를 건드리지 않는 이유
+### RFC 3986의 문자 분류
 
-RFC 3986에서 쿼리에 허용되는 문자 집합을 보면 `+` 가 들어 있습니다.
+RFC 3986은 URL에 쓰이는 문자를 몇 갈래로 나눕니다. 이 분류를 알면 도구들의 차이가 바로 설명됩니다.
+
+| 분류 | 포함 문자 | 뜻 |
+|---|---|---|
+| `unreserved` | `A-Z` `a-z` `0-9` `-` `.` `_` `~` | 어디에 써도 안전한 문자. 인코딩할 이유가 없다 |
+| `gen-delims` | `:` `/` `?` `#` `[` `]` `@` | URL의 큰 덩어리를 나누는 구분자 |
+| `sub-delims` | `!` `$` `&` `'` `(` `)` `*` `+` `,` `;` `=` | 컴포넌트 안에서 구분자로 쓸 수 있도록 예약된 문자 |
+| `pchar` | `unreserved` + `sub-delims` + `%XX` + `:` `@` | 경로 한 조각(path segment)에 쓸 수 있는 문자 |
+| `query` | `pchar` + `/` + `?` | 쿼리 문자열에 쓸 수 있는 문자 |
+
+`gen-delims` 와 `sub-delims` 를 합쳐 **reserved** 라고 부릅니다. 그런데 reserved는 "반드시 인코딩해야 한다"는 뜻이 아닙니다. **"구분자로 쓸 수 있게 예약돼 있다"는 뜻**입니다. 그래서 같은 문자가 구분자로 쓰일 수도 있고 값의 일부로 쓰일 수도 있습니다.
+
+바로 여기서 이 글의 문제가 나옵니다.
 
 ```text
-unreserved  = ALPHA / DIGIT / "-" / "." / "_" / "~"
-sub-delims  = "!" / "$" / "&" / "'" / "(" / ")"
-            / "*" / "+" / "," / ";" / "="
-pchar       = unreserved / pct-encoded / sub-delims / ":" / "@"
-query       = *( pchar / "/" / "?" )
+query = *( pchar / "/" / "?" )
+pchar = unreserved / pct-encoded / sub-delims / ":" / "@"
 ```
 
-`+` 는 `sub-delims` 에 속하고, `sub-delims` 는 `pchar` 에 포함되며, `query` 는 `pchar` 를 허용합니다. 즉 쿼리에 `+` 가 날것으로 들어 있어도 **RFC 3986 입장에서는 완벽히 합법**입니다. "컴포넌트별로 불법 문자만 인코딩한다"는 정책의 인코더라면 당연히 `+` 를 그대로 둡니다.
+`+` 는 `sub-delims` 에 속하고, `sub-delims` 는 `pchar` 에 포함되며, `query` 는 `pchar` 를 허용합니다. 즉 쿼리에 `+` 가 날것으로 들어 있어도 **RFC 3986 입장에서는 완벽히 합법**입니다.
 
-그리고 폼 디코더는 그 `+` 를 공백으로 읽습니다. 양쪽 다 자기 규격에는 맞습니다.
+그리고 인코더는 그 문자가 구분자로 쓰인 건지 값의 일부인지 **알 수 없습니다.** 문자열만 보고는 구별할 방법이 없으니까요. 그래서 "컴포넌트별로 불법인 문자만 인코딩한다"는 정책의 인코더는 `+` 를 건드리지 않습니다. 합법이니까요.
+
+그리고 폼 디코더는 그 `+` 를 공백으로 읽습니다. 양쪽 다 자기 표준에는 맞습니다.
 
 ## 세 도구는 어떻게 다른가
 
@@ -127,20 +140,20 @@ query       = *( pchar / "/" / "?" )
 
 `URLEncoder` 의 출력은 **수신 측이 폼 디코더일 때만** 원본으로 돌아옵니다. RFC 3986 디코더를 쓰는 상대에게 보내면 공백이 `+` 로 변해 도착합니다.
 
-`UriUtils.encode` 의 출력은 양쪽 모두에서 복원됩니다. `%2B` 와 `%20` 은 두 규격이 해석을 공유하는 표현이기 때문입니다. 공백을 `+` 로 쓰거나 `+` 를 날것으로 두는 순간 해석이 갈리지만, 퍼센트 인코딩된 옥텟은 갈리지 않습니다.
+`UriUtils.encode` 의 출력은 양쪽 모두에서 복원됩니다. `%2B` 와 `%20` 은 두 표준이 해석을 공유하는 표현이기 때문입니다. 공백을 `+` 로 쓰거나 `+` 를 날것으로 두는 순간 해석이 갈리지만, 퍼센트 인코딩된 옥텟은 갈리지 않습니다.
 
 ## 왜 다르게 동작하는가
 
-차이는 각 도구가 **다른 규격을 구현했거나, 같은 규격을 다른 범위로 적용**하기 때문입니다.
+차이는 각 도구가 **다른 표준을 구현했거나, 같은 표준을 다른 범위로 적용**하기 때문입니다.
 
-| 도구 | 따르는 규격 | 인코딩 범위 |
+| 도구 | 따르는 표준 | 인코딩 범위 |
 |---|---|---|
 | [`URLEncoder`](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/net/URLEncoder.html) | `x-www-form-urlencoded` (폼) | 영숫자와 `.` `-` `*` `_` 외 전부. 공백은 `+` |
 | [`UriUtils.encode`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/util/UriUtils.html) | RFC 3986 | **unreserved만** 남기고 전부 |
 | `UriUtils.encodeQueryParam` | RFC 3986 | 쿼리에 불법인 문자만 (여기에 `=` `&` 추가) |
 | [`UriComponentsBuilder`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/util/UriComponentsBuilder.html) | RFC 3986 | 컴포넌트별 불법 문자만. 단 URI 변수는 예외 |
 
-`URLEncoder` 가 RFC 3986의 구현이 아니라는 점이 핵심입니다. Javadoc이 밝히듯 이 클래스는 **HTML 폼 규격의 구현**입니다. 그래서 공백이 `+` 가 되고, URL의 경로 부분에는 쓸 수 없습니다. 경로에서 `+` 는 공백이 아니라 그냥 `+` 니까요.
+`URLEncoder` 가 RFC 3986의 구현이 아니라는 점이 핵심입니다. Javadoc이 밝히듯 이 클래스는 **HTML 폼 표준의 구현**입니다. 그래서 공백이 `+` 가 되고, URL의 경로 부분에는 쓸 수 없습니다. 경로에서 `+` 는 공백이 아니라 그냥 `+` 니까요.
 
 Spring 쪽은 모두 RFC 3986을 따르지만 적용 범위가 다릅니다. [`HierarchicalUriComponents.Type`](https://github.com/spring-projects/spring-framework/blob/main/spring-web/src/main/java/org/springframework/web/util/HierarchicalUriComponents.java) 열거형이 컴포넌트별 허용 문자를 정의합니다.
 
@@ -225,51 +238,28 @@ builder.encode().buildAndExpand(value);   // 인코딩을 먼저 걸음 -> '+' -
 | `/` | `/` | `/%2F` | `/` | `%2F` |
 | `;` | `/;` | `/%3B` | `;` | `%3B` |
 
-`?` 는 path에서 `%3F` 로 바뀌지만 query에서는 통과합니다. `&` 와 `=` 는 정반대입니다. 컴포넌트마다 구조를 깨뜨리는 문자가 다르니 규격상으로는 일관된 동작인데, 쓰는 사람 입장에서는 외울 수 없는 표가 됩니다.
+`?` 는 path에서 `%3F` 로 바뀌지만 query에서는 통과합니다. `&` 와 `=` 는 정반대입니다. 컴포넌트마다 구조를 깨뜨리는 문자가 다르니 표준상으로는 일관된 동작인데, 쓰는 사람 입장에서는 외울 수 없는 표가 됩니다.
 
 특히 `/` 행을 보세요. 값으로 `/` 를 path에 넣으면 인코딩되지 않고 **그대로 경로 구분자가 됩니다.** 값 하나가 URL의 구조를 바꿔 버리니, 경로에 외부 입력을 넣을 때는 반드시 URI 변수로 넘기거나 `UriUtils.encodePathSegment` 를 거쳐야 합니다.
 
-## HTTP 클라이언트의 기본값은 또 다르다
+## HTTP 클라이언트에 따라 기본값이 다르다
 
-여기서 한 겹이 더 있습니다. `RestTemplate` · [`RestClient`](https://docs.spring.io/spring-framework/reference/integration/rest-clients.html#rest-restclient) · `WebClient` 는 내부적으로 `DefaultUriBuilderFactory` 를 쓰는데, **클라이언트마다 기본 모드가 다릅니다.**
-
-로컬 HTTP 서버를 띄워 같은 값을 보내고, 서버가 받은 raw query를 그대로 찍어 봤습니다.
+한 겹이 더 있습니다. Spring의 HTTP 클라이언트들은 내부적으로 `DefaultUriBuilderFactory` 를 쓰는데, **클라이언트마다 기본 모드가 다릅니다.** 로컬 HTTP 서버를 띄워 같은 값을 보내고 서버가 받은 raw query를 그대로 찍어 봤습니다.
 
 | 클라이언트 | 기본 [`EncodingMode`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/util/DefaultUriBuilderFactory.EncodingMode.html) | 서버가 받은 값 |
 |---|---|---|
-| `RestTemplate` | `URI_COMPONENT` | `foo=a+b%20c` **깨짐** |
-| `RestClient` | `TEMPLATE_AND_VALUES` | `foo=a%2Bb%20c` |
+| [`RestClient`](https://docs.spring.io/spring-framework/reference/integration/rest-clients.html#rest-restclient) | `TEMPLATE_AND_VALUES` | `foo=a%2Bb%20c` |
 | `WebClient` | `TEMPLATE_AND_VALUES` | `foo=a%2Bb%20c` |
+| `RestTemplate` | `URI_COMPONENT` | `foo=a+b%20c` **깨짐** |
 
 ```java
-// 둘 다 템플릿 + 변수로 정석 호출했는데 결과가 다르다
-restTemplate.getForObject(base + "/api?foo={v}", String.class, "a+b c");
-// 서버가 받은 값: foo=a+b%20c
-
 restClient.get().uri(base + "/api?foo={v}", "a+b c").retrieve().body(String.class);
 // 서버가 받은 값: foo=a%2Bb%20c
 ```
 
-`DefaultUriBuilderFactory` 의 클래스 기본값은 `TEMPLATE_AND_VALUES` 입니다. `RestClient` 와 `WebClient` 는 이 기본값을 그대로 씁니다. 그런데 `RestTemplate` 은 생성자에서 이걸 덮어씁니다.
+`RestClient` 와 `WebClient` 는 `DefaultUriBuilderFactory` 의 클래스 기본값인 `TEMPLATE_AND_VALUES` 를 그대로 씁니다. **템플릿과 변수를 나눠 넘기기만 하면 앞 절의 비대칭을 신경 쓸 필요가 없습니다.** 변수에 엄격한 인코딩이 자동으로 걸리니까요.
 
-```java
-private static DefaultUriBuilderFactory initUriTemplateHandler() {
-    DefaultUriBuilderFactory uriFactory = new DefaultUriBuilderFactory();
-    uriFactory.setEncodingMode(EncodingMode.URI_COMPONENT);  // for backwards compatibility..
-    return uriFactory;
-}
-```
-
-주석 그대로 하위 호환 때문입니다. 즉 **`RestTemplate` 을 쓰는 한 템플릿과 변수를 아무리 올바르게 나눠 넘겨도 `+` 는 그대로 나갑니다.** `RestClient` 로 바꾸면 같은 코드가 `%2B` 로 나갑니다.
-
-참고로 `RestTemplate` 이 deprecated된 건 아닙니다. Javadoc은 6.1부터 `RestClient` 가 더 현대적인 API를 제공하며 새 상위 기능은 `RestClient` 에 집중된다고 안내합니다. 이 인코딩 차이도 그 격차 중 하나입니다. `RestTemplate` 을 계속 써야 한다면 모드를 직접 바꿔 주면 됩니다.
-
-```java
-DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
-factory.setEncodingMode(EncodingMode.TEMPLATE_AND_VALUES);
-restTemplate.setUriTemplateHandler(factory);
-// 서버가 받은 값: foo=a%2Bb%20c
-```
+`RestTemplate` 만 다릅니다. 생성자에서 하위 호환을 위해 `URI_COMPONENT` 로 덮어쓰기 때문에, 템플릿과 변수를 올바르게 나눠 넘겨도 `+` 가 그대로 나갑니다. 레거시 코드에서 이 문제를 만났다면 `setUriTemplateHandler` 로 모드를 바꾸거나 `RestClient` 로 옮기면 됩니다.
 
 ## 결론: UriUtils.encode(), 그리고 같은 클래스의 함정
 
@@ -299,7 +289,7 @@ restTemplate.setUriTemplateHandler(factory);
 >
 > — RFC 3986, 2.3. Unreserved Characters
 
-`~` 와 `%7E` 는 규격상 같은 URI이고, 규격은 더 나아가 `%7E` 를 만들지 말라고 합니다. `~` 를 남기는 `UriUtils.encode` 가 규격을 지키는 쪽이고, `%7E` 를 만드는 `URLEncoder` 가 SHOULD NOT을 어기는 쪽입니다. `URLEncoder` 가 그렇게 동작하는 건 1994년 RFC 1738이 `~` 를 unsafe로 분류했던 시절의 유산입니다.
+`~` 와 `%7E` 는 표준상 같은 URI이고, 표준은 더 나아가 `%7E` 를 만들지 말라고 합니다. `~` 를 남기는 `UriUtils.encode` 가 표준을 지키는 쪽이고, `%7E` 를 만드는 `URLEncoder` 가 SHOULD NOT을 어기는 쪽입니다. `URLEncoder` 가 그렇게 동작하는 건 1994년 RFC 1738이 `~` 를 unsafe로 분류했던 시절의 유산입니다.
 
 의미상 둘이 동등하니 실무에서 문제가 되는 일은 드뭅니다. 다만 **URL을 바이트 단위로 비교하는 곳**에서는 다릅니다. 요청 서명(HMAC) 계산, 캐시 키, 로그 매칭 같은 데서는 두 표현이 서로 다른 문자열입니다.
 
@@ -308,18 +298,18 @@ restTemplate.setUriTemplateHandler(factory);
 ```mermaid
 flowchart TB
     START["쿼리 값·경로 세그먼트에<br/>외부 입력을 넣어야 한다"]
-    Q1{"HTTP 클라이언트로<br/>호출하는가?"}
-    Q2{"어떤 클라이언트인가?"}
-    A1["RestClient · WebClient<br/>템플릿과 변수를 나눠 넘기면 끝"]
-    A2["RestTemplate<br/>EncodingMode 를<br/>TEMPLATE_AND_VALUES 로 변경"]
-    A3["UriComponentsBuilder 직접 조립<br/>값을 플레이스홀더로 넘기고<br/>encode() 먼저, buildAndExpand() 나중"]
+    Q1{"RestClient 나 WebClient 로<br/>호출하는가?"}
+    A1["URL 템플릿과 변수를<br/>나눠서 넘기면 끝"]
+    Q2{"UriComponentsBuilder 로<br/>직접 조립하는가?"}
+    A2["값을 플레이스홀더로 넘기고<br/>encode() 먼저,<br/>buildAndExpand() 나중"]
+    A3["UriUtils.encode(v, UTF_8) 로<br/>먼저 인코딩하고<br/>build(true) 로 조립"]
     OK["+ 는 %2B, 공백은 %20<br/>어떤 디코더에서도 원본 복원"]
 
     START --> Q1
-    Q1 -->|Yes| Q2
-    Q1 -->|No| A3
-    Q2 --> A1
-    Q2 --> A2
+    Q1 -->|Yes| A1
+    Q1 -->|No| Q2
+    Q2 -->|Yes| A2
+    Q2 -->|No| A3
     A1 --> OK
     A2 --> OK
     A3 --> OK
@@ -328,14 +318,16 @@ flowchart TB
 실무 규칙으로 압축하면 이렇습니다.
 
 1. **`RestClient` 나 `WebClient` 를 쓴다면** URL 템플릿과 변수를 나눠 넘기는 정석 호출만으로 충분합니다. 값을 문자열 연결로 붙이지만 마세요.
-2. **`RestTemplate` 을 쓴다면** `EncodingMode` 를 `TEMPLATE_AND_VALUES` 로 바꿔 두세요. 기본값이 하위 호환 모드입니다.
-3. **URL을 직접 조립한다면** `UriUtils.encode(value, UTF_8)` 로 값을 먼저 인코딩하고 `build(true)` 로 조립합니다. 같은 클래스의 `encodeQueryParam` 이 아니라 `encode` 입니다.
+2. **`UriComponentsBuilder` 로 직접 조립한다면** 값을 `queryParam("k", v)` 로 박지 말고 `{v}` 플레이스홀더로 넘기고, `encode()` 를 `buildAndExpand()` 보다 먼저 호출합니다.
+3. **값만 따로 인코딩해야 한다면** `UriUtils.encode(value, UTF_8)` 를 쓰고 `build(true)` 로 조립합니다. 같은 클래스의 `encodeQueryParam` 이 아니라 `encode` 입니다.
 4. **`URLEncoder` 는 URL에 쓰지 않습니다.** 폼 바디를 손으로 만드는 경우가 아니라면 맞지 않습니다.
 5. **인코딩 책임은 한 곳에만 둡니다.** 어떤 도구도 이중 인코딩을 막아 주지 않습니다. `%20` 을 다시 인코딩하면 `%2520` 이 됩니다.
 
-마지막으로 덧붙이면, `+` 인코딩을 지적하는 이슈가 Spring 트래커에 [2012년](https://github.com/spring-projects/spring-framework/issues/14464)부터 [2019년](https://github.com/spring-projects/spring-framework/issues/23148)까지 반복해서 올라왔고 전부 닫혔습니다. 버그가 아니라 규격 해석의 차이이기 때문입니다.
+레거시 코드에서 `RestTemplate` 을 쓰고 있다면 2·3번이 아니라 `EncodingMode` 부터 확인하세요. 기본값이 하위 호환 모드라 템플릿과 변수를 올바르게 나눠 넘겨도 `+` 가 빠져나갑니다.
 
-그러니 "Spring이 왜 이렇게 만들었나"를 묻는 대신, **내가 보내는 URL을 상대가 어떤 규격으로 읽을 것인가**를 먼저 확인하는 편이 빠릅니다.
+마지막으로 덧붙이면, `+` 인코딩을 지적하는 이슈가 Spring 트래커에 [2012년](https://github.com/spring-projects/spring-framework/issues/14464)부터 [2019년](https://github.com/spring-projects/spring-framework/issues/23148)까지 반복해서 올라왔고 전부 닫혔습니다. 버그가 아니라 표준 해석의 차이이기 때문입니다.
+
+그러니 "Spring이 왜 이렇게 만들었나"를 묻는 대신, **내가 보내는 URL을 상대가 어떤 표준으로 읽을 것인가**를 먼저 확인하는 편이 빠릅니다.
 
 ## 참고 자료
 
@@ -345,4 +337,4 @@ flowchart TB
 - [Spring Framework Reference — REST Clients](https://docs.spring.io/spring-framework/reference/integration/rest-clients.html)
 - [Spring Framework Reference — URI Links](https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-uri-building.html)
 - [HierarchicalUriComponents 소스](https://github.com/spring-projects/spring-framework/blob/main/spring-web/src/main/java/org/springframework/web/util/HierarchicalUriComponents.java)
-- [Jim Rennie — Spring's UriComponentsBuilder encoding](https://blog.jimrennie.com/2020-04-01-uri-components-builder-encoding)
+- [Jim Rennie — Spring's UriComponentsBuilder encoding](https://blog.jimrennie.com/2020-04-01-uri-components-builder-encoding) — 같은 문제를 Spring 5 시절에 정리한 글. 결론도 "`UriUtils` 가 가장 일관적이며 쿼리 파라미터를 인코딩하는 가장 안전한 방법"으로 같다
