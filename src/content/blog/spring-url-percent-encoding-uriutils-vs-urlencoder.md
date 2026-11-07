@@ -51,11 +51,11 @@ https://api.example.com/search?q=spring&page=2#top
 
 > **어떤 문자를 인코딩해야 하는가?**
 
-이 질문의 답이 **하나가 아닙니다.** 그리고 그게 이 글의 전부입니다.
+그런데 이 질문에는 답이 하나가 아닙니다. 어떤 도구는 `+` 를 인코딩하고 어떤 도구는 그냥 둡니다. 둘 다 각자의 근거가 있습니다. 이 글은 그 근거가 무엇이고, 그래서 어떤 도구를 골라야 하는지에 대한 이야기입니다.
 
 ## URL 인코딩 표준은 두 가지가 존재했다
 
-이 문제를 "Spring의 버그"로 보면 영원히 헷갈립니다. 원인은 URL 인코딩에 서로 다른 **두 가지 표준**이 존재했고, 둘 다 아직 현역이라는 데 있습니다.
+Spring이 뭔가 잘못 만든 거라고 생각하면 이 동작은 끝까지 이해되지 않습니다. 원인은 Spring이 아니라 URL 인코딩에 서로 다른 **두 가지 표준**이 존재했고, 둘 다 아직 현역이라는 데 있습니다.
 
 | 시점 | 표준 | 이 글과 관련된 내용 |
 |---|---|---|
@@ -83,10 +83,26 @@ RFC 3986은 URL에 쓰이는 문자를 몇 갈래로 나눕니다. 이 분류를
 | `unreserved` | `A-Z` `a-z` `0-9` `-` `.` `_` `~` | 어디에 써도 안전한 문자. 인코딩할 이유가 없다 |
 | `gen-delims` | `:` `/` `?` `#` `[` `]` `@` | URL의 큰 덩어리를 나누는 구분자 |
 | `sub-delims` | `!` `$` `&` `'` `(` `)` `*` `+` `,` `;` `=` | 컴포넌트 안에서 구분자로 쓸 수 있도록 예약된 문자 |
-| `pchar` | `unreserved` + `sub-delims` + `%XX` + `:` `@` | 경로 한 조각(path segment)에 쓸 수 있는 문자 |
+| `pchar` | `unreserved` + `sub-delims` + `%XX` + `:` `@` | 경로 세그먼트 하나에 들어갈 수 있는 문자 |
 | `query` | `pchar` + `/` + `?` | 쿼리 문자열에 쓸 수 있는 문자 |
 
 `gen-delims` 와 `sub-delims` 를 합쳐 **reserved** 라고 부릅니다. 그런데 reserved는 "반드시 인코딩해야 한다"는 뜻이 아닙니다. **"구분자로 쓸 수 있게 예약돼 있다"는 뜻**입니다. 그래서 같은 문자가 구분자로 쓰일 수도 있고 값의 일부로 쓰일 수도 있습니다.
+
+`pchar` 와 `query` 는 "어디에 쓸 수 있는 문자인지"를 정의한 집합입니다. 실제 URL에 대보면 쉽습니다.
+
+```text
+https://example.com/files/2026/report.pdf?tag=a+b&sort=date
+```
+
+| 부분 | 적용되는 집합 |
+|---|---|
+| `files` · `2026` · `report.pdf` | 각각 하나의 **경로 세그먼트**. 세그먼트 안에 들어갈 수 있는 문자가 `pchar` |
+| `tag=a+b&sort=date` | **쿼리** 전체. `pchar` 에 `/` 와 `?` 를 더한 집합이 허용된다 |
+
+두 집합의 차이를 보면 규칙이 왜 이렇게 생겼는지 보입니다.
+
+- **`pchar` 에 `/` 가 없는 이유**: `/` 는 세그먼트를 나누는 문자입니다. 세그먼트 *안*에 들어가면 조각이 하나 더 생겨 버리니 들어갈 수 없습니다. 파일명에 `/` 가 필요하면 `%2F` 로 인코딩해야 합니다.
+- **`query` 가 `pchar` 보다 넓은 이유**: 쿼리 안에서는 `/` 와 `?` 가 더 이상 구조적 의미를 갖지 않습니다. `?q=a/b?c` 는 합법적인 URL입니다.
 
 바로 여기서 이 글의 문제가 나옵니다.
 
@@ -97,9 +113,28 @@ pchar = unreserved / pct-encoded / sub-delims / ":" / "@"
 
 `+` 는 `sub-delims` 에 속하고, `sub-delims` 는 `pchar` 에 포함되며, `query` 는 `pchar` 를 허용합니다. 즉 쿼리에 `+` 가 날것으로 들어 있어도 **RFC 3986 입장에서는 완벽히 합법**입니다.
 
-그리고 인코더는 그 문자가 구분자로 쓰인 건지 값의 일부인지 **알 수 없습니다.** 문자열만 보고는 구별할 방법이 없으니까요. 그래서 "컴포넌트별로 불법인 문자만 인코딩한다"는 정책의 인코더는 `+` 를 건드리지 않습니다. 합법이니까요.
+게다가 인코더는 그 문자가 구분자로 쓰인 건지 값의 일부인지 **알 수 없습니다.** 완성된 문자열만 받아서는 구별할 방법이 없으니까요. 그래서 "각 컴포넌트에서 허용되지 않는 문자만 인코딩한다"는 정책을 가진 인코더는 `+` 를 건드리지 않습니다. 허용되는 문자니까요.
 
 그리고 폼 디코더는 그 `+` 를 공백으로 읽습니다. 양쪽 다 자기 표준에는 맞습니다.
+
+### 공백은 어느 분류에도 없다
+
+위 분류를 다시 보면 한 가지가 빠져 있습니다. **공백이 없습니다.** 실수로 뺀 게 아니라 정말로 없습니다. RFC 3986의 문법 어디에도 공백이 등장하지 않습니다. 즉 **공백은 URL에 쓸 수 없는 문자**입니다.
+
+RFC 3986은 퍼센트 인코딩을 설명할 때 공백을 바로 그 예로 듭니다.
+
+> A percent-encoding mechanism is used to represent a data octet in a component when that octet's corresponding character is **outside the allowed set** (...) For example, "%20" is the percent-encoding for the binary octet "00100000" (ABNF: %x20), which in US-ASCII corresponds to the space character (SP).
+>
+> — RFC 3986, 2.1. Percent-Encoding
+
+이 차이가 다음 절의 실측 표를 전부 설명해 줍니다.
+
+| 문자 | RFC 3986에서의 위치 | 인코딩 의무 | 그래서 |
+|---|---|---|---|
+| 공백 | 허용 집합 **밖** | 반드시 인코딩해야 한다 | 모든 도구가 인코딩한다 (RFC 계열은 `%20`, 폼 계열은 `+`) |
+| `+` | `sub-delims`, 허용 집합 **안** | 의무가 없다 | 도구의 정책에 따라 갈린다 |
+
+공백은 선택의 여지가 없으니 모든 도구가 같은 일을 합니다. `+` 는 의무가 없으니 도구마다 다른 선택을 합니다. **세 도구가 왜 다르게 동작하는지는 결국 이 차이로 요약됩니다.**
 
 ## 세 도구는 어떻게 다른가
 
@@ -150,8 +185,8 @@ pchar = unreserved / pct-encoded / sub-delims / ":" / "@"
 |---|---|---|
 | [`URLEncoder`](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/net/URLEncoder.html) | `x-www-form-urlencoded` (폼) | 영숫자와 `.` `-` `*` `_` 외 전부. 공백은 `+` |
 | [`UriUtils.encode`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/util/UriUtils.html) | RFC 3986 | **unreserved만** 남기고 전부 |
-| `UriUtils.encodeQueryParam` | RFC 3986 | 쿼리에 불법인 문자만 (여기에 `=` `&` 추가) |
-| [`UriComponentsBuilder`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/util/UriComponentsBuilder.html) | RFC 3986 | 컴포넌트별 불법 문자만. 단 URI 변수는 예외 |
+| `UriUtils.encodeQueryParam` | RFC 3986 | 쿼리에서 허용되지 않는 문자만 (여기에 `=` `&` 추가) |
+| [`UriComponentsBuilder`](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/util/UriComponentsBuilder.html) | RFC 3986 | 컴포넌트별로 허용되지 않는 문자만. 단 URI 변수는 예외 |
 
 `URLEncoder` 가 RFC 3986의 구현이 아니라는 점이 핵심입니다. Javadoc이 밝히듯 이 클래스는 **HTML 폼 표준의 구현**입니다. 그래서 공백이 `+` 가 되고, URL의 경로 부분에는 쓸 수 없습니다. 경로에서 `+` 는 공백이 아니라 그냥 `+` 니까요.
 
