@@ -10,5 +10,10 @@
   "assets": {
     "directory": "./dist",
     "not_found_handling": "404-page"
-  }
+  },
+  // 브랜치 프리뷰 (Worker Previews). 비프로덕션 브랜치 push 마다 Workers Builds 가
+  // `npx wrangler preview` 를 돌려 프리뷰 URL 을 만든다.
+  // 이 블로그는 vars·secrets·바인딩이 하나도 없어서 비워 두면 된다 — 블록 자체는 필수.
+  // https://developers.cloudflare.com/workers/previews/
+  "previews": {}
 }
