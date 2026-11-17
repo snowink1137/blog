@@ -1,13 +1,18 @@
 /**
- * 프리뷰 전용 교정 모드 — 본문 블록에 ¶번호를 붙이고, 그 자리에서 의견을 적는다.
+ * 프리뷰 교정 모드 — 본문 블록에 ¶번호를 붙이고 그 자리에서 의견을 적는다.
  *
+ * 글을 다듬을 때 "어느 부분"인지 지목하는 비용을 없애는 상시 도구다.
  * 흐름: ¶번호 탭 → 그 블록 밑에 메모칸 → 적고 저장 → 다 적었으면 한 번에
  * 복사하거나 텔레그램으로 보낸다. 저장은 브라우저 localStorage 라서
- * 새로고침해도 남아 있고, 서버·바인딩·외부 요청은 하나도 없다.
+ * 새로고침해도 남고, 서버·바인딩·외부 요청은 하나도 없다.
  *
- * *.workers.dev 프리뷰와 로컬 dev 에서만 동작한다. 프로덕션 도메인에서는
- * 즉시 반환하므로 hello-world-log.com 에는 아무 영향이 없다.
- * 머지 전에 BlogPost.astro 의 import 와 이 파일을 함께 지운다.
+ * 번호 대상: 문단·목록·소제목·인용 + 표·코드블록·다이어그램·이미지.
+ * 앞의 넷은 배지를 블록 안에 넣고, 뒤의 넷은 안에 넣을 수 없으니 래퍼를
+ * 씌워 왼쪽 여백(좁은 화면에서는 위쪽)에 올린다.
+ *
+ * 로드 조건: BlogPost.astro 가 *.workers.dev · localhost 에서만 이 모듈을
+ * 동적 import 한다. 프로덕션 도메인은 이 파일을 내려받지도 않는다.
+ * 아래 게이트는 혹시 직접 import 되는 경우를 막는 이중 안전장치다.
  */
 
 const host = location.hostname;
@@ -47,10 +52,14 @@ if (enabled) {
   .pa-badge.pa-has { color: #065f46; background: #d1fae5; border-color: #6ee7b7; }
   .dark .pa-badge { color: #fcd34d; background: #422006; border-color: #92400e; }
   .dark .pa-badge.pa-has { color: #6ee7b7; background: #022c22; border-color: #065f46; }
+  .pa-wrap { position: relative; }
+  .pa-wrap > .pa-badge:first-child { margin: 0 0 .3rem; }
   @media (min-width: 1100px) {
     .pa-block { position: relative; }
-    .pa-block > .pa-badge:first-child {
-      position: absolute; left: -3.1rem; margin-right: 0; text-align: right;
+    .pa-block > .pa-badge:first-child,
+    .pa-wrap > .pa-badge:first-child {
+      position: absolute; left: -3.1rem; top: .1rem;
+      margin: 0; text-align: right;
     }
   }
   .pa-box {
@@ -93,13 +102,8 @@ if (enabled) {
     font: 500 .78rem/1.5 system-ui, sans-serif;
     box-shadow: 0 4px 16px rgb(0 0 0 / .35);
   }
-  .pa-dock-head {
-    display: flex; gap: .5rem; align-items: center;
-    padding: .5rem .7rem; cursor: pointer;
-  }
-  .pa-dock-n {
-    padding: 0 .4rem; border-radius: 999px; background: #0f766e; font-weight: 700;
-  }
+  .pa-dock-head { display: flex; gap: .5rem; align-items: center; padding: .5rem .7rem; cursor: pointer; }
+  .pa-dock-n { padding: 0 .4rem; border-radius: 999px; background: #0f766e; font-weight: 700; }
   .pa-dock-body { display: none; border-top: 1px solid rgb(255 255 255 / .12); }
   .pa-dock.pa-open .pa-dock-body { display: block; }
   .pa-list { max-height: 15rem; overflow: auto; padding: .35rem 0; }
@@ -120,20 +124,55 @@ if (enabled) {
 
   const prose = document.querySelector('.prose');
   if (prose) {
-    const SEL = 'p, li, h2, h3, h4, blockquote';
+    // 문단형 + 덩어리형을 한 번에, 문서 순서대로 모은다.
+    const SEL =
+      'p, li, h2, h3, h4, blockquote, table, pre.mermaid, .expressive-code, figure, .gallery';
     const blocks: HTMLElement[] = [];
     prose.querySelectorAll<HTMLElement>(SEL).forEach((el) => {
-      if (el.closest('table, pre, figure, .expressive-code')) return;
-      if (blocks.some((b) => b.contains(el))) return;
-      if (!el.textContent?.trim()) return;
+      if (blocks.some((b) => b.contains(el))) return; // 중첩 방지
+      if (!el.textContent?.trim() && !el.querySelector('img, svg')) return;
       blocks.push(el);
     });
+
+    /** 배지를 안에 넣을 수 없는 덩어리 — 래퍼를 씌운다 */
+    const isBig = (el: HTMLElement) =>
+      el.tagName === 'TABLE' ||
+      el.tagName === 'FIGURE' ||
+      el.classList.contains('expressive-code') ||
+      el.classList.contains('mermaid') ||
+      el.classList.contains('gallery');
 
     /** 배지·메모칸을 뺀 순수 본문 텍스트 */
     const blockText = (el: HTMLElement) => {
       const c = el.cloneNode(true) as HTMLElement;
-      c.querySelectorAll('.pa-badge, .pa-box').forEach((x) => x.remove());
+      c.querySelectorAll('.pa-badge, .pa-box, script, style, link').forEach((x) =>
+        x.remove(),
+      );
       return (c.textContent ?? '').replace(/\s+/g, ' ').trim();
+    };
+
+    /** 목록·독에 쓸 짧은 꼬리표 — 덩어리는 종류를 먼저 밝힌다 */
+    const label = (el: HTMLElement) => {
+      if (el.tagName === 'TABLE') {
+        const row = el.querySelector('thead tr, tr');
+        const cells = row
+          ? Array.from(row.children)
+              .map((c) => (c.textContent ?? '').trim())
+              .filter(Boolean)
+              .join(' · ')
+          : '';
+        return `[표] ${cells}`.slice(0, 70);
+      }
+      if (el.classList.contains('mermaid')) return '[다이어그램]';
+      if (el.classList.contains('expressive-code')) {
+        const first = blockText(el).split('\n')[0];
+        return `[코드] ${first}`.slice(0, 70);
+      }
+      if (el.tagName === 'FIGURE' || el.classList.contains('gallery')) {
+        const img = el.querySelector('img');
+        return `[이미지] ${img?.alt ?? ''}`.slice(0, 70);
+      }
+      return blockText(el).slice(0, 60);
     };
 
     const copyText = async (s: string) => {
@@ -160,7 +199,7 @@ if (enabled) {
     const byNum = new Map<string, HTMLElement>();
     const badges = new Map<string, HTMLElement>();
 
-    // ---- 모아 보기 독 -------------------------------------------------
+    // ---- 모아 보기 패널 -----------------------------------------------
     const dock = document.createElement('div');
     dock.className = 'pa-dock';
     dock.innerHTML = `
@@ -183,7 +222,7 @@ if (enabled) {
 
     const exportText = () => {
       const keys = Object.keys(notes).sort((a, b) => +a - +b);
-      const lines = [
+      return [
         `[교정 의견 ${keys.length}건] ${document.title}`,
         '',
         ...keys.flatMap((k) => {
@@ -191,8 +230,9 @@ if (enabled) {
           const head = n.quote ? `¶${k} "${n.quote}"` : `¶${k} ${n.excerpt}`;
           return [head, `→ ${n.text}`, ''];
         }),
-      ];
-      return lines.join('\n').trim();
+      ]
+        .join('\n')
+        .trim();
     };
 
     const refreshDock = () => {
@@ -229,7 +269,7 @@ if (enabled) {
         }
         if (!Object.keys(notes).length) {
           btn.textContent = '적은 게 없어요';
-          setTimeout(() => refreshDock(), 1200);
+          setTimeout(refreshDock, 1200);
           return;
         }
         const body = exportText();
@@ -253,6 +293,13 @@ if (enabled) {
     });
 
     // ---- 메모칸 -------------------------------------------------------
+    const placeBox = (el: HTMLElement, box: HTMLElement) => {
+      const w = el.parentElement;
+      if (w?.classList.contains('pa-wrap')) w.appendChild(box);
+      else if (el.tagName === 'LI') el.appendChild(box);
+      else el.insertAdjacentElement('afterend', box);
+    };
+
     const openBox = (el: HTMLElement, num: string, quote = '') => {
       const existing = el.parentElement?.querySelector<HTMLElement>(
         `.pa-box[data-for="${num}"]`,
@@ -297,7 +344,7 @@ if (enabled) {
           notes[num] = {
             text: v,
             quote: box.dataset.quote ?? '',
-            excerpt: blockText(el).slice(0, 60),
+            excerpt: label(el),
           };
         } else {
           delete notes[num];
@@ -308,14 +355,12 @@ if (enabled) {
       };
       box.querySelector('[data-b="save"]')!.addEventListener('click', commit);
       box.querySelector('[data-b="close"]')!.addEventListener('click', close);
-      box
-        .querySelector('[data-b="del"]')
-        ?.addEventListener('click', () => {
-          delete notes[num];
-          save(notes);
-          refreshDock();
-          close();
-        });
+      box.querySelector('[data-b="del"]')?.addEventListener('click', () => {
+        delete notes[num];
+        save(notes);
+        refreshDock();
+        close();
+      });
       ta.addEventListener('keydown', (ev) => {
         if (ev.key === 'Escape') {
           ev.preventDefault();
@@ -327,8 +372,7 @@ if (enabled) {
         }
       });
 
-      if (el.tagName === 'LI') el.appendChild(box);
-      else el.insertAdjacentElement('afterend', box);
+      placeBox(el, box);
       ta.focus();
     };
 
@@ -337,24 +381,35 @@ if (enabled) {
       el.classList.add('pa-block');
       el.dataset.paNum = num;
       byNum.set(num, el);
+
       const badge = document.createElement('span');
       badge.className = 'pa-badge';
       badge.textContent = `¶${num}`;
-      badge.title = '탭하면 이 블록에 의견을 적습니다';
+      badge.title = '탭하면 여기에 의견을 적습니다';
       badge.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
         openBox(el, num);
       });
       badges.set(num, badge);
-      const target =
-        el.tagName === 'BLOCKQUOTE'
-          ? (el.querySelector('p') as HTMLElement | null) ?? el
-          : el;
-      target.insertBefore(badge, target.firstChild);
+
+      if (isBig(el)) {
+        // 표·코드블록·다이어그램·이미지: 래퍼를 씌워 배지를 바깥에 둔다.
+        const wrap = document.createElement('div');
+        wrap.className = 'pa-wrap';
+        el.parentNode?.insertBefore(wrap, el);
+        wrap.appendChild(el);
+        wrap.insertBefore(badge, wrap.firstChild);
+      } else {
+        const target =
+          el.tagName === 'BLOCKQUOTE'
+            ? (el.querySelector('p') as HTMLElement | null) ?? el
+            : el;
+        target.insertBefore(badge, target.firstChild);
+      }
     });
 
-    // ---- 문장을 집어서 바로 의견 적기 ----------------------------------
+    // ---- 문장(또는 표 칸)을 집어서 바로 의견 적기 -----------------------
     let selBtn: HTMLButtonElement | null = null;
     const clearSel = () => {
       selBtn?.remove();
@@ -386,7 +441,7 @@ if (enabled) {
         });
       }
       selBtn.dataset.num = num;
-      selBtn.textContent = `¶${num} 이 문장에 의견 적기`;
+      selBtn.textContent = `¶${num} 여기에 의견 적기`;
       selBtn.style.left = `${Math.max(8, rect.left + window.scrollX)}px`;
       selBtn.style.top = `${rect.bottom + window.scrollY + 6}px`;
     });

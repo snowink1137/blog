@@ -232,8 +232,14 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
     <script>
       import '../../lib/lightbox';
       import '../../lib/mermaid-client';
-      // 프리뷰 전용 교정 모드 (*.workers.dev / localhost 에서만 동작). 머지 전 제거.
-      import '../../lib/preview-annotate';
+      // 프리뷰 교정 모드 — ¶번호를 붙여 글을 다듬을 때 지목을 쉽게 하는 도구.
+      // 프로덕션 도메인에서는 모듈 자체를 내려받지 않도록 동적 import 로 둔다.
+      {
+        const h = location.hostname;
+        if (h.endsWith('.workers.dev') || h === 'localhost' || h === '127.0.0.1') {
+          import('../../lib/preview-annotate');
+        }
+      }
     </script>
   </body>
 </html>
