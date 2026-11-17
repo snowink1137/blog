@@ -232,6 +232,8 @@ const jsonLdText = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
     <script>
       import '../../lib/lightbox';
       import '../../lib/mermaid-client';
+      // 프리뷰 전용 교정 모드 (*.workers.dev / localhost 에서만 동작). 머지 전 제거.
+      import '../../lib/preview-annotate';
     </script>
   </body>
 </html>
