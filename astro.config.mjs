@@ -11,6 +11,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 import rehypeGallery from './src/lib/rehype-gallery.js';
 import rehypeMermaidClient from './src/lib/rehype-mermaid-client.js';
+import rehypeTableScroll from './src/lib/rehype-table-scroll.js';
 
 // 글 slug → 최종 수정일(updatedDate ?? pubDate) 매핑. sitemap <lastmod> 용.
 // frontmatter 포맷이 단순(따옴표 감싼 ISO 문자열)해서 의존성 없이 정규식으로 파싱.
@@ -164,6 +165,7 @@ export default defineConfig({
       ],
       [rehypeGallery, {}],
       [rehypeMermaidClient, {}],
+      [rehypeTableScroll, {}],
     ],
   },
 

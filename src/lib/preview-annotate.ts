@@ -294,14 +294,16 @@ if (enabled) {
 
     // ---- 메모칸 -------------------------------------------------------
     const placeBox = (el: HTMLElement, box: HTMLElement) => {
-      const w = el.parentElement;
-      if (w?.classList.contains('pa-wrap')) w.appendChild(box);
+      // 래퍼가 있으면 그 안의 맨 끝 — 표는 .table-scroll 안에 있으므로
+      // closest 로 올라가야 가로 스크롤 영역 바깥에 메모칸이 놓인다.
+      const w = el.closest('.pa-wrap');
+      if (w) w.appendChild(box);
       else if (el.tagName === 'LI') el.appendChild(box);
       else el.insertAdjacentElement('afterend', box);
     };
 
     const openBox = (el: HTMLElement, num: string, quote = '') => {
-      const existing = el.parentElement?.querySelector<HTMLElement>(
+      const existing = (el.closest('.pa-wrap') ?? el.parentElement)?.querySelector<HTMLElement>(
         `.pa-box[data-for="${num}"]`,
       );
       if (existing) {
@@ -395,10 +397,15 @@ if (enabled) {
 
       if (isBig(el)) {
         // 표·코드블록·다이어그램·이미지: 래퍼를 씌워 배지를 바깥에 둔다.
+        // 표는 .table-scroll(가로 스크롤 컨테이너) 안에 있으니 그 컨테이너째로
+        // 감싼다 — 안쪽에 두면 왼쪽 여백의 배지가 잘리고 스크롤 폭만 늘어난다.
+        const outer = el.parentElement?.classList.contains('table-scroll')
+          ? el.parentElement
+          : el;
         const wrap = document.createElement('div');
         wrap.className = 'pa-wrap';
-        el.parentNode?.insertBefore(wrap, el);
-        wrap.appendChild(el);
+        outer.parentNode?.insertBefore(wrap, outer);
+        wrap.appendChild(outer);
         wrap.insertBefore(badge, wrap.firstChild);
       } else {
         const target =

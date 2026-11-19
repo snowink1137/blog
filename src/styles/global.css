@@ -126,6 +126,21 @@
   .prose img {
     @apply cursor-zoom-in;
   }
+
+  /* 넓은 표: 폭이 모자라면 표만 가로로 스크롤한다. 빌드 때 rehype-table-scroll 이
+     표를 이 컨테이너로 감싼다 (html/body 가 overflow-x: clip 이라 래퍼 없이는
+     넘친 열이 잘려 접근이 안 된다). */
+  .prose .table-scroll {
+    @apply my-8 max-w-full overflow-x-auto;
+  }
+  .prose .table-scroll > table {
+    @apply my-0;
+  }
+  /* 표 칸의 인라인 코드는 줄바꿈하지 않는다 — `a+b c` 처럼 공백이 들어간 값이
+     줄 경계에서 쪼개지면 공백이 있는지 보이지 않는다. */
+  .prose :is(th, td) code {
+    @apply whitespace-nowrap;
+  }
 }
 
 /* PhotoSwipe lightbox background follows current theme — its own .pswp scope
